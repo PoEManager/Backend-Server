@@ -11,6 +11,7 @@
     "license": "MIT",
     "repository": "https://github.com/PoEManager/Backend-Server/tree/master",
     "dependencies": {
+        "@types/node": "^12.7.2",
         "typescript": "^3.5.3"
     },
     "devDependencies": {

@@ -6,7 +6,7 @@
         "allowJs": false,
         "sourceMap": true,
         "outDir": "./dist",
-        "rootDir": "./app",
+        "rootDir": "./",
         "strict": true,
         "esModuleInterop": true,
         "plugins": [
