@@ -4,13 +4,16 @@
     "description": "The backend (i.e. REST) server of PoE Manager.",
     "main": "app.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest",
         "doc": "typedoc"
     },
     "keywords": [],
     "author": "Lukas Reichmann",
     "license": "MIT",
-    "repository": "https://github.com/PoEManager/Backend-Server/tree/master",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/PoEManager/Backend-Server/tree/master"
+    },
     "dependencies": {
         "@types/bcrypt": "^3.0.0",
         "@types/node": "^12.7.2",
@@ -18,7 +21,25 @@
         "typescript": "^3.5.3"
     },
     "devDependencies": {
+        "@types/jest": "^24.0.18",
+        "jest": "^24.9.0",
+        "ts-jest": "^24.0.2",
         "tslint": "^5.19.0",
         "typedoc": "^0.15.0"
+    },
+    "jest": {
+        "modulePathIgnorePatterns": [
+            "/dist/"
+        ],
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "clearMocks": true,
+        "coverageDirectory": "coverage",
+        "coverageReporters": [
+            "json",
+            "lcov",
+            "clover"
+        ]
     }
 }

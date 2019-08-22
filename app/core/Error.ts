@@ -22,7 +22,7 @@ class Error {
      * The layout of this object is defined by each child class (but remains the same for each instance of the child
      * class).
      */
-    public readonly data: object;
+    public readonly data: Error.ICustomErrorData;
 
     /**
      * Constructs a new instance.
@@ -31,7 +31,7 @@ class Error {
      * @param message The message of the error.
      * @param data The additional data of the error.
      */
-    protected constructor(name: string, message: string, data: object) {
+    protected constructor(name: string, message: string, data: Error.ICustomErrorData) {
         this.name = name;
         this.message = message;
         this.data = data;
@@ -72,7 +72,18 @@ namespace Error {
          * The message of the error.
          */
         readonly message: string;
-        readonly data: object;
+
+        /**
+         * The additional data.
+         */
+        readonly data: ICustomErrorData;
+    }
+
+    /**
+     * An object type that can contain any data.
+     */
+    export interface ICustomErrorData {
+        [key: string]: any;
     }
 }
 
