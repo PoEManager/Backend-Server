@@ -4,7 +4,8 @@
     "description": "The backend (i.e. REST) server of PoE Manager.",
     "main": "app.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "doc": "typedoc"
     },
     "keywords": [],
     "author": "Lukas Reichmann",
@@ -15,6 +16,7 @@
         "typescript": "^3.5.3"
     },
     "devDependencies": {
-        "tslint": "^5.19.0"
+        "tslint": "^5.19.0",
+        "typedoc": "^0.15.0"
     }
 }
