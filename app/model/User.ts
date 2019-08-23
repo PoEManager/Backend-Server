@@ -1,5 +1,7 @@
 
+import DatabaseConnection from '../core/DatabaseConnection';
 import DefaultLogin from './DefaultLogin';
+import errors from './Errors';
 
 /**
  * The representation of a single user account.
@@ -8,17 +10,38 @@ import DefaultLogin from './DefaultLogin';
  */
 class User {
     /**
+     * The ID of the user.
+     */
+    private readonly id: User.ID;
+
+    /**
+     * Constructs a new instance. Should not be used directly, use UserManager.get() instead.
+     *
+     * @param id The ID of the user.
+     */
+    public constructor(id: User.ID) {
+        this.id = id;
+    }
+
+    /**
      * @returns The ID of the user.
      */
     public getId(): User.ID {
-        return 0;
+        return this.id;
     }
 
     /**
      * @returns The nickname of the user.
      */
-    public getNickname(): string {
-        return '';
+    public async getNickname(): Promise<string> {
+        const result = await DatabaseConnection.query('SELECT `nickname` FROM `Users` WHERE `Users`.`id` = ?', {
+            parameters: [
+                this.id
+            ],
+            expectedErrors: []
+        });
+
+        return result.nickname;
     }
 
     /**
@@ -26,8 +49,20 @@ class User {
      *
      * @param nickname The new nickname.
      */
-    public setNickname(nickname: string): void {
-
+    public async setNickname(nickname: string): Promise<void> {
+        const result = await DatabaseConnection.query(
+            'UPDATE `Users` SET `Users`.`nickname` = ? WHERE `Users`.`id` = ?', {
+            parameters: [
+                nickname,
+                this.id
+            ],
+            expectedErrors: [
+                {
+                    code: DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL, // invalid format for nickname
+                    error: new errors.InvalidNicknameError(nickname)
+                }
+            ]
+        });
     }
 
     /**
@@ -64,9 +99,11 @@ class User {
 
     /**
      * Delete the user account.
+     *
+     * @returns ```true```, if the user was successfully deleted. ```false``` if it was not (does the user even exist?).
      */
-    public delete(): void {
-
+    public delete(): boolean {
+        return false;
     }
 }
 
