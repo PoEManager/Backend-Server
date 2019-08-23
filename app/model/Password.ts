@@ -41,7 +41,7 @@ class Password {
      *
      * @param encrypted The encrypted password.
      */
-    constructor(encrypted: string) {
+    private constructor(encrypted: string) {
         this.encrypted = encrypted;
     }
 
@@ -50,17 +50,8 @@ class Password {
      *
      * @param password The unencrypted password to compare to.
      */
-    public async compareTo(password: Password): Promise<boolean> {
-        return await bcrypt.compare(password.getEncrypted(), this.encrypted);
-    }
-
-    /**
-     * Compares the instance to another, encrypted password.
-     *
-     * @param encrypted The encrypted password.
-     */
-    public async compareToEncrypted(encrypted: string) {
-        return encrypted === this.encrypted;
+    public async compareTo(password: string): Promise<boolean> {
+        return await bcrypt.compare(password, this.encrypted);
     }
 
     /**
