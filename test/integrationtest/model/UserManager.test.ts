@@ -63,10 +63,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
-                    expect(UserManager.create(createData))
+                    await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
-                    // tslint:enable
                 });
 
                 it('should reject nicknames with a special character', async () => {
@@ -78,10 +76,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
-                    // tslint:enable
                 });
 
                 it('should reject nicknames with a line break', async () => {
@@ -93,10 +89,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
-                    // tslint:enable
                 });
 
                 it('should reject short nicknames', async () => {
@@ -108,10 +102,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
-                    // tslint:enable
                 });
 
                 it('should reject long nicknames', async () => {
@@ -123,10 +115,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
-                    // tslint:enable
                 });
             });
 
@@ -140,10 +130,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData))
                         .rejects.toEqual(new errors.InvalidEmailError(createData.loginData.email));
-                    // tslint:enable
                 });
 
                 it('should reject duplicate E-Mails', async () => {
@@ -155,9 +143,7 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData1)).resolves.not.toBeNull();
-                    // tslint:enable
 
                     const createData2 = {
                         nickname: 'nickname',
@@ -167,10 +153,8 @@ describe('model', () => {
                         }
                     };
 
-                    // tslint:disable:no-floating-promises
                     await expect(UserManager.create(createData2))
                         .rejects.toEqual(new errors.DuplicateEmailError(createData2.loginData.email));
-                    // tslint:enable
                 });
             });
         });
