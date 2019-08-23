@@ -84,5 +84,45 @@ describe('model', () => {
                 expect(error.data.id).toBe('5');
             });
         });
+
+        describe('InvalidNicknameError', () => {
+            it('should correctly set the properties', () => {
+                const error = new errors.InvalidNicknameError('nickname');
+
+                expect(error.name).toBe('INVALID_NICKNAME_ERROR');
+                expect(error.message).toContain('nickname');
+                expect(error.data.nickname).toBe('nickname');
+            });
+
+            it('should correctly generate a REST error', () => {
+                const error = new errors.InvalidNicknameError('nickname')
+                    .asRESTError();
+
+                expect(error.isError).toBeTruthy();
+                expect(error.name).toBe('INVALID_NICKNAME_ERROR');
+                expect(error.message).toContain('nickname');
+                expect(error.data.nickname).toBe('nickname');
+            });
+        });
+
+        describe('InvalidEmailError', () => {
+            it('should correctly set the properties', () => {
+                const error = new errors.InvalidEmailError('test@test.com');
+
+                expect(error.name).toBe('INVALID_EMAIL_ERROR');
+                expect(error.message).toContain('test@test.com');
+                expect(error.data.email).toBe('test@test.com');
+            });
+
+            it('should correctly generate a REST error', () => {
+                const error = new errors.InvalidEmailError('test@test.com')
+                    .asRESTError();
+
+                expect(error.isError).toBeTruthy();
+                expect(error.name).toBe('INVALID_EMAIL_ERROR');
+                expect(error.message).toContain('test@test.com');
+                expect(error.data.email).toBe('test@test.com');
+            });
+        });
     });
 });

@@ -87,6 +87,42 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Thrown if a nickname is invalid.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     nickname: "<the invalid nickname>"
+     * }
+     * ```
+     */
+    export class InvalidNicknameError extends Error {
+        public constructor(nickname: string) {
+            super('INVALID_NICKNAME_ERROR', `Nickname ${nickname} is invalid.`, {
+                nickname
+            });
+        }
+    }
+
+    /**
+     * Thrown if an E-Mail is invalid.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     email: "<the invalid E-Mail>"
+     * }
+     * ```
+     */
+    export class InvalidEmailError extends Error {
+        public constructor(email: string) {
+            super('INVALID_EMAIL_ERROR', `Nickname ${email} is invalid.`, {
+                email
+            });
+        }
+    }
 }
 
 export = errors;
