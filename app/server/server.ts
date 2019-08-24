@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'http';
 import morgan from 'morgan';
-import logger from '../core/Logger';
+import logger from '../core/logger';
 import router from './routers/routers/router';
 
 namespace Server {

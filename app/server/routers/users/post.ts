@@ -1,8 +1,8 @@
 import express from 'express';
-import logger from '../../../core/Logger';
-import UserManager from '../../../model/UserManager';
-import RouteConfiguration from '../../RouteConfiguration';
-import ServerUtils from '../../serverUtils';
+import logger from '../../../core/logger';
+import UserManager from '../../../model/user-manager';
+import RouteConfiguration from '../../route-configuration';
+import ServerUtils from '../../server-utils';
 
 const route: RouteConfiguration = {
     method: 'POST',

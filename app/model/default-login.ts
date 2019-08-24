@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import DatabaseConnection from '../core/DatabaseConnection';
+import DatabaseConnection from '../core/database-connection';
 import errors from './Errors';
-import Password from './Password';
-import UserManager from './UserManager';
+import Password from './password';
+import UserManager from './user-manager';
 
 /**
  * The representation of a single user login.

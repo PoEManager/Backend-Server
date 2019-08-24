@@ -1,10 +1,10 @@
-import DatabaseConnection from '../../../app/core/DatabaseConnection';
+import DatabaseConnection from '../../../app/core/database-connection';
 import errors from '../../../app/model/Errors';
-import User from '../../../app/model/User';
-import UserManager from '../../../app/model/UserManager';
+import UserManager from '../../../app/model/user-manager';
+import User from '../../../app/model/uUser';
 
 describe('model', () => {
-    describe('User.ts', () => {
+    describe('user.ts', () => {
         beforeEach(async () => {
             await DatabaseConnection.transaction(async conn => {
                 await conn.query('DELETE FROM `Users`');

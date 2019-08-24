@@ -2,7 +2,7 @@
 import errors from '../../../app/model/Errors';
 
 describe('model', () => {
-    describe('Errors.ts', () => {
+    describe('errors.ts', () => {
         describe('UserNotFoundError', () => {
             it('should correctly set the properties', () => {
                 const error = new errors.UserNotFoundError(5);

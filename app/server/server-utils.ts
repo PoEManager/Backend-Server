@@ -1,8 +1,8 @@
 
 import express from 'express';
 import Error from '../core/Error';
-import InternalError from '../core/InternalError';
-import logger from '../core/Logger';
+import InternalError from '../core/internal-error';
+import logger from '../core/logger';
 
 namespace ServerUtils {
     /**

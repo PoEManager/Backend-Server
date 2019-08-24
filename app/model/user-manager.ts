@@ -1,9 +1,9 @@
 
-import DatabaseConnection from '../core/DatabaseConnection';
-import DefaultLogin from './DefaultLogin';
+import DatabaseConnection from '../core/database-connection';
+import DefaultLogin from './default-login';
 import errors from './Errors';
-import Password from './Password';
-import User from './User';
+import Password from './password';
+import User from './uUser';
 
 /**
  * A namespace that gives access to the user system.

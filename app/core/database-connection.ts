@@ -1,7 +1,7 @@
 
 import mariadb from 'mariadb';
 import Error from './Error';
-import InternalError from './InternalError';
+import InternalError from './internal-error';
 
 /**
  * Makes sure to close the connection pool.

@@ -1,7 +1,7 @@
-import Password from '../../../app/model/Password';
+import Password from '../../../app/model/password';
 
 describe('model', () => {
-    describe('Password.ts', () => {
+    describe('password.ts', () => {
         it('should correctly encrypt a new password', async () => {
             const password = await Password.encryptPassword('password');
 

@@ -1,7 +1,7 @@
 
 import _ from 'lodash';
-import DatabaseConnection from '../core/DatabaseConnection';
-import DefaultLogin from './DefaultLogin';
+import DatabaseConnection from '../core/database-connection';
+import DefaultLogin from './default-login';
 import errors from './Errors';
 
 /**

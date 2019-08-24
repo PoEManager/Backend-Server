@@ -1,11 +1,11 @@
-import DatabaseConnection from '../../../app/core/DatabaseConnection';
-import DefaultLogin from '../../../app/model/DefaultLogin';
+import DatabaseConnection from '../../../app/core/database-connection';
+import DefaultLogin from '../../../app/model/default-login';
 import errors from '../../../app/model/Errors';
-import Password from '../../../app/model/Password';
-import UserManager from '../../../app/model/UserManager';
+import Password from '../../../app/model/password';
+import UserManager from '../../../app/model/user-manager';
 
 describe('model', () => {
-    describe('DefaultLogin.ts', () => {
+    describe('default-login.ts', () => {
         beforeEach(async () => {
             await DatabaseConnection.transaction(async conn => {
                 await conn.query('DELETE FROM `Users`');

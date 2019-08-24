@@ -1,5 +1,5 @@
 import express from 'express';
-import RouteConfiguration from '../../RouteConfiguration';
+import RouteConfiguration from '../../route-configuration';
 import userPost from '../users/post';
 
 const router = express.Router();
