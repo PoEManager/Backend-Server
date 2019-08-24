@@ -1,6 +1,7 @@
 
+import _ from 'lodash';
 import DatabaseConnection from '../core/DatabaseConnection';
-import DefaultLogin from './DefaultLogin';
+import DefaultLogin, { IDefaultLoginQueryResult } from './DefaultLogin';
 import errors from './Errors';
 
 /**
@@ -9,6 +10,7 @@ import errors from './Errors';
  * In order to get such a reference, see UserManager.get().
  */
 class User {
+
     /**
      * The ID of the user.
      */
@@ -128,9 +130,34 @@ class User {
      *
      * @param queryData A list of the data that should be queried.
      * @returns The queried data.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
      */
-    public query(queryData: User.QueryData[]): User.IQueryResult {
-        return {};
+    public async query(queryData: User.QueryData[]): Promise<User.IQueryResult> {
+
+        let columns: string;
+
+        // if no data is queried, just check if the user exists (if not, an error will be thrown)
+        if (queryData.length === 0) {
+            columns = '1';
+        } else {
+            let columnsList  = _.map(queryData, queryDataToColumn); // convert QueryData to actual SQL columns
+            columnsList = _.map(columnsList, surroundByBackticks); // surround columns with backticks (`)
+            columns = columnsList.join(','); // make comma separated list
+        }
+        const sql = `SELECT ${columns} FROM \`Users\` WHERE \`Users\`.\`user_id\` = ?`;
+
+        const result = await DatabaseConnection.query(sql, {
+            parameters: [
+                this.id
+            ]
+        });
+
+        if (result.length === 1) {
+            return sqlResultToQueryResult(result[0]);
+        } else {
+            throw this.makeUserNotFoundError();
+        }
     }
 
     /**
@@ -156,6 +183,31 @@ class User {
     private makeUserNotFoundError(): errors.UserNotFoundError {
         return new errors.UserNotFoundError(this.id);
     }
+}
+
+function queryDataToColumn(queryData: User.QueryData): string {
+    switch (queryData) {
+        case User.QueryData.ID:
+            return 'user_id';
+        case User.QueryData.NICKNAME:
+            return 'nickname';
+        case User.QueryData.DEFAULT_LOGIN_ID:
+            return 'defaultlogin_id';
+        default:
+            return ''; // does not happen
+    }
+}
+
+function surroundByBackticks(str: string): string {
+    return `\`${str}\``;
+}
+
+function sqlResultToQueryResult(result: any): User.IQueryResult {
+    return {
+        id: result.user_id ? result.user_id : undefined,
+        defaultLoginId: result.defaultlogin_id ? result.defaultlogin_id : undefined,
+        nickname: result.nickname ? result.nickname : undefined
+    };
 }
 
 namespace User {

@@ -16,8 +16,10 @@
     },
     "dependencies": {
         "@types/bcrypt": "^3.0.0",
+        "@types/lodash": "^4.14.137",
         "@types/node": "^12.7.2",
         "bcrypt": "^3.0.6",
+        "lodash": "^4.17.15",
         "mariadb": "^2.1.0",
         "typescript": "^3.5.3"
     },

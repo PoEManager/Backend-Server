@@ -158,5 +158,57 @@ describe('model', () => {
                 await expect(new User(-1).hasDefaultLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
+
+        describe('query()', () => {
+            it('should correctly query the user\'s attributes', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const defaultLoginId = (await user.getDefaultLogin()).getId();
+
+                await expect(user.query([
+                    User.QueryData.ID,
+                    User.QueryData.DEFAULT_LOGIN_ID,
+                    User.QueryData.NICKNAME
+                ])).resolves.toMatchObject({
+                    id: user.getId(),
+                    defaultLoginId,
+                    nickname: user.getNickname()
+                });
+            });
+
+            it('should not set attributes that were not queried (some queried attributes)', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.query([])).resolves.toMatchObject({});
+            });
+
+            it('should not set attributes that were not queried (no queried attributes)', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.query([User.QueryData.ID])).resolves.toMatchObject({id: user.getId()});
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).query([])).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
     });
 });
