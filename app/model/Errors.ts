@@ -1,4 +1,3 @@
-
 import Error from '../core/Error';
 import DefaultLogin from './DefaultLogin';
 import User from './User';
@@ -17,7 +16,7 @@ namespace errors {
      */
     export class UserNotFoundError extends Error {
         public constructor(id: User.ID) {
-            super('USER_NOT_FOUND_ERROR', `User with ID '${id}' does not exist.`, {
+            super('USER_NOT_FOUND_ERROR', `User with ID '${id}' does not exist.`, 404, {
                 id
             });
         }
@@ -35,7 +34,7 @@ namespace errors {
      */
     export class DuplicateEmailError extends Error {
         public constructor(email: string) {
-            super('DUPLICATE_EMAIL_ERROR', `An account with the E-Mail address ${email} already exists.`, {
+            super('DUPLICATE_EMAIL_ERROR', `An account with the E-Mail address ${email} already exists.`, 400, {
                 email
             });
         }
@@ -54,7 +53,7 @@ namespace errors {
      */
     export class LoginNotFoundError extends Error {
         public constructor(id: DefaultLogin.ID, type: LoginNotFoundError.LoginType) {
-            super('LOGIN_NOT_FOUND_ERROR', `Login of type ${type} with ID '${id}' does not exist.`, {
+            super('LOGIN_NOT_FOUND_ERROR', `Login of type ${type} with ID '${id}' does not exist.`, 404, {
                 id,
                 type
             });
@@ -102,7 +101,7 @@ namespace errors {
      */
     export class InvalidChangeIDError extends Error {
         public constructor(id: UserManager.ChangeID) {
-            super('INVALID_CHANGE_ID_ERROR', `Change ID ${id} is invalid.`, {
+            super('INVALID_CHANGE_ID_ERROR', `Change ID ${id} is invalid.`, 404, {
                 id
             });
         }
@@ -120,7 +119,7 @@ namespace errors {
      */
     export class InvalidNicknameError extends Error {
         public constructor(nickname: string) {
-            super('INVALID_NICKNAME_ERROR', `Nickname ${nickname} is invalid.`, {
+            super('INVALID_NICKNAME_ERROR', `Nickname ${nickname} is invalid.`, 400, {
                 nickname
             });
         }
@@ -138,7 +137,7 @@ namespace errors {
      */
     export class InvalidEmailError extends Error {
         public constructor(email: string) {
-            super('INVALID_EMAIL_ERROR', `Nickname ${email} is invalid.`, {
+            super('INVALID_EMAIL_ERROR', `Nickname ${email} is invalid.`, 400, {
                 email
             });
         }

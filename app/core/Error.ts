@@ -17,6 +17,11 @@ class Error {
     public readonly message: string;
 
     /**
+     * The HTTP code that will be send to a client when this error occurs.
+     */
+    public readonly httpCode: number;
+
+    /**
      * Any data that gives further information about the error.
      *
      * The layout of this object is defined by each child class (but remains the same for each instance of the child
@@ -31,9 +36,10 @@ class Error {
      * @param message The message of the error.
      * @param data The additional data of the error.
      */
-    protected constructor(name: string, message: string, data: Error.ICustomErrorData) {
+    protected constructor(name: string, message: string, httpCode: number, data: Error.ICustomErrorData) {
         this.name = name;
         this.message = message;
+        this.httpCode = httpCode;
         this.data = data;
     }
 

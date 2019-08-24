@@ -7,7 +7,7 @@ import Error from './Error';
  */
 class InternalError extends Error {
     protected constructor(data: Error.ICustomErrorData)  {
-        super('INTERNAL_ERROR', `Internal error. ${JSON.stringify(data)}`, data);
+        super('INTERNAL_ERROR', `Internal error. ${JSON.stringify(data)}`, 500, data);
     }
 }
 
