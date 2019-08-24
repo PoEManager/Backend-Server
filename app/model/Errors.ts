@@ -61,12 +61,32 @@ namespace errors {
         }
     }
 
+    /**
+     * The types of logins that are supported by LoginNotFoundError.
+     */
     export namespace LoginNotFoundError {
         /**
          * The identifiers of the different login types.
          */
         export enum LoginType {
             DEFAULT = 'DEFAULT'
+        }
+    }
+
+    /**
+     * Thrown if a default login does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the login that was not found>",
+     *     type: "DEFAULT"
+     * }
+     * ```
+     */
+    export class DefaultLoginNotFoundError extends LoginNotFoundError {
+        constructor(id: DefaultLogin.ID) {
+            super(id, LoginNotFoundError.LoginType.DEFAULT);
         }
     }
 

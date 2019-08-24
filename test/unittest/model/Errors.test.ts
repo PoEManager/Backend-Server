@@ -65,6 +65,28 @@ describe('model', () => {
             });
         });
 
+        describe('DefaultLoginNotFoundError', () => {
+            it('should correctly set the properties', () => {
+                const error = new errors.DefaultLoginNotFoundError(5);
+
+                expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
+                expect(error.message).toContain(5);
+                expect(error.data.id).toBe(5);
+                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
+            });
+
+            it('should correctly generate a REST error', () => {
+                const error = new errors.DefaultLoginNotFoundError(5)
+                    .asRESTError();
+
+                expect(error.isError).toBeTruthy();
+                expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
+                expect(error.message).toContain(5);
+                expect(error.data.id).toBe(5);
+                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
+            });
+        });
+
         describe('InvalidChangeIDError', () => {
             it('should correctly set the properties', () => {
                 const error = new errors.InvalidChangeIDError('5');
