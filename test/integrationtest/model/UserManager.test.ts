@@ -171,6 +171,31 @@ describe('model', () => {
 
                 await expect(user.getId()).toBe((await UserManager.get(user.getId())).getId());
             });
+
+            it('should throw if the user does not exist', async () => {
+                await expect(UserManager.get(-1)).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getDefaultLogin()', () => {
+            it('should return the correct login if it exists', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const login = await user.getDefaultLogin();
+                const checkLogin = await UserManager.getDefaultLogin(login.getId());
+
+                await expect(login.getId()).toBe(checkLogin.getId());
+            });
+
+            it('should throw if the login does not exist', async () => {
+                await expect(UserManager.getDefaultLogin(-1)).rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
+            });
         });
     });
 });
