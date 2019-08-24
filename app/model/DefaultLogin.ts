@@ -97,15 +97,37 @@ class DefaultLogin {
     /**
      * @returns The new E-Mail, if a change is in progress, or ```null``` if there is no change.
      */
-    public getNewEmail(): string | null {
-        return null;
+    public async getNewEmail(): Promise<string | null> {
+        const result = await DatabaseConnection.query(
+            'SELECT `new_email` FROM `DefaultLogins` WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].new_email;
+        } else {
+            throw this.makeLoginNotFoundError();
+        }
     }
 
     /**
      * @returns The new password, if a change is in progress, or ```null``` if there is no change.
      */
-    public getNewPassword(): Password | null {
-        return null;
+    public async getNewPassword(): Promise<Password | null> {
+        const result = await DatabaseConnection.query(
+            'SELECT `new_password` FROM `DefaultLogins` WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return new Password(result[0].new_password);
+        } else {
+            throw this.makeLoginNotFoundError();
+        }
     }
 
     /**
