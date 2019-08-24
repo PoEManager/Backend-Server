@@ -21,6 +21,7 @@ namespace UserManager {
      *
      * @throws **DuplicateEmailError** An account with the passed E-Mail address already exists. Only thrown if the
      *         'loginData' field in the user create data is 'IDefaultLoginCreateData'.
+     * @throws **InvalidEmailError** The passed email is invalid.
      * @throws **InvalidNicknameError** The passed nickname is invalid.
      */
     export async function create(createData: UserManager.IUserCreateData): Promise<User> {

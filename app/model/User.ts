@@ -32,26 +32,33 @@ class User {
 
     /**
      * @returns The nickname of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
      */
     public async getNickname(): Promise<string> {
-        const result = await DatabaseConnection.query('SELECT `nickname` FROM `Users` WHERE `Users`.`id` = ?', {
+        const result = await DatabaseConnection.query('SELECT `nickname` FROM `Users` WHERE `Users`.`user_id` = ?', {
             parameters: [
                 this.id
-            ],
-            expectedErrors: []
+            ]
         });
 
-        return result.nickname;
+        if (result.length !== 1) {
+            throw this.makeUserNotFoundError();
+    }
+
+        return result[0].nickname;
     }
 
     /**
      * Sets a new nickname.
      *
      * @param nickname The new nickname.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
      */
     public async setNickname(nickname: string): Promise<void> {
         const result = await DatabaseConnection.query(
-            'UPDATE `Users` SET `Users`.`nickname` = ? WHERE `Users`.`id` = ?', {
+            'UPDATE `Users` SET `Users`.`nickname` = ? WHERE `Users`.`user_id` = ?', {
             parameters: [
                 nickname,
                 this.id
@@ -63,6 +70,10 @@ class User {
                 }
             ]
         });
+
+        if (result.affectedRows !== 1) {
+            throw this.makeUserNotFoundError();
+    }
     }
 
     /**

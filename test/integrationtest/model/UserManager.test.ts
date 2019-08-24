@@ -4,18 +4,18 @@ import errors from '../../../app/model/Errors';
 import UserManager from '../../../app/model/UserManager';
 
 describe('model', () => {
-    beforeEach(async () => {
-        await DatabaseConnection.transaction(async conn => {
-            await conn.query('DELETE FROM `Users`');
-            await conn.query('DELETE FROM `DefaultLogins`');
-        });
-    });
-
-    afterAll(async () => {
-        await DatabaseConnection.reset();
-    });
-
     describe('UserManager.ts', () => {
+        beforeEach(async () => {
+            await DatabaseConnection.transaction(async conn => {
+                await conn.query('DELETE FROM `Users`');
+                await conn.query('DELETE FROM `DefaultLogins`');
+            });
+        });
+
+        afterAll(async () => {
+            await DatabaseConnection.reset();
+        });
+
         describe('create()', () => {
             it('should correctly create a new user', async () => {
                 const user = await UserManager.create({
