@@ -4,7 +4,7 @@
     "description": "The backend (i.e. REST) server of PoE Manager.",
     "main": "app.js",
     "scripts": {
-        "test": "jest --coverage",
+        "test": "jest --coverage --runInBand",
         "doc": "typedoc"
     },
     "keywords": [],
