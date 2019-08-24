@@ -46,6 +46,23 @@ describe('model', () => {
                 await expect(user.delete()).resolves.toBeUndefined();
                 await expect(user.delete()).rejects.toEqual(new errors.UserNotFoundError(user.getId()));
             });
+
+            it('should also delete the users credential data', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const defaultLogin = await user.getDefaultLogin();
+                expect(user).toBeDefined();
+                await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
+                await expect(user.delete()).resolves.toBeUndefined();
+                await expect(UserManager.getDefaultLogin(defaultLogin.getId())).rejects
+                    .toEqual(new errors.DefaultLoginNotFoundError(defaultLogin.getId()));
+            });
         });
     });
 });
