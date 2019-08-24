@@ -100,10 +100,25 @@ class User {
     /**
      * Delete the user account.
      *
-     * @returns ```true```, if the user was successfully deleted. ```false``` if it was not (does the user even exist?).
+     * @throws **UserNotFoundError** If the user does not exist (i.e. no user could be deleted).
      */
-    public delete(): boolean {
-        return false;
+    public async delete(): Promise<void> {
+        const result = await DatabaseConnection.query('DELETE FROM `Users` WHERE `Users`.`user_id` = ?', {
+            parameters: [
+                this.id
+            ]
+        });
+
+        if (result.affectedRows !== 1) {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * @returns A UserNotFoundError with the proper user ID.
+     */
+    private makeUserNotFoundError(): errors.UserNotFoundError {
+        return new errors.UserNotFoundError(this.id);
     }
 }
 
