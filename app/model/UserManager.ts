@@ -25,7 +25,7 @@ namespace UserManager {
      * @throws **InvalidNicknameError** The passed nickname is invalid.
      */
     export async function create(createData: UserManager.IUserCreateData): Promise<User> {
-        const password = Password.encryptPassword(createData.loginData.unencryptedPassword);
+        const password = await Password.encryptPassword(createData.loginData.unencryptedPassword);
 
         let result: any;
 
@@ -34,7 +34,7 @@ namespace UserManager {
                 'INSERT INTO `DefaultLogins` (`email`, `password`) VALUES (?, ?)', {
                     parameters: [
                         createData.loginData.email,
-                        password
+                        password.getEncrypted()
                     ],
                     expectedErrors: [
                         {
@@ -112,7 +112,8 @@ namespace UserManager {
      * @throws **LoginNotFoundError** The login with the passed ID does not exist.
      */
     export async function getDefaultLogin(id: DefaultLogin.ID): Promise<DefaultLogin> {
-        const result = await DatabaseConnection.query('SELECT 1 FROM `Users` WHERE `Users`.`user_id` = ?', {
+        const result = await DatabaseConnection.query(
+            'SELECT 1 FROM `DefaultLogins` WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
             parameters: [
                 id
             ],
