@@ -185,6 +185,12 @@ class User {
     }
 }
 
+/**
+ * Maps the elements in User.QueryData to their SQL column counterparts.
+ *
+ * @param queryData The data to map.
+ * @returns The SQL column.
+ */
 function queryDataToColumn(queryData: User.QueryData): string {
     switch (queryData) {
         case User.QueryData.ID:
@@ -198,10 +204,20 @@ function queryDataToColumn(queryData: User.QueryData): string {
     }
 }
 
+/**
+ * @param str The string to convert.
+ * @returns The passed string surrounded by backticks (`).
+ */
 function surroundByBackticks(str: string): string {
     return `\`${str}\``;
 }
 
+/**
+ * Converts a SQL query result to User.IQueryResult.
+ *
+ * @param result The SQL query result.
+ * @returns The converted result.
+ */
 function sqlResultToQueryResult(result: any): User.IQueryResult {
     return {
         id: result.user_id ? result.user_id : undefined,
