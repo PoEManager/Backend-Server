@@ -1,3 +1,4 @@
+import Joi from '@hapi/joi';
 import express from 'express';
 import logger from '../../../core/logger';
 import UserManager from '../../../model/user-manager';
@@ -7,7 +8,14 @@ import ServerUtils from '../../server-utils';
 const route: RouteConfiguration = {
     method: 'POST',
     path: '/users',
-    handler
+    handler,
+    bodySchema: Joi.object({
+        nickname: Joi.string().required(),
+        loginData: Joi.object({
+            email: Joi.string().required(),
+            password: Joi.string().required()
+        }).required()
+    })
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
