@@ -8,10 +8,24 @@ import UserManager from './UserManager';
  */
 class DefaultLogin {
     /**
+     * The ID of the login.
+     */
+    private readonly id: number;
+
+    /**
+     * Constructs a new instance. Should not be used directly, use UserManager.getDefaultLogin() instead.
+     *
+     * @param id The ID of the login.
+     */
+    public constructor(id: DefaultLogin.ID) {
+        this.id = id;
+    }
+
+    /**
      * @returns The ID of the login.
      */
     public getId(): DefaultLogin.ID {
-        return 0;
+        return this.id;
     }
 
     /**
