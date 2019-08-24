@@ -41,7 +41,7 @@ class Password {
      *
      * @param encrypted The encrypted password.
      */
-    private constructor(encrypted: string) {
+    public constructor(encrypted: string) {
         this.encrypted = encrypted;
     }
 
