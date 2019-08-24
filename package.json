@@ -5,7 +5,7 @@
     "main": "app.js",
     "scripts": {
         "test": "jest --coverage --runInBand",
-        "doc": "typedoc"
+        "doc": "typedoc --mode file --out 'docs/typedoc'"
     },
     "keywords": [],
     "author": "Lukas Reichmann",

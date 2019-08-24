@@ -17,9 +17,5 @@
                 "suppressWhileTypeErrorsPresent": false
             }
         ]
-    },
-    "typeDocOptions": {
-        "mode": "file",
-        "out": "./docs"
     }
 }
