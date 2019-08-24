@@ -111,8 +111,19 @@ namespace UserManager {
      *
      * @throws **LoginNotFoundError** The login with the passed ID does not exist.
      */
-    export function getDefaultLogin(id: DefaultLogin.ID): DefaultLogin {
-        throw new errors.LoginNotFoundError(id, errors.LoginNotFoundError.LoginType.DEFAULT);
+    export async function getDefaultLogin(id: DefaultLogin.ID): Promise<DefaultLogin> {
+        const result = await DatabaseConnection.query('SELECT 1 FROM `Users` WHERE `Users`.`user_id` = ?', {
+            parameters: [
+                id
+            ],
+            expectedErrors: []
+        });
+
+        if (result.length === 1) {
+            return new DefaultLogin(id);
+        } else {
+            throw new errors.DefaultLoginNotFoundError(id);
+        }
     }
 
     /**

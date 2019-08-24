@@ -44,7 +44,7 @@ class User {
 
         if (result.length !== 1) {
             throw this.makeUserNotFoundError();
-    }
+        }
 
         return result[0].nickname;
     }
@@ -73,21 +73,43 @@ class User {
 
         if (result.affectedRows !== 1) {
             throw this.makeUserNotFoundError();
-    }
-    }
-
-    /**
-     * @returns ```true```, if the user has a default login. ```false``` if he/she does not.
-     */
-    public hasDefaultLogin(): boolean {
-        return false;
+        }
     }
 
     /**
-     * @returns A reference to the default login of the user, or ```null``` if the user does not have a default login.
+     * @returns ```true```, if the user has a default login, ```false``` if not.
      */
-    public getDefaultLogin(): DefaultLogin | null {
-        return null;
+    public async hasDefaultLogin(): Promise<boolean> {
+        try {
+            // check if this function throws or not
+            await this.getDefaultLogin();
+            return true;
+        } catch (error) {
+            if (error instanceof errors.UserNotFoundError) {
+                return false;
+            }
+
+            throw error;
+        }
+    }
+
+    /**
+     * @returns A reference to the default login of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getDefaultLogin(): Promise<DefaultLogin> {
+        const result = await DatabaseConnection.query('SELECT `defaultlogin_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return new DefaultLogin(result[0].defaultlogin_id);
+        } else {
+            throw this.makeUserNotFoundError();
+        }
     }
 
     /**
