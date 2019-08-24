@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import DatabaseConnection from '../core/DatabaseConnection';
 import errors from './Errors';
 import Password from './Password';
@@ -124,7 +125,7 @@ class DefaultLogin {
             });
 
         if (result.length === 1) {
-            return new Password(result[0].new_password);
+            return result.new_password ? new Password(result[0].new_password) : null;
         } else {
             throw this.makeLoginNotFoundError();
         }
@@ -137,8 +138,31 @@ class DefaultLogin {
      * @param queryData A list of the data that should be queried.
      * @returns The queried data.
      */
-    public query(queryData: DefaultLogin.DefaultLoginQueryData): DefaultLogin.IDefaultLoginQueryResult {
-        return {};
+    public async query(queryData: DefaultLogin.QueryData[]): Promise<DefaultLogin.IQueryResult> {
+
+        let columns: string;
+
+        // if no data is queried, just check if the user exists (if not, an error will be thrown)
+        if (queryData.length === 0) {
+            columns = '1';
+        } else {
+            let columnsList  = _.map(queryData, queryDataToColumn); // convert QueryData to actual SQL columns
+            columnsList = _.map(columnsList, str => `\`${str}\``); // surround columns with backticks (`)
+            columns = columnsList.join(','); // make comma separated list
+        }
+        const sql = `SELECT ${columns} FROM \`DefaultLogins\` WHERE \`DefaultLogins\`.\`defaultlogin_id\` = ?`;
+
+        const result = await DatabaseConnection.query(sql, {
+            parameters: [
+                this.id
+            ]
+        });
+
+        if (result.length === 1) {
+            return sqlResultToQueryResult(result[0], queryData);
+        } else {
+            throw this.makeLoginNotFoundError();
+        }
     }
 
     /**
@@ -147,6 +171,45 @@ class DefaultLogin {
     private makeLoginNotFoundError(): errors.DefaultLoginNotFoundError {
         return new errors.DefaultLoginNotFoundError(this.id);
     }
+}
+
+/**
+ * Maps the elements in User.QueryData to their SQL column counterparts.
+ *
+ * @param queryData The data to map.
+ * @returns The SQL column.
+ */
+function queryDataToColumn(queryData: DefaultLogin.QueryData): string {
+    switch (queryData) {
+        case DefaultLogin.QueryData.ID:
+            return 'defaultlogin_id';
+        case DefaultLogin.QueryData.EMAIL:
+            return 'email';
+        case DefaultLogin.QueryData.PASSWORD:
+            return 'password';
+        case DefaultLogin.QueryData.NEW_EMAIL:
+            return 'new_email';
+        case DefaultLogin.QueryData.NEW_PASSWORD:
+            return 'new_password';
+        default:
+            return ''; // does not happen
+    }
+}
+
+/**
+ * Converts a SQL query result to User.IQueryResult.
+ *
+ * @param result The SQL query result.
+ * @returns The converted result.
+ */
+function sqlResultToQueryResult(result: any, queryData: DefaultLogin.QueryData[]): DefaultLogin.IQueryResult {
+    return {
+        id: queryData.includes(DefaultLogin.QueryData.ID) ? result.defaultlogin_id : undefined,
+        email: queryData.includes(DefaultLogin.QueryData.EMAIL) ? result.email : undefined,
+        password: queryData.includes(DefaultLogin.QueryData.PASSWORD) ? result.password : undefined,
+        newEmail: queryData.includes(DefaultLogin.QueryData.NEW_EMAIL) ? result.new_email : undefined,
+        newPassword: queryData.includes(DefaultLogin.QueryData.NEW_PASSWORD) ? result.new_password : undefined
+    };
 }
 
 namespace DefaultLogin {
@@ -158,7 +221,7 @@ namespace DefaultLogin {
     /**
      * The data that can be queried by DefaultLogin.query().
      */
-    export enum DefaultLoginQueryData {
+    export enum QueryData {
         /**
          * Query the ID of the login. Equivalent to User.getId().
          */
@@ -186,7 +249,7 @@ namespace DefaultLogin {
      *
      * For data that was not queried, the fields will be ```undefined```.
      */
-    export interface IDefaultLoginQueryResult {
+    export interface IQueryResult {
         /**
          * The ID of the login.
          */
