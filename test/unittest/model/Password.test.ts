@@ -3,7 +3,11 @@ import Password from '../../../app/model/Password';
 describe('model', () => {
     describe('Password.ts', () => {
         it('should correctly encrypt a new password', async () => {
-            await expect(Password.encryptPassword('password')).resolves.toBeDefined();
+            const password = await Password.encryptPassword('password');
+
+            // bcrypt generates 60 character hashes; if the length fits, it is a good indication if the password was
+            // properly generated
+            await expect(password.getEncrypted().length).toBe(60);
         });
 
         it('should correctly compare passwords', async () => {
