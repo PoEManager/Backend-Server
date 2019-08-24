@@ -55,6 +55,7 @@ class User {
      * @param nickname The new nickname.
      *
      * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **InvalidNicknameError** The new nickname is invalid.
      */
     public async setNickname(nickname: string): Promise<void> {
         const result = await DatabaseConnection.query(
@@ -78,6 +79,8 @@ class User {
 
     /**
      * @returns ```true```, if the user has a default login, ```false``` if not.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
      */
     public async hasDefaultLogin(): Promise<boolean> {
         try {
@@ -85,7 +88,7 @@ class User {
             await this.getDefaultLogin();
             return true;
         } catch (error) {
-            if (error instanceof errors.UserNotFoundError) {
+            if (error instanceof errors.LoginNotFoundError) {
                 return false;
             }
 
