@@ -1,7 +1,7 @@
 
 import _ from 'lodash';
 import DatabaseConnection from '../core/DatabaseConnection';
-import DefaultLogin, { IDefaultLoginQueryResult } from './DefaultLogin';
+import DefaultLogin from './DefaultLogin';
 import errors from './Errors';
 
 /**
@@ -142,7 +142,7 @@ class User {
             columns = '1';
         } else {
             let columnsList  = _.map(queryData, queryDataToColumn); // convert QueryData to actual SQL columns
-            columnsList = _.map(columnsList, surroundByBackticks); // surround columns with backticks (`)
+            columnsList = _.map(columnsList, str => `\`${str}\``); // surround columns with backticks (`)
             columns = columnsList.join(','); // make comma separated list
         }
         const sql = `SELECT ${columns} FROM \`Users\` WHERE \`Users\`.\`user_id\` = ?`;
@@ -154,7 +154,7 @@ class User {
         });
 
         if (result.length === 1) {
-            return sqlResultToQueryResult(result[0]);
+            return sqlResultToQueryResult(result[0], queryData);
         } else {
             throw this.makeUserNotFoundError();
         }
@@ -205,24 +205,16 @@ function queryDataToColumn(queryData: User.QueryData): string {
 }
 
 /**
- * @param str The string to convert.
- * @returns The passed string surrounded by backticks (`).
- */
-function surroundByBackticks(str: string): string {
-    return `\`${str}\``;
-}
-
-/**
  * Converts a SQL query result to User.IQueryResult.
  *
  * @param result The SQL query result.
  * @returns The converted result.
  */
-function sqlResultToQueryResult(result: any): User.IQueryResult {
+function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.IQueryResult {
     return {
-        id: result.user_id ? result.user_id : undefined,
-        defaultLoginId: result.defaultlogin_id ? result.defaultlogin_id : undefined,
-        nickname: result.nickname ? result.nickname : undefined
+        id: queryData.includes(User.QueryData.ID) ? result.user_id : undefined,
+        defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
+        nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined
     };
 }
 
