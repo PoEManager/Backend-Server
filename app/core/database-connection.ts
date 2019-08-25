@@ -136,12 +136,39 @@ namespace DatabaseConnection {
     }
 
     /**
+     * Executes multiple SQL queries.
+     *
+     * @param queries A function that is supposed to contain a list of query statements:
+     * ```
+     * conn.query(<first SQL query>);
+     * conn.query(<second SQL query>);
+     * ```
+     */
+    export async function multiQuery<T>(queries: (conn: Connection) => Promise<T>): Promise<T> {
+        let conn: mariadb.Connection | null = null;
+
+        try {
+            conn = await getConnection();
+            const connectionWrapper = new Connection(conn);
+            const ret = await queries(connectionWrapper);
+            await conn.end();
+            return ret;
+        } catch (error) {
+            if (conn) {
+                await conn.end();
+            }
+
+            throw error;
+        }
+    }
+
+    /**
      * Helper class that is used to wrap mariadb.Connection.
      *
      * This class only exposes the query() method, and it is used to be passed in DatabaseConnection.transaction().
      * It is also used by DatabaseConnection.query() to avoid code duplication.
      */
-    class Connection {
+    export class Connection {
         private readonly connection: mariadb.Connection;
 
         /**
