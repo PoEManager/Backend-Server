@@ -49,10 +49,12 @@ namespace UserManager {
                 });
 
             result = await conn.query(
-                'INSERT INTO `Users` (`defaultlogin_id`, `nickname`) VALUES (?, ?)', {
+                'INSERT INTO `Users` (`defaultlogin_id`, `nickname`, `verified`, ' +
+                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, POEM_UUID(), POEM_DATE_INFINITY())', {
                     parameters: [
                         result.insertId,
-                        createData.nickname
+                        createData.nickname,
+                        false
                     ],
                     expectedErrors: [
                         {
