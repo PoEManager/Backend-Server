@@ -120,8 +120,49 @@ class User {
     /**
      * @returns The current change state of the user, or ```null``` if no change is currently going on.
      */
-    public getChangeState(): User.ChangeType {
-        return null;
+    public async getChangeState(): Promise<User.ChangeType> {
+        return await DatabaseConnection.multiQuery(async conn => {
+            const result = await conn.query(
+                'SELECT `change_uid`, UNIX_TIMESTAMP(`change_expire_date`) as `change_expire_date` ' +
+                'FROM `Users` WHERE `Users`.`user_id` = ?', {
+                    parameters: [
+                        this.id
+                    ]
+                });
+
+            if (result.length !== 1) {
+                throw this.makeUserNotFoundError();
+            }
+
+            if (result[0].change_uid) {
+                const changeType = await this.getChangeType(conn);
+
+                if (result[0].change_expire_date < new Date().getTime()) {
+                    // change is still valid, change is going on (has not expired yet)
+                    return changeType;
+                } else {
+                    // change has expired; clean up and return false
+                    await this.resetChange(conn, changeType);
+
+                    // reset change_uid and change_expire_date
+                    await conn.query(
+                        'UPDATE `Users` SET `change_uid` = NULL, `change_expire_date` = NULL ' +
+                        'WHERE `Users`.`user_id` = ?', {
+                            parameters: [
+                                this.id
+                            ]
+                        });
+
+                    if (result.affectedRows !== 1) {
+                        throw this.makeUserNotFoundError();
+                    }
+
+                    return null;
+                }
+            } else { // when change_uid is null, no change is in progress
+                return null;
+            }
+        });
     }
 
     /**
@@ -145,6 +186,7 @@ class User {
             columnsList = _.map(columnsList, str => `\`${str}\``); // surround columns with backticks (`)
             columns = columnsList.join(','); // make comma separated list
         }
+
         const sql = `SELECT ${columns} FROM \`Users\` WHERE \`Users\`.\`user_id\` = ?`;
 
         const result = await DatabaseConnection.query(sql, {
@@ -174,6 +216,44 @@ class User {
 
         if (result.affectedRows !== 1) {
             throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Resets an ongoing change (in a ROLLBACK sort of way).
+     *
+     * @param conn The connection that will be used for the query.
+     * @param change The change to reset.
+     */
+    private async resetChange(conn: DatabaseConnection.Connection, change: User.ChangeType): Promise<void> {
+        switch (change) {
+            case User._ChangeType.VERIFY_ACCOUNT:
+                // verification needs no reset
+                break;
+        }
+    }
+
+    /**
+     * Queries the current change type.
+     * This method ignores the change_uid and change_expire_date.
+     *
+     * @param conn The connection that will be used for the query.
+     */
+    private async getChangeType(conn: DatabaseConnection.Connection): Promise<User.ChangeType | null> {
+        const result = await conn.query('SELECT `Users`.`verified` FROM `Users` WHERE `Users`.`user_id` = ?', {
+            parameters: [
+                this.id
+            ]
+        });
+
+        if (result.length !== 1) {
+            throw this.makeUserNotFoundError();
+        }
+
+        if (!result[0].verified) { // if the user is not verified yet, this change takes precedence
+            return User._ChangeType.VERIFY_ACCOUNT;
+        } else {
+            return null;
         }
     }
 

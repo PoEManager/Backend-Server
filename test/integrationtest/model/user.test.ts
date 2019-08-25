@@ -210,5 +210,25 @@ describe('model', () => {
                 await expect(new User(-1).query([])).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
+
+        describe('getVerificationState()', () => {
+            // todo change state when no change is in progress
+
+            it('should correctly query the user\'s change state', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.getChangeState()).resolves.toBe(User._ChangeType.VERIFY_ACCOUNT);
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getChangeState()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
     });
 });
