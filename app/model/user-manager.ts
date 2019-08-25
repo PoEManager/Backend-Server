@@ -3,7 +3,7 @@ import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
 import errors from './Errors';
 import Password from './password';
-import User from './uUser';
+import User from './user';
 
 /**
  * A namespace that gives access to the user system.

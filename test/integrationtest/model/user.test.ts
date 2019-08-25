@@ -1,7 +1,7 @@
 import DatabaseConnection from '../../../app/core/database-connection';
 import errors from '../../../app/model/Errors';
+import User from '../../../app/model/user';
 import UserManager from '../../../app/model/user-manager';
-import User from '../../../app/model/uUser';
 
 describe('model', () => {
     describe('user.ts', () => {

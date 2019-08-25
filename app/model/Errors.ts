@@ -1,7 +1,7 @@
 import Error from '../core/Error';
 import DefaultLogin from './default-login';
+import User from './user';
 import UserManager from './user-manager';
-import User from './uUser';
 
 namespace errors {
     /**
