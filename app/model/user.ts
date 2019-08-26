@@ -119,6 +119,46 @@ class User {
     }
 
     /**
+     * @returns The current change uid.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getChangeUID(): Promise<string | null> {
+        const result = await DatabaseConnection.query(
+            'SELECT TO_BASE64(\`Users\`.\`change_uid\`) as change_uid FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].change_uid;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * @returns The current expire date.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getChangeExpireDate(): Promise<Date> {
+        const result = await DatabaseConnection.query(
+            'SELECT UNIX_TIMESTAMP(\`Users\`.\`change_expire_date\`) FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return new Date(result[0].change_expire_date);
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
      * @returns The current change state of the user, or ```null``` if no change is currently going on.
      */
     public async getChangeState(): Promise<User.ChangeType | null> {
@@ -239,6 +279,13 @@ class User {
         }
     }
 
+    /**
+     * Creates a new change for the user by setting a change uid and change expire date.
+     *
+     * @param infiniteDuration If ```true```, the change will never expire. Otherwise, it expires after two weeks.
+     *
+     * @throws **ChangeAlreadyInProgressError** If there is already another change in progress.
+     */
     private async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
         if (await this.getChangeState() !== null) { // also throws user not found error
             throw new errors.ChangeAlreadyInProgressError();
@@ -249,7 +296,8 @@ class User {
         const result = await DatabaseConnection.query(`UPDATE \`Users\` ` +
             `SET \`Users\`.\`change_uid\` = POEM_UUID(), \`Users\`.\`change_expire_date\` = ${dateFn}` +
             `WHERE \`User\`.\`user_id\` = ?;` +
-            `SELECT TO_BASE&(\`Users\`.\`change_uid\`) FROM \`Users\` WHERE \`Users\`.\`user_id\` = ?;`, {
+            `SELECT TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid FROM \`Users\` ` +
+            `WHERE \`Users\`.\`user_id\` = ?;`, {
                 parameters: [
                     this.id,
                     this.id
@@ -260,7 +308,7 @@ class User {
             throw new errors.UserNotFoundError(this.id);
         }
 
-        return result[1][0].change_uuid;
+        return result[1][0].change_uid;
     }
 
     /**

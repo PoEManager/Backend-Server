@@ -250,5 +250,53 @@ describe('model', () => {
                 await expect(new User(-1).isVerified()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
+
+        describe('getChangeUID()', () => {
+            it('should return null if no change is going on', async () => {
+                // todo
+            });
+
+            it('should return a valid change uid if a change is in progress', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const changeUid = await user.getChangeUID();
+                await expect(changeUid!.length).toBe(24);
+
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getChangeUID()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getChangeExpireDate()', () => {
+            it('should return null if no change is going on', async () => {
+                // todo
+            });
+
+            it('should return a valid change date if a change is in progress', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const changeUid = await user.getChangeUID();
+                await expect(changeUid!.length).toBe(24);
+
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getChangeUID()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
     });
 });
