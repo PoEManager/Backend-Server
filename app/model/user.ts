@@ -3,6 +3,7 @@ import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
 import errors from './Errors';
+import UserManager from './user-manager';
 
 /**
  * The representation of a single user account.
@@ -120,7 +121,7 @@ class User {
     /**
      * @returns The current change state of the user, or ```null``` if no change is currently going on.
      */
-    public async getChangeState(): Promise<User.ChangeType> {
+    public async getChangeState(): Promise<User.ChangeType | null> {
         return await DatabaseConnection.multiQuery(async conn => {
             const result = await conn.query(
                 'SELECT `change_uid`, UNIX_TIMESTAMP(`change_expire_date`) as `change_expire_date` ' +
@@ -163,6 +164,42 @@ class User {
                 return null;
             }
         });
+    }
+
+    /**
+     * @returns ```true``` if the user is verified, ```false``` if not.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async isVerified(): Promise<boolean> {
+        const result = await DatabaseConnection.query('SELECT `verified` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].verified;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Starts a verification change.
+     *
+     * @returns The change ID of the change.
+     *
+     * @throws **UserAlreadyVerifiedError** The user is already verified.
+     * @throws **ChangeAlreadyInProgressError** Another change is already in progress.
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async verify(): Promise<UserManager.ChangeID> {
+        if (await this.isVerified()) { // also throws user not found error
+            throw new errors.UserAlreadyVerifiedError();
+        }
+
+        return this.newChange(true);
     }
 
     /**
@@ -219,15 +256,39 @@ class User {
         }
     }
 
+    private async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
+        if (await this.getChangeState() !== null) { // also throws user not found error
+            throw new errors.ChangeAlreadyInProgressError();
+        }
+
+        const dateFn = infiniteDuration ? 'POEM_DATE_INFINITY()' : 'POEM_DATE_TWO_WEEKS()';
+
+        const result = await DatabaseConnection.query(`UPDATE \`Users\` ` +
+            `SET \`Users\`.\`change_uid\` = POEM_UUID(), \`Users\`.\`change_expire_date\` = ${dateFn}` +
+            `WHERE \`User\`.\`user_id\` = ?;` +
+            `SELECT TO_BASE&(\`Users\`.\`change_uid\`) FROM \`Users\` WHERE \`Users\`.\`user_id\` = ?;`, {
+                parameters: [
+                    this.id,
+                    this.id
+                ]
+            });
+
+        if (result[0].affectedRows !== 1 || result[1].length !== 1) {
+            throw new errors.UserNotFoundError(this.id);
+        }
+
+        return result[1][0].change_uuid;
+    }
+
     /**
      * Resets an ongoing change (in a ROLLBACK sort of way).
      *
      * @param conn The connection that will be used for the query.
      * @param change The change to reset.
      */
-    private async resetChange(conn: DatabaseConnection.Connection, change: User.ChangeType): Promise<void> {
+    private async resetChange(conn: DatabaseConnection.Connection, change: User.ChangeType | null): Promise<void> {
         switch (change) {
-            case User._ChangeType.VERIFY_ACCOUNT:
+            case User.ChangeType.VERIFY_ACCOUNT:
                 // verification needs no reset
                 break;
         }
@@ -251,7 +312,7 @@ class User {
         }
 
         if (!result[0].verified) { // if the user is not verified yet, this change takes precedence
-            return User._ChangeType.VERIFY_ACCOUNT;
+            return User.ChangeType.VERIFY_ACCOUNT;
         } else {
             return null;
         }
@@ -302,7 +363,7 @@ namespace User {
     /**
      * An enum with the possible types of account changes.
      */
-    export enum _ChangeType {
+    export enum ChangeType {
         /**
          * The account requires verification.
          */
@@ -316,11 +377,6 @@ namespace User {
          */
         NEW_PASSWORD
     }
-
-    /**
-     * A combination of the actual ChangeType enum and ```null``` (the latter indicates no change).
-     */
-    export type ChangeType = _ChangeType | null;
 
     /**
      * The type of a user ID.

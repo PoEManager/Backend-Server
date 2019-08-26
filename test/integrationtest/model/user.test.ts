@@ -223,11 +223,31 @@ describe('model', () => {
                     }
                 });
 
-                await expect(user.getChangeState()).resolves.toBe(User._ChangeType.VERIFY_ACCOUNT);
+                await expect(user.getChangeState()).resolves.toBe(User.ChangeType.VERIFY_ACCOUNT);
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
                 await expect(new User(-1).getChangeState()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('isVerified()', () => {
+            it('should return false if the user is not verified', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.isVerified()).resolves.toBeFalsy();
+            });
+
+            // todo check when verification works
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).isVerified()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
     });
