@@ -142,6 +142,38 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Thrown if an E-Mail is invalid.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *
+     * }
+     * ```
+     */
+    export class ChangeAlreadyInProgressError extends Error {
+        public constructor() {
+            super('CHANGE_ALREADY_IN_PROGRESS_ERROR', `Another change is already in progress.`, 409, {});
+        }
+    }
+
+    /**
+     * Thrown if an E-Mail is invalid.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *
+     * }
+     * ```
+     */
+    export class UserAlreadyVerifiedError extends Error {
+           public constructor() {
+               super('USER_ALREADY_VERIFIED_ERROR', `The user is already verified.`, 400, {});
+           }
+       }
 }
 
 export = errors;
