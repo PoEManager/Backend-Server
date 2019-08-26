@@ -186,23 +186,6 @@ class User {
     }
 
     /**
-     * Starts a verification change.
-     *
-     * @returns The change ID of the change.
-     *
-     * @throws **UserAlreadyVerifiedError** The user is already verified.
-     * @throws **ChangeAlreadyInProgressError** Another change is already in progress.
-     * @throws **UserNotFoundError** If the user does not exist.
-     */
-    public async verify(): Promise<UserManager.ChangeID> {
-        if (await this.isVerified()) { // also throws user not found error
-            throw new errors.UserAlreadyVerifiedError();
-        }
-
-        return this.newChange(true);
-    }
-
-    /**
      * Query data about the user. This method unites all of the other getters (such as getNickname() and getId()) into
      * one. This can improve the performance, because it reduces the amount of SQL calls to the database.
      *
