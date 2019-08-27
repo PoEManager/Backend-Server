@@ -1,7 +1,7 @@
 
 import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
-import errors from './Errors';
+import errors from './errors';
 import Password from './password';
 import User from './user';
 

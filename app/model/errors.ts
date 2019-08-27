@@ -1,4 +1,4 @@
-import Error from '../core/Error';
+import Error from '../core/error';
 import DefaultLogin from './default-login';
 import User from './user';
 import UserManager from './user-manager';
@@ -126,7 +126,7 @@ namespace errors {
     }
 
     /**
-     * Thrown if an E-Mail is invalid.
+     * An E-Mail is in an invalid format.
      *
      * The data layout is the following:
      * ```typescript
@@ -144,36 +144,60 @@ namespace errors {
     }
 
     /**
-     * Thrown if an E-Mail is invalid.
+     * A change is already in progress.
      *
      * The data layout is the following:
      * ```typescript
      * {
-     *
+     *     id: "<the ID of the user>"
      * }
      * ```
      */
     export class ChangeAlreadyInProgressError extends Error {
-        public constructor() {
-            super('CHANGE_ALREADY_IN_PROGRESS_ERROR', `Another change is already in progress.`, 409, {});
+        public constructor(id: User.ID) {
+            super('CHANGE_ALREADY_IN_PROGRESS_ERROR', `Another change is already in progress.`, 409, {
+                id
+            });
         }
     }
 
     /**
-     * Thrown if an E-Mail is invalid.
+     * The user is already verified.
      *
      * The data layout is the following:
      * ```typescript
      * {
-     *
+     *     id: "<the ID of the user>"
      * }
      * ```
      */
     export class UserAlreadyVerifiedError extends Error {
-           public constructor() {
-               super('USER_ALREADY_VERIFIED_ERROR', `The user is already verified.`, 400, {});
-           }
-       }
+        public constructor(id: User.ID) {
+            super('USER_ALREADY_VERIFIED_ERROR', `The user is already verified.`, 400, {
+                id
+            });
+        }
+    }
+
+    /**
+     * The user is in an invalid state.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     is: "<current change>",
+     *     expected: "<expected change>"
+     * }
+     * ```
+     */
+    export class InvalidChangeState extends Error {
+        public constructor(is: User.ChangeType | null, expected: User.ChangeType) {
+            super('INVALID_CHANGE_STATE', `The user is in an invalid change state.`, 400, {
+                is,
+                expected
+            });
+        }
+    }
 }
 
 export = errors;

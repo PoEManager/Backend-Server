@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
-import errors from './Errors';
+import errors from './errors';
 import UserManager from './user-manager';
 
 /**
@@ -288,7 +288,7 @@ class User {
      */
     private async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
         if (await this.getChangeState() !== null) { // also throws user not found error
-            throw new errors.ChangeAlreadyInProgressError();
+            throw new errors.ChangeAlreadyInProgressError(this.id);
         }
 
         const dateFn = infiniteDuration ? 'POEM_DATE_INFINITY()' : 'POEM_DATE_TWO_WEEKS()';

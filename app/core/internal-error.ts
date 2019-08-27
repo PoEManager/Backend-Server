@@ -1,4 +1,4 @@
-import Error from './Error';
+import Error from './error';
 
 /**
  * The base class for all internal errors.

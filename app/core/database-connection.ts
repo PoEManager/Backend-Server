@@ -1,6 +1,6 @@
 
 import mariadb from 'mariadb';
-import Error from './Error';
+import Error from './error';
 import InternalError from './internal-error';
 
 /**

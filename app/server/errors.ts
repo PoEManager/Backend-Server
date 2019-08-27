@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi';
-import Error from '../core/Error';
+import Error from '../core/error';
 
 namespace errors {
     /**

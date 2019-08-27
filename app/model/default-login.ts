@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
-import errors from './Errors';
+import errors from './errors';
 import Password from './password';
 import UserManager from './user-manager';
 
