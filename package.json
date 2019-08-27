@@ -6,7 +6,9 @@
     "scripts": {
         "test": "jest --coverage --runInBand",
         "doc": "typedoc --mode file --out 'docs/typedoc'",
-        "start": "tsc && node dist/app/app.js"
+        "build": "tsc",
+        "prestart": "npm run build",
+        "start": "node dist/app/app.js"
     },
     "keywords": [],
     "author": "Lukas Reichmann",
