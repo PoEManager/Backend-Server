@@ -98,6 +98,38 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * A string could not be parsed into JSON.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *
+     * }
+     * ```
+     */
+    export class JSONParseError extends Error {
+        public constructor() {
+            super('JSON_PARSE_ERROR', `JSON could not be parsed.`, 500, {});
+        }
+    }
+
+    /**
+     * A file could not be located.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     path: "<path to the file>"
+     * }
+     * ```
+     */
+    export class FileNotFoundError extends Error {
+        public constructor(path: string) {
+            super('FILE_NOT_FOUND_ERROR', `File could not be found: ${path}`, 500, {});
+        }
+    }
 }
 
 export = errors;
