@@ -1,5 +1,5 @@
 
-import errors from '../../../app/model/Errors';
+import errors from '../../../app/model/errors';
 
 describe('model', () => {
     describe('errors.ts', () => {

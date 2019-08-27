@@ -1,5 +1,5 @@
 import DatabaseConnection from '../../../app/core/database-connection';
-import errors from '../../../app/model/Errors';
+import errors from '../../../app/model/errors';
 import User from '../../../app/model/user';
 import UserManager from '../../../app/model/user-manager';
 

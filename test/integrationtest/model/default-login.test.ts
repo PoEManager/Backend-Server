@@ -1,6 +1,6 @@
 import DatabaseConnection from '../../../app/core/database-connection';
 import DefaultLogin from '../../../app/model/default-login';
-import errors from '../../../app/model/Errors';
+import errors from '../../../app/model/errors';
 import Password from '../../../app/model/password';
 import UserManager from '../../../app/model/user-manager';
 
