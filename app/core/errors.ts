@@ -77,6 +77,27 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Types do not match.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     got: "<gotten type>",
+     *     expected: "<expected type>"
+     * }
+     * ```
+     */
+    export class TypeMismatchError extends Error {
+        public constructor(got: string, expected: string) {
+            super('TYPE_MISMATCH_ERROR',
+            `The types do not match. Got: ${got} Expected: ${expected}`, 500, {
+                got,
+                expected
+            });
+        }
+    }
 }
 
 export = errors;
