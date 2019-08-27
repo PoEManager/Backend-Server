@@ -1,5 +1,7 @@
 import server from './server/server';
 
+
+function main() {
 server.start();
 
 async function handler() {
@@ -12,3 +14,6 @@ async function handler() {
 
 process.on('SIGINT', handler);
 process.on('SIGTERM', handler);
+}
+
+main();
