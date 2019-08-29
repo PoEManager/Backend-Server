@@ -127,7 +127,31 @@ namespace errors {
      */
     export class FileNotFoundError extends Error {
         public constructor(path: string) {
-            super('FILE_NOT_FOUND_ERROR', `File could not be found: ${path}`, 500, {});
+            super('FILE_NOT_FOUND_ERROR', `File could not be found: ${path}`, 500, {
+                path
+            });
+        }
+    }
+
+    /**
+     * A file could not be located.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     properties: "<wrong properties>",
+     *     object: "<invalid object>"
+     * }
+     * ```
+     */
+    export class ObjectValidationError extends Error {
+        public constructor(properties: string[], object: any) {
+            const str = properties.length === 0 ? `Property ${properties[0]}` : 'Multiple properties';
+
+            super('OBJECT_VALIDATION_ERROR', `${str} in object could not be validated.`, 500, {
+                properties,
+                object
+            });
         }
     }
 }
