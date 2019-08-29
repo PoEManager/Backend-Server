@@ -1,7 +1,7 @@
 import path from 'path';
 import errors from '../../../app/core/errors';
-import RootDirectory from '../../../app/core/get-root-directory';
 import JSONLoader from '../../../app/core/load-json';
+import RootDirectory from '../../../app/core/root-directory';
 
 describe('core', () => {
     describe('load-json.ts', () => {
