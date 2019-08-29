@@ -1,59 +1,117 @@
 import errors from '../../../app/core/errors';
-import mergeObjects from '../../../app/core/object-merger';
+import ObjectMerger from '../../../app/core/object-merger';
 
 describe('core', () => {
     describe('object-merger.ts', () => {
-        it('should correctly merge two objects', async () => {
-            const a = {
-                a: 'a',
-                b: 1,
-                c: {
-                    d: 'd',
-                    e: 2,
-                    f: {
-                        g: 'g',
-                        h: 3
+        describe('async variant', () => {
+            it('should correctly merge two objects', async () => {
+                const a = {
+                    a: 'a',
+                    b: 1,
+                    c: {
+                        d: 'd',
+                        e: 2,
+                        f: {
+                            g: 'g',
+                            h: 3
+                        }
                     }
-                }
-            };
+                };
 
-            const b = {
-                a: 'a',
-                b: 3,
-                c: {
-                    d: 'xyz',
-                    e: 2,
-                    f: {
-                        i: 'i'
+                const b = {
+                    a: 'a',
+                    b: 3,
+                    c: {
+                        d: 'xyz',
+                        e: 2,
+                        f: {
+                            i: 'i'
+                        }
                     }
-                }
-            };
+                };
 
-            await expect(mergeObjects(a, b)).resolves.toEqual({
-                a: 'a',
-                b: 3,
-                c: {
-                    d: 'xyz',
-                    e: 2,
-                    f: {
-                        g: 'g',
-                        h: 3,
-                        i: 'i'
+                await expect(ObjectMerger.merge(a, b)).resolves.toEqual({
+                    a: 'a',
+                    b: 3,
+                    c: {
+                        d: 'xyz',
+                        e: 2,
+                        f: {
+                            g: 'g',
+                            h: 3,
+                            i: 'i'
+                        }
                     }
-                }
+                });
+            });
+
+            it('should throw if types do not match', async () => {
+                const a = {
+                    a: 'a'
+                };
+
+                const b = {
+                    a: 1
+                };
+
+                await expect(ObjectMerger.merge(a, b)).
+                    rejects.toEqual(new errors.TypeMismatchError('number', 'string'));
             });
         });
 
-        it('should throw if types do not match', async () => {
-            const a = {
-                a: 'a'
-            };
+        describe('sync variant', () => {
+            it('should correctly merge two objects', () => {
+                const a = {
+                    a: 'a',
+                    b: 1,
+                    c: {
+                        d: 'd',
+                        e: 2,
+                        f: {
+                            g: 'g',
+                            h: 3
+                        }
+                    }
+                };
 
-            const b = {
-                a: 1
-            };
+                const b = {
+                    a: 'a',
+                    b: 3,
+                    c: {
+                        d: 'xyz',
+                        e: 2,
+                        f: {
+                            i: 'i'
+                        }
+                    }
+                };
 
-            await expect(mergeObjects(a, b)).rejects.toEqual(new errors.TypeMismatchError('number', 'string'));
+                expect(ObjectMerger.mergeSync(a, b)).toEqual({
+                    a: 'a',
+                    b: 3,
+                    c: {
+                        d: 'xyz',
+                        e: 2,
+                        f: {
+                            g: 'g',
+                            h: 3,
+                            i: 'i'
+                        }
+                    }
+                });
+            });
+
+            it('should throw if types do not match', () => {
+                const a = {
+                    a: 'a'
+                };
+
+                const b = {
+                    a: 1
+                };
+
+                expect(() => ObjectMerger.mergeSync(a, b)).toThrow(new errors.TypeMismatchError('number', 'string'));
+            });
         });
     });
 });
