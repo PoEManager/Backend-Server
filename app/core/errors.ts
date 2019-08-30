@@ -134,7 +134,7 @@ namespace errors {
     }
 
     /**
-     * A file could not be located.
+     * An object could not be validated.
      *
      * The data layout is the following:
      * ```typescript
@@ -145,12 +145,46 @@ namespace errors {
      * ```
      */
     export class ObjectValidationError extends Error {
-        public constructor(properties: string[], object: any) {
-            const str = properties.length === 0 ? `Property ${properties[0]}` : 'Multiple properties';
+        public constructor(messages: string[]) {
+            super('OBJECT_VALIDATION_ERROR', `Object could not be validated: ${messages.join('; ')}`, 500, {
+                messages
+            });
+        }
+    }
 
-            super('OBJECT_VALIDATION_ERROR', `${str} in object could not be validated.`, 500, {
-                properties,
-                object
+    /**
+     * A config meta file could not be located.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     message: "<message that describes the problem>"
+     * }
+     * ```
+     */
+    export class ConfigMetaValidationError extends Error {
+        public constructor(messages: string[]) {
+            super('CONFIG_META_VALIDATION_ERROR', `config-meta object could not be validated: ${messages.join('; ')}`,
+            500, {
+                messages
+            });
+        }
+    }
+
+    /**
+     * A config dependency does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     dependency: "<the invalid dependency>"
+     * }
+     * ```
+     */
+    export class ConfigExtensionError extends Error {
+        public constructor(dependency: string) {
+            super('CONFIG_EXTENSION_ERROR', `Dependency ${dependency} does not exist.`, 500, {
+                dependency
             });
         }
     }
