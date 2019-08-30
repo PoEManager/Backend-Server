@@ -197,5 +197,28 @@ describe('model', () => {
                 await expect(UserManager.getDefaultLogin(-1)).rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
             });
         });
+
+        describe('getUserFromChangeUID()', () => {
+            it('should return the correct login if it exists', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const changeUID = await user.getChangeUID();
+
+                const testUser = await UserManager.getUserFromChangeUID(changeUID!);
+
+                expect(testUser.getId()).toBe(user.getId());
+            });
+
+            it('should throw if the login does not exist', async () => {
+                await expect(UserManager.getUserFromChangeUID('invalid-change-id'))
+                    .rejects.toEqual(new errors.InvalidChangeIDError('invalid-change-id'));
+            });
+        });
     });
 });

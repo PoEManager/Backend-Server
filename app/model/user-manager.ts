@@ -130,6 +130,31 @@ namespace UserManager {
     }
 
     /**
+     * Returns a user with a specific change ID.
+     *
+     * @param changeUID The change ID.
+     * @returns The user that has the passed change ID.
+     *
+     * @throws **InvalidChangeIDError** If there is not user with the passed change ID.
+     */
+    export async function getUserFromChangeUID(changeUID: UserManager.ChangeID): Promise<User> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`change_uid` = FROM_BASE64(?)', {
+                parameters: [
+                    changeUID
+                ],
+                expectedErrors: []
+            }
+        );
+
+        if (result.length === 1) {
+            return new User(result[0].user_id);
+        } else {
+            throw new errors.InvalidChangeIDError(changeUID);
+        }
+    }
+
+    /**
      * The data that is used to create new user account with email+password authentication.
      */
     export interface IDefaultLoginCreateData {
