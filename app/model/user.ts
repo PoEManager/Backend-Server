@@ -242,8 +242,7 @@ class User {
         if (queryData.length === 0) {
             columns = '1';
         } else {
-            let columnsList  = _.map(queryData, queryDataToColumn); // convert QueryData to actual SQL columns
-            columnsList = _.map(columnsList, str => `\`${str}\``); // surround columns with backticks (`)
+            const columnsList  = _.map(queryData, queryDataToColumn); // convert QueryData to actual SQL columns
             columns = columnsList.join(','); // make comma separated list
         }
 
@@ -366,11 +365,13 @@ class User {
 function queryDataToColumn(queryData: User.QueryData): string {
     switch (queryData) {
         case User.QueryData.ID:
-            return 'user_id';
+            return '`Users`.`user_id`';
         case User.QueryData.NICKNAME:
-            return 'nickname';
+            return '`Users`.`nickname`';
         case User.QueryData.DEFAULT_LOGIN_ID:
-            return 'defaultlogin_id';
+            return '`Users`.`defaultlogin_id`';
+        case User.QueryData.CHANGE_UID:
+            return 'TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid';
         default:
             return ''; // does not happen
     }
@@ -386,7 +387,8 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
     return {
         id: queryData.includes(User.QueryData.ID) ? result.user_id : undefined,
         defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
-        nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined
+        nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
+        changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined
     };
 }
 
@@ -429,7 +431,12 @@ namespace User {
         /**
          * The user's default login ID.
          */
-        DEFAULT_LOGIN_ID
+        DEFAULT_LOGIN_ID,
+
+        /**
+         * The user's change UID.
+         */
+        CHANGE_UID
     }
 
     /**
@@ -452,6 +459,11 @@ namespace User {
          * The default login ID of the user. If the user does not have a default login, this will be set to ```null```.
          */
         defaultLoginId?: DefaultLogin.ID;
+
+        /**
+         * The current change UID.If there is no change going on, this will be set to `null`.
+         */
+        changeUid?: Buffer;
     }
 }
 

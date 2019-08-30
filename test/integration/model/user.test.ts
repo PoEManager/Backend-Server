@@ -171,15 +171,17 @@ describe('model', () => {
 
                 const defaultLoginId = (await user.getDefaultLogin()).getId();
 
-                await expect(user.query([
+                const result = await user.query([
                     User.QueryData.ID,
                     User.QueryData.DEFAULT_LOGIN_ID,
-                    User.QueryData.NICKNAME
-                ])).resolves.toMatchObject({
-                    id: user.getId(),
-                    defaultLoginId,
-                    nickname: user.getNickname()
-                });
+                    User.QueryData.NICKNAME,
+                    User.QueryData.CHANGE_UID
+                ]);
+
+                expect(result.id).toBe(user.getId());
+                expect(result.nickname).toBe('nickname');
+                expect(result.defaultLoginId).toBe(defaultLoginId);
+                expect(result.changeUid!.length).toBe(24);
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
