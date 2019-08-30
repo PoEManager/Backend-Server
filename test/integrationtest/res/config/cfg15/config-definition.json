@@ -1,0 +1,17 @@
+{
+    "default": {
+        "sources": [
+            "default",
+            "$config-env",
+            "local"
+        ]
+    },
+    "test": {
+        "extends": "default",
+        "sources": [
+            "default",
+            "$config-env",
+            "local"
+        ]
+    }
+}

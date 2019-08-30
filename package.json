@@ -4,7 +4,7 @@
     "description": "The backend (i.e. REST) server of PoE Manager.",
     "main": "app.js",
     "scripts": {
-        "test": "jest --coverage --runInBand",
+        "test": "NODE_ENV='test' jest --coverage --runInBand",
         "doc": "typedoc --mode file --out 'docs/typedoc'",
         "build": "tsc",
         "prestart": "npm run build",
@@ -27,6 +27,7 @@
         "@types/morgan": "^1.7.37",
         "@types/node": "^12.7.2",
         "@types/nodemailer": "^6.2.1",
+        "ajv": "^6.10.2",
         "bcrypt": "^3.0.6",
         "config": "^3.2.2",
         "express": "^4.17.1",

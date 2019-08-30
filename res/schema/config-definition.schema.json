@@ -1,0 +1,70 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "PoE Manager config meta definition schema",
+    "type": "object",
+    "additionalProperties": false,
+    "patternProperties": {
+        "^[a-zA-Z0-9-_.]+$": {
+            "$ref": "#/definitions/configEnvironment"
+        }
+    },
+    "properties": {
+        "default": {
+            "$ref": "#/definitions/configEnvironment"
+        }
+    },
+    "definitions": {
+        "configEnvironment": {
+            "type": "object",
+            "properties": {
+                "sources": {
+                    "type": "array",
+                    "additionalItems": false,
+                    "uniqueItems": true,
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "$config-env"
+                                ]
+                            },
+                            {
+                                "type": "string",
+                                "regex": "^[a-zA-Z0-9-_.]+$"
+                            }
+                        ]
+                    }
+                },
+                "configs": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "schema": {
+                                "$ref": "http://json-schema.org/draft-07/schema"
+                            }
+                        }
+                    },
+                    "additionalItems": false
+                },
+                "extends": {
+                    "default": null,
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "regex": "^[a-zA-Z0-9-_.]+$"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

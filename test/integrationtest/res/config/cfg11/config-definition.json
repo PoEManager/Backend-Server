@@ -1,0 +1,41 @@
+{
+    "default": {
+        "sources": [
+            "another"
+        ]
+    },
+    "test": {
+        "sources": [
+            "default",
+            "$config-env",
+            "local"
+        ],
+        "extends": "default",
+        "configs": [
+            {
+                "name": "test",
+                "schema": {
+                    "$schema": "http://json-schema.org/draft-07/schema",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "test1",
+                        "test2",
+                        "test3"
+                    ],
+                    "properties": {
+                        "test1": {
+                            "type1": "string"
+                        },
+                        "test2": {
+                            "type": "string"
+                        },
+                        "test3": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

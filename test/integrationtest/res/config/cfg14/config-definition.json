@@ -1,0 +1,10 @@
+{
+    "default": {
+        "sources": [
+            "default",
+            "$config-env",
+            "local"
+        ],
+        "configs": []
+    }
+}

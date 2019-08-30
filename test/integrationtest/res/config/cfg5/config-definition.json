@@ -1,0 +1,27 @@
+{
+    "test": {
+        "sources": [
+            "default",
+            "$config-env",
+            "local"
+        ],
+        "configs": [
+            {
+                "name": "test",
+                "schema": {
+                    "$schema": "http://json-schema.org/draft-07/schema",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "overriddenTest"
+                    ],
+                    "properties": {
+                        "overriddenTest": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}
