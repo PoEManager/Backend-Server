@@ -14,7 +14,8 @@
                     "additionalProperties": false,
                     "required": [
                         "host",
-                        "auth"
+                        "auth",
+                        "sender"
                     ],
                     "properties": {
                         "host": {
@@ -22,6 +23,7 @@
                         },
                         "auth": {
                             "type": "object",
+                            "additionalProperties": false,
                             "required": [
                                 "user",
                                 "password"
@@ -34,6 +36,25 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "sender": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "basic",
+                "schema": {
+                    "$schema": "http://json-schema.org/draft-07/schema",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "baseURL"
+                    ],
+                    "properties": {
+                        "baseURL": {
+                            "type": "string"
                         }
                     }
                 }
