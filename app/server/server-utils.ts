@@ -12,7 +12,7 @@ namespace ServerUtils {
      */
     export class UnexpectedError extends InternalError {
         public constructor() {
-            super({});
+            super('UNEXPECTED_ERROR', {});
         }
     }
 
