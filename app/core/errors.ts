@@ -1,4 +1,4 @@
-import Error from './error';
+import InternalError from './internal-error';
 
 namespace errors {
 
@@ -12,12 +12,9 @@ namespace errors {
      * }
      * ```
      */
-    export class InvalidEmailConfigurationError extends Error {
+    export class InvalidEmailConfigurationError extends InternalError {
         public constructor(name: string) {
-            super('INVALID_EMAIL_CONFIGURATION_ERROR',
-            `The E-Mail configuration "${name}" is in an invalid format.`, 500, {
-                name
-            });
+            super('INVALID_EMAIL_CONFIGURATION_ERROR', { name });
         }
     }
 
@@ -31,12 +28,9 @@ namespace errors {
      * }
      * ```
      */
-    export class TemplateCompileError extends Error {
+    export class TemplateCompileError extends InternalError {
         public constructor(name: string) {
-            super('TEMPLATE_COMPILE_ERROR',
-            `The HTML template "${name}" could not be compiled.`, 500, {
-                name
-            });
+            super('TEMPLATE_COMPILE_ERROR', { name });
         }
     }
 
@@ -50,12 +44,9 @@ namespace errors {
      * }
      * ```
      */
-    export class HTMLGenerationError extends Error {
+    export class HTMLGenerationError extends InternalError {
         public constructor(name: string) {
-            super('HTML_GENERATION_ERROR',
-            `The HTML from the template "${name}" could not be generated.`, 500, {
-                name
-            });
+            super('HTML_GENERATION_ERROR', { name });
         }
     }
 
@@ -69,12 +60,9 @@ namespace errors {
      * }
      * ```
      */
-    export class EmailSendError extends Error {
+    export class EmailSendError extends InternalError {
         public constructor(to: string) {
-            super('EMAIL_SEND_ERROR',
-            `Could not send an E-Mail to "${to}".`, 500, {
-                to
-            });
+            super('EMAIL_SEND_ERROR', { to });
         }
     }
 
@@ -89,13 +77,9 @@ namespace errors {
      * }
      * ```
      */
-    export class TypeMismatchError extends Error {
+    export class TypeMismatchError extends InternalError {
         public constructor(got: string, expected: string) {
-            super('TYPE_MISMATCH_ERROR',
-            `The types do not match. Got: ${got} Expected: ${expected}`, 500, {
-                got,
-                expected
-            });
+            super('TYPE_MISMATCH_ERROR', { got, expected });
         }
     }
 
@@ -109,9 +93,9 @@ namespace errors {
      * }
      * ```
      */
-    export class JSONParseError extends Error {
+    export class JSONParseError extends InternalError {
         public constructor() {
-            super('JSON_PARSE_ERROR', `JSON could not be parsed.`, 500, {});
+            super('JSON_PARSE_ERROR', {});
         }
     }
 
@@ -125,11 +109,9 @@ namespace errors {
      * }
      * ```
      */
-    export class FileNotFoundError extends Error {
+    export class FileNotFoundError extends InternalError {
         public constructor(path: string) {
-            super('FILE_NOT_FOUND_ERROR', `File could not be found: ${path}`, 500, {
-                path
-            });
+            super('FILE_NOT_FOUND_ERROR', { path });
         }
     }
 
@@ -144,11 +126,9 @@ namespace errors {
      * }
      * ```
      */
-    export class ObjectValidationError extends Error {
+    export class ObjectValidationError extends InternalError {
         public constructor(messages: string[]) {
-            super('OBJECT_VALIDATION_ERROR', `Object could not be validated: ${messages.join('; ')}`, 500, {
-                messages
-            });
+            super('OBJECT_VALIDATION_ERROR', { messages });
         }
     }
 
@@ -162,12 +142,9 @@ namespace errors {
      * }
      * ```
      */
-    export class ConfigMetaValidationError extends Error {
+    export class ConfigMetaValidationError extends InternalError {
         public constructor(messages: string[]) {
-            super('CONFIG_META_VALIDATION_ERROR', `config-meta object could not be validated: ${messages.join('; ')}`,
-            500, {
-                messages
-            });
+            super('CONFIG_META_VALIDATION_ERROR', { messages });
         }
     }
 
@@ -181,11 +158,9 @@ namespace errors {
      * }
      * ```
      */
-    export class ConfigExtensionError extends Error {
+    export class ConfigExtensionError extends InternalError {
         public constructor(dependency: string) {
-            super('CONFIG_EXTENSION_ERROR', `Dependency ${dependency} does not exist.`, 500, {
-                dependency
-            });
+            super('CONFIG_EXTENSION_ERROR', { dependency });
         }
     }
 }

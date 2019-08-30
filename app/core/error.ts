@@ -45,6 +45,8 @@ class Error {
 
     /**
      * Converts the error into a REST error.
+     *
+     * @returns The REST error.
      */
     public asRESTError(): Error.IRESTError {
         return {

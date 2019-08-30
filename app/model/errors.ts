@@ -155,7 +155,8 @@ namespace errors {
      */
     export class ChangeAlreadyInProgressError extends Error {
         public constructor(id: User.ID) {
-            super('CHANGE_ALREADY_IN_PROGRESS_ERROR', `Another change is already in progress.`, 409, {
+            super('CHANGE_ALREADY_IN_PROGRESS_ERROR',
+                `Another change is already in progress for the user with the id='${id}'.`, 409, {
                 id
             });
         }
@@ -173,7 +174,7 @@ namespace errors {
      */
     export class UserAlreadyVerifiedError extends Error {
         public constructor(id: User.ID) {
-            super('USER_ALREADY_VERIFIED_ERROR', `The user is already verified.`, 400, {
+            super('USER_ALREADY_VERIFIED_ERROR', `The user with the id='${id}' is already verified.`, 400, {
                 id
             });
         }
