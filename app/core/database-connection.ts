@@ -259,7 +259,7 @@ namespace DatabaseConnection {
      */
     export class UnexpectedSQLError extends InternalError {
         public constructor(errorCode: number, error: string, message: string) {
-            super({
+            super('UNEXPECTED_SQL_ERROR', {
                 errorCode,
                 error,
                 message
