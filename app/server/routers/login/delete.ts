@@ -1,4 +1,4 @@
-import JWTManager from '../../../core/jwt-manager';
+import SessionTokenManager from '../../../core/session-token-manager';
 import RouteConfiguration from '../../route-configuration';
 
 const route: RouteConfiguration = {
@@ -6,7 +6,7 @@ const route: RouteConfiguration = {
     path: '/login',
     auth: true,
     handler: async (req, res) => {
-        await JWTManager.invalidateJWT(req.header('x-auth-token')!); // always defined, b/c auth is required
+        await SessionTokenManager.invalidate(req.header('x-auth-token')!); // always defined, b/c auth is required
         res.send();
     }
 };

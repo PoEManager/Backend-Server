@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from '../../../app/core/config';
 import DatabaseConnection from '../../../app/core/database-connection';
-import errors from '../../../app/core/errors';
-import JwtManager from '../../../app/core/jwt-manager';
-import User from '../../../app/model/user';
+import SessionTokenManager from '../../../app/core/session-token-manager';
 import UserManager from '../../../app/model/user-manager';
 
 describe('core', () => {
@@ -19,7 +17,7 @@ describe('core', () => {
             await DatabaseConnection.reset();
         });
 
-        describe('createJWT()', () => {
+        describe('create()', () => {
             it('should correctly generate a JWT for a user', async () => {
                 const user = await UserManager.create({
                     nickname: 'test123',
@@ -29,11 +27,11 @@ describe('core', () => {
                     }
                 });
 
-                await expect(JwtManager.createJWT(user)).resolves.toBeDefined();
+                await expect(SessionTokenManager.create(user)).resolves.toBeDefined();
             });
         });
 
-        describe('verifyJWT()', () => {
+        describe('verify()', () => {
             it('should correctly verify a JWT for an existing user', async () => {
                 const user = await UserManager.create({
                     nickname: 'test123',
@@ -43,38 +41,38 @@ describe('core', () => {
                     }
                 });
 
-                const token = await JwtManager.createJWT(user);
-                const verifiedUser = await JwtManager.verifyJWT(token);
+                const token = await SessionTokenManager.create(user);
+                const verifiedUser = await SessionTokenManager.verify(token);
                 expect(verifiedUser.getId()).toBe(user.getId());
             });
 
             it('should throw if an invalid JWT is passed', async () => {
-                await expect(JwtManager.verifyJWT('abcd')).rejects.toMatchObject({data: {token: 'abcd'}});
+                await expect(SessionTokenManager.verify('abcd')).rejects.toMatchObject({data: {token: 'abcd'}});
             });
 
             it('should throw if a JWT with invalid payload is passed (missing user ID)', async () => {
                 const token = jwt.sign({
                     jwtId: 12345
-                }, config.security.jwt.secret);
+                }, config.security.sessionToken.secret);
 
-                await expect(JwtManager.verifyJWT(token)).rejects.toMatchObject({data: {token}});
+                await expect(SessionTokenManager.verify(token)).rejects.toMatchObject({data: {token}});
             });
 
             it('should throw if a JWT with invalid payload is passed (missing JWT ID)', async () => {
                 const token = jwt.sign({
                     userId: 12345
-                }, config.security.jwt.secret);
+                }, config.security.sessionToken.secret);
 
-                await expect(JwtManager.verifyJWT(token)).rejects.toMatchObject({data: {token}});
+                await expect(SessionTokenManager.verify(token)).rejects.toMatchObject({data: {token}});
             });
 
             it('should throw if a JWT for an invalid user is passed', async () => {
                 const token = jwt.sign({
                     userId: 12345,
                     jwtId: 12345
-                }, config.security.jwt.secret);
+                }, config.security.sessionToken.secret);
 
-                await expect(JwtManager.verifyJWT(token)).rejects.toMatchObject({data: {token}});
+                await expect(SessionTokenManager.verify(token)).rejects.toMatchObject({data: {token}});
             });
 
             it('should throw if a JWT with an invalid JWT ID is passed', async () => {
@@ -86,14 +84,14 @@ describe('core', () => {
                     }
                 });
 
-                const token = await JwtManager.createJWT(user);
+                const token = await SessionTokenManager.create(user);
                 await user.incrementJwtId();
 
-                await expect(JwtManager.verifyJWT(token)).rejects.toMatchObject({data: {token}});
+                await expect(SessionTokenManager.verify(token)).rejects.toMatchObject({data: {token}});
             });
         });
 
-        describe('invalidateJWT()', () => {
+        describe('invalidate()', () => {
             it('should not validate a JWT after it has been invalidated', async () => {
                 const user = await UserManager.create({
                     nickname: 'test123',
@@ -103,10 +101,10 @@ describe('core', () => {
                     }
                 });
 
-                const token = await JwtManager.createJWT(user);
-                await expect(JwtManager.verifyJWT(token)).resolves.toBeDefined();
-                await JwtManager.invalidateJWT(token);
-                await expect(JwtManager.verifyJWT(token)).rejects.toBeDefined();
+                const token = await SessionTokenManager.create(user);
+                await expect(SessionTokenManager.verify(token)).resolves.toBeDefined();
+                await SessionTokenManager.invalidate(token);
+                await expect(SessionTokenManager.verify(token)).rejects.toBeDefined();
             });
         });
     });

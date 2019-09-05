@@ -5,7 +5,7 @@ import UserManager from '../model/user-manager';
 import config from './config';
 import errors from './errors';
 
-namespace JWTManager {
+namespace SessionTokenManager {
     /**
      * The contents of a JWT payload.
      */
@@ -19,7 +19,7 @@ namespace JWTManager {
      *
      * @param user The user to create the JWT for.
      */
-    export async function createJWT(user: User): Promise<string> {
+    export async function create(user: User): Promise<string> {
         const queryResult = await user.query([User.QueryData.ID, User.QueryData.JWT_ID]);
 
         const payload: IPayload = {
@@ -27,10 +27,10 @@ namespace JWTManager {
             jwtId: queryResult.jwtId!
         };
 
-        const secret = config.security.jwt.secret;
+        const secret = config.security.sessionToken.secret;
 
         const options = {
-            expiresIn: config.security.jwt.expiration
+            expiresIn: config.security.sessionToken.expiration
         };
 
         return jwt.sign(payload, secret, options);
@@ -44,8 +44,8 @@ namespace JWTManager {
      *
      * @throws **InvalidJWTError** If there is something wrong with the JWT.
      */
-    export async function verifyJWT(token: string): Promise<User> {
-        const secret = config.security.jwt.secret;
+    export async function verify(token: string): Promise<User> {
+        const secret = config.security.sessionToken.secret;
 
         try {
             const obj = jwt.verify(token, secret) as IPayload;
@@ -72,13 +72,13 @@ namespace JWTManager {
      *
      * @param token The JWT.
      *
-     * @throws **InvalidJWTError** See `verifyJWT()`.
+     * @throws **InvalidJWTError** See `verify()`.
      */
-    export async function invalidateJWT(token: string): Promise<void> {
-        const user = await verifyJWT(token);
+    export async function invalidate(token: string): Promise<void> {
+        const user = await verify(token);
 
         await user.incrementJwtId();
     }
 }
 
-export = JWTManager;
+export = SessionTokenManager;

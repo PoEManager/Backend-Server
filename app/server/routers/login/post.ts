@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi';
-import JWTManager from '../../../core/jwt-manager';
+import SessionTokenManager from '../../../core/session-token-manager';
 import errors from '../../../model/errors';
 import UserManager from '../../../model/user-manager';
 import RouteConfiguration from '../../route-configuration';
@@ -17,7 +17,7 @@ const route: RouteConfiguration = {
         const password = await login.getPassword();
 
         if (await password.compareTo(req.body.password)) {
-            res.send({token: await JWTManager.createJWT(user)});
+            res.send({token: await SessionTokenManager.create(user)});
         } else {
             throw new errors.InvalidCredentialsError();
         }

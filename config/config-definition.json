@@ -66,10 +66,10 @@
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
-                        "jwt"
+                        "sessionToken"
                     ],
                     "properties": {
-                        "jwt": {
+                        "sessionToken": {
                             "type": "object",
                             "additionalProperties": false,
                             "required": [
