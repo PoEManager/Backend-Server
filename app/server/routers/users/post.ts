@@ -27,7 +27,7 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
         }
     });
 
-    logger.info(`Created new user: id=${user.getId()};` +
+    req.locals.logger.logger.info(`Created new user: id=${user.getId()};` +
         `nickname=${req.body.nickname};email=${req.body.loginData.email}`);
     req.locals.logger.info(`User creation successful. User ID is ${user.getId()}.`);
     res.send();

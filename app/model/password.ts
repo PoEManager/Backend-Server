@@ -1,5 +1,6 @@
 
 import bcrypt from 'bcrypt';
+import config from '../core/config';
 
 /**
  * A class that creates and compares encrypted passwords.
@@ -66,8 +67,7 @@ namespace Password {
     /**
      * The amount of rounds used to generate the salt.
      */
-    // todo make configurable
-    export const SALT_ROUNDS = 10;
+    export const SALT_ROUNDS = config.security.passwordSaltRounds;
 }
 
 export = Password;
