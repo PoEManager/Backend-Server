@@ -279,6 +279,27 @@ describe('model', () => {
             });
         });
 
+        describe('incrementJwtId()', () => {
+            it('should return a valid JWT ID', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const oldJwt = await user.getJwtID();
+                await user.incrementJwtId();
+                await expect(user.getJwtID()).resolves.toBe(oldJwt + 1);
+
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).incrementJwtId()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
         describe('getJwtID()', () => {
             it('should return a valid JWT ID', async () => {
                 const user = await UserManager.create({

@@ -125,7 +125,7 @@ class User {
      */
     public async getChangeUID(): Promise<string | null> {
         const result = await DatabaseConnection.query(
-            'SELECT TO_BASE64(\`Users\`.\`change_uid\`) as change_uid FROM `Users` WHERE `Users`.`user_id` = ?', {
+            'SELECT TO_BASE64(`Users`.`change_uid`) as change_uid FROM `Users` WHERE `Users`.`user_id` = ?', {
                 parameters: [
                     this.id
                 ]
@@ -145,7 +145,7 @@ class User {
      */
     public async getChangeExpireDate(): Promise<Date> {
         const result = await DatabaseConnection.query(
-            'SELECT UNIX_TIMESTAMP(\`Users\`.\`change_expire_date\`) FROM `Users` WHERE `Users`.`user_id` = ?', {
+            'SELECT UNIX_TIMESTAMP(`Users`.`change_expire_date`) FROM `Users` WHERE `Users`.`user_id` = ?', {
                 parameters: [
                     this.id
                 ]
@@ -165,7 +165,7 @@ class User {
      */
     public async getJwtID(): Promise<number> {
         const result = await DatabaseConnection.query(
-            'SELECT `Users\`.\`jwt_id\` FROM `Users` WHERE `Users`.`user_id` = ?', {
+            'SELECT `Users`.`jwt_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
                 parameters: [
                     this.id
                 ]
@@ -174,6 +174,24 @@ class User {
         if (result.length === 1) {
             return result[0].jwt_id;
         } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Increments the current JWT ID by one.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async incrementJwtId(): Promise<void> {
+        const result = await DatabaseConnection.query(
+            'UPDATE `Users` SET `jwt_id`=`jwt_id` + 1 WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.affectedRows !== 1) {
             throw this.makeUserNotFoundError();
         }
     }
