@@ -20,7 +20,8 @@
         ]
     },
     "include": [
-        "app/**/*"
+        "app/**/*",
+        "app/typings/express.d.ts"
     ],
     "exclude": [
         "node_modules",

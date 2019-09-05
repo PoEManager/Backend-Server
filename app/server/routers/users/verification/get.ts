@@ -11,7 +11,7 @@ const route: RouteConfiguration = {
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
-    const verified = await (res.locals.user as User).isVerified();
+    const verified = await req.locals.user.isVerified();
     res.send({verified});
 }
 

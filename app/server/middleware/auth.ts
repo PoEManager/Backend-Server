@@ -15,7 +15,7 @@ function makeAuth(): MiddlewareFunction {
             const token = req.header('x-auth-token');
 
             if (token) {
-                res.locals.user = await SessionTokenManager.verify(token);
+                req.locals.user = await SessionTokenManager.verify(token);
                 next();
             } else {
                 throw new errors.InvalidCredentialsError();

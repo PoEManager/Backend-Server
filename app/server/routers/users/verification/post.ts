@@ -13,7 +13,7 @@ const route: RouteConfiguration = {
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
-    const user = res.locals.user as User;
+    const user = req.locals.user as User;
 
     if (await user.isVerified()) {
         throw new errors.UserAlreadyVerifiedError(user.getId());
