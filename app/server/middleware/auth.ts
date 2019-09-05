@@ -12,16 +12,19 @@ import MiddlewareFunction from './middleware-function';
 function makeAuth(): MiddlewareFunction {
     return async (req, res, next) => {
         try {
+            req.locals.logger.info('Authenticating user...');
             const token = req.header('x-auth-token');
 
             if (token) {
                 req.locals.user = await SessionTokenManager.verify(token);
+                req.locals.logger.info(`Authentication successful. Authenticated as user with ID ${req.locals.user.getId()}.`);
                 next();
             } else {
+                req.locals.logger.info('Authentication failed.');
                 throw new errors.InvalidCredentialsError();
             }
         } catch (error) {
-            ServerUtils.sendRESTError(res, error);
+            ServerUtils.sendRESTError(req, res, error);
         }
     };
 }

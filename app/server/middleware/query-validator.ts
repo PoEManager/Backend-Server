@@ -12,10 +12,13 @@ import MiddlewareFunction from './middleware-function';
 function makeQueryValidator(schema: Joi.Schema): MiddlewareFunction {
     return async (req, res, next) => {
         try {
+            req.locals.logger.info('Validating query parameters.');
             await Joi.validate(req.query, schema);
+            req.locals.logger.info('Query validation successful.');
             next();
         } catch (error) {
-            ServerUtils.sendRESTError(res, new errors.InvalidQueryFormatError(schema));
+            req.locals.logger.info('Query validation failed.');
+            ServerUtils.sendRESTError(req, res, new errors.InvalidQueryFormatError(schema));
         }
     };
 }

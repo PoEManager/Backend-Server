@@ -11,7 +11,9 @@ const route: RouteConfiguration = {
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
+    req.locals.logger.info('Validating user.');
     await UserManager.validateChange(base64url.unescape(req.params.changeId));
+    req.locals.logger.info('User validation successful.');
     res.send();
 }
 

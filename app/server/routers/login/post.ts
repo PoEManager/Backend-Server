@@ -12,11 +12,13 @@ const route: RouteConfiguration = {
         password: Joi.string().required()
     }),
     handler: async (req, res) => {
+        req.locals.logger.info('Logging in user.');
         const user = await UserManager.searchForUserWithEmail(req.body.email);
         const login = await user.getDefaultLogin();
         const password = await login.getPassword();
 
         if (await password.compareTo(req.body.password)) {
+            req.locals.logger.info(`Login successful for user with ID ${user.getId()}.`);
             res.send({token: await SessionTokenManager.create(user)});
         } else {
             throw new errors.InvalidCredentialsError();

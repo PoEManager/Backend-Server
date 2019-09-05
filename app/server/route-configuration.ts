@@ -26,7 +26,7 @@ namespace IRouteConfiguration {
             try {
                 await handler(req, res);
             } catch (error) {
-                ServerUtils.sendRESTError(res, error);
+                ServerUtils.sendRESTError(req, res, error);
             }
         };
     }

@@ -10,6 +10,7 @@ import MiddlewareFunction from './middleware-function';
  */
 function makeHeaderValidator(keys: string[]): MiddlewareFunction {
     return (req, res, next) => {
+        req.locals.logger.info('Validating header.');
         const missingKeys: string[] = [];
 
         for (const key in keys) {
@@ -19,8 +20,10 @@ function makeHeaderValidator(keys: string[]): MiddlewareFunction {
         }
 
         if (missingKeys.length > 0) {
-            ServerUtils.sendRESTError(res, new errors.InvalidHeaderFormatError(missingKeys));
+            req.locals.logger.info('Header validation failed.');
+            ServerUtils.sendRESTError(req, res, new errors.InvalidHeaderFormatError(missingKeys));
         } else {
+            req.locals.logger.info('Header validation successful.');
             next();
         }
     };

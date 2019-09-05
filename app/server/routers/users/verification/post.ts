@@ -13,6 +13,7 @@ const route: RouteConfiguration = {
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
+    req.locals.logger.info('User is making a verification request.');
     const user = req.locals.user as User;
 
     if (await user.isVerified()) {
@@ -23,6 +24,7 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
         }
 
         await EmailManager.sendVerificationMail(user);
+        req.locals.logger.info('Verification E-Mail sent.');
         res.send();
     }
 }

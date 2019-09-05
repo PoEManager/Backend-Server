@@ -18,6 +18,7 @@ const route: RouteConfiguration = {
 };
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
+    req.locals.logger.info(`Creating new user with nickname ${req.body.nickname}.`);
     const user = await UserManager.create({
         nickname: req.body.nickname,
         loginData: {
@@ -28,6 +29,7 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 
     logger.info(`Created new user: id=${user.getId()};` +
         `nickname=${req.body.nickname};email=${req.body.loginData.email}`);
+    req.locals.logger.info(`User creation successful. User ID is ${user.getId()}.`);
     res.send();
 }
 
