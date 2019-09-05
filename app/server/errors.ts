@@ -83,6 +83,24 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Thrown if an unverified user attempts to access a route that requires verification.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>"
+     * }
+     * ```
+     */
+    export class NotVerifiedError extends Error {
+        public constructor(id: User.ID) {
+            super('NOT_VERIFIED_ERROR', `The user with the ID '${id}' is not verified.`, 403, {
+                id
+            });
+        }
+    }
 }
 
 export = errors;

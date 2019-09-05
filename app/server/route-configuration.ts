@@ -3,6 +3,7 @@ import express from 'express';
 import makeAuth from './middleware/auth';
 import makeBodyValidator from './middleware/body-validator';
 import makeHeaderValidator from './middleware/header-validator';
+import makeIsVerified from './middleware/is-verified';
 import MiddlewareFunction from './middleware/middleware-function';
 import makeQueryValidator from './middleware/query-validator';
 import ServerUtils from './server-utils';
@@ -32,8 +33,6 @@ namespace IRouteConfiguration {
     }
 
     export function addRoute(router: express.Router, route: IRouteConfiguration): void {
-        // todo auth & verification
-
         if (!route.auth && route.verified) {
             throw new Error('Verification requires authentication');
         }
@@ -42,6 +41,10 @@ namespace IRouteConfiguration {
 
         if (route.auth) {
             middleware.push(makeAuth());
+        }
+
+        if (route.verified) {
+            middleware.push(makeIsVerified());
         }
 
         if (route.headers) {

@@ -2,8 +2,7 @@ import LoggerCreator from '../../core/logger-creator';
 import MiddlewareFunction from './middleware-function';
 
 /**
- * Generates a middleware that logs incoming requests.
- * Stores the authenticated user in `req.locals.user`.
+ * Sets up a logger for the route in `req.locals.logger`.
  *
  * @returns The middleware function.
  */
