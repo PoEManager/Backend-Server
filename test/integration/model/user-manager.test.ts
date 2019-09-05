@@ -199,7 +199,7 @@ describe('model', () => {
         });
 
         describe('getUserFromChangeUID()', () => {
-            it('should return the correct login if it exists', async () => {
+            it('should return the correct user if it exists', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -215,9 +215,30 @@ describe('model', () => {
                 expect(testUser.getId()).toBe(user.getId());
             });
 
-            it('should throw if the login does not exist', async () => {
+            it('should throw if the user does not exist', async () => {
                 await expect(UserManager.getUserFromChangeUID('invalid-change-id'))
                     .rejects.toEqual(new errors.InvalidChangeIDError('invalid-change-id'));
+            });
+        });
+
+        describe('searchForUserWithEmail()', () => {
+            it('should return the correct user if it exists', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const testUser = await UserManager.searchForUserWithEmail('test@test.com');
+
+                expect(testUser.getId()).toBe(user.getId());
+            });
+
+            it('should throw if the user does not exist', async () => {
+                await expect(UserManager.searchForUserWithEmail('invalid email'))
+                    .rejects.toEqual(new errors.InvalidCredentialsError());
             });
         });
     });

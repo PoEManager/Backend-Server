@@ -58,13 +58,45 @@
                         }
                     }
                 }
+            },
+            {
+                "name": "security",
+                "schema": {
+                    "$schema": "http://json-schema.org/draft-07/schema",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "jwt"
+                    ],
+                    "properties": {
+                        "jwt": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "secret",
+                                "expiration"
+                            ],
+                            "properties": {
+                                "secret": {
+                                    "type": "string"
+                                },
+                                "expiration": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         ]
     },
     "test": {
         "sources": [
-            "$config-env"
+            "default",
+            "$config-env",
+            "local"
         ],
+        "extends": "default",
         "configs": [
             {
                 "name": "test",
