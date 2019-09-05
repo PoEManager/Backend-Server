@@ -63,6 +63,7 @@ import RootDirectory from './root-directory';
  * that is tied to a specific host or setup.
  *
  * There is a special source, called '$config-env'. It is a placeholder for the name of the configuration environment.
+ * This placeholder can be used as a source or as part of a source. For example: "$config-env", "$config-env-local".
  *
  * **configuration**:
  * A configuration environment defines one or more configurations. These configurations have a name and a schema. The
@@ -286,14 +287,7 @@ function processSources(config: IConfigEnvironment): string[] {
     // process special keys
     // tslint:disable-next-line: forin
     for (const key in config.sources) {
-        switch (config.sources[key]) {
-            case PLACEHOLDER_CONFIG_ENV:
-                ret[key] = getEnv(); // replace $config-env with the name of the current environment
-                break;
-            default:
-                ret[key] = config.sources[key]; // keep as-is
-                break;
-        }
+        ret[key] = config.sources[key].replace(PLACEHOLDER_CONFIG_ENV, getEnv());
     }
 
     return _.uniq(ret); // remove uniques (first one is kept)
