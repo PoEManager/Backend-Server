@@ -1,15 +1,11 @@
 import express from 'express';
 import http from 'http';
 import morgan from 'morgan';
+import config from '../core/config';
 import logger from '../core/logger';
 import router from './routers/routers/router';
 
 namespace Server {
-    const config = {
-        port: 3000,
-        urlPrefix: 'api'
-    };
-
     let app: express.Express | null = null;
     let server: http.Server;
 
@@ -25,10 +21,10 @@ namespace Server {
         app.use(morgan('tiny'));
         app.use(express.json());
         app.use(express.urlencoded({extended: false}));
-        app.use(`/${config.urlPrefix}`, router);
+        app.use(`/${config.basic.basePath}`, router);
 
         server = http.createServer(app);
-        server.listen(config.port);
+        server.listen(config.basic.port);
         server.on('close', () => {
             logger.info('Server is closing down.');
         });

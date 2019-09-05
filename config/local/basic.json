@@ -1,3 +1,4 @@
 {
-    "baseURL": "www.poemanager.com"
+    "baseURL": "www.poemanager.com",
+    "port": 3000
 }

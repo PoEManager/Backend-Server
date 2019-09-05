@@ -50,11 +50,19 @@
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
-                        "baseURL"
+                        "baseURL",
+                        "basePath",
+                        "port"
                     ],
                     "properties": {
                         "baseURL": {
                             "type": "string"
+                        },
+                        "basePath": {
+                            "type": "string"
+                        },
+                        "port": {
+                            "type": "number"
                         }
                     }
                 }

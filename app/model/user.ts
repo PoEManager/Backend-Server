@@ -342,7 +342,7 @@ class User {
      *
      * @throws **ChangeAlreadyInProgressError** If there is already another change in progress.
      */
-    private async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
+    public async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
         if (await this.getChangeState() !== null) { // also throws user not found error
             throw new errors.ChangeAlreadyInProgressError(this.id);
         }
@@ -528,7 +528,7 @@ namespace User {
         /**
          * The current change UID. If there is no change going on, this will be set to `null`.
          */
-        changeUid?: Buffer;
+        changeUid?: string;
 
         /**
          * The current session ID.

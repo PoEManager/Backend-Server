@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi';
 import Error from '../core/error';
+import User from '../model/user';
 
 namespace errors {
     /**
@@ -61,6 +62,24 @@ namespace errors {
             super('INVALID_QUERY_FORMAT_ERROR',
                 `The query parameters are in an invalid format`, 400, {
                 // todo
+            });
+        }
+    }
+
+    /**
+     * Thrown if a verified user accesses GET /user/verification
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>"
+     * }
+     * ```
+     */
+    export class UserAlreadyVerifiedError extends Error {
+        public constructor(id: User.ID) {
+            super('USER_ALREADY_VERIFIED_ERROR', `The user with the ID '${id}' is already verified.`, 400, {
+                id
             });
         }
     }

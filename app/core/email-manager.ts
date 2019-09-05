@@ -1,5 +1,5 @@
 import Joi from '@hapi/joi';
-import base64url from 'base64url';
+import base64url from 'base64-url';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
@@ -9,6 +9,7 @@ import JSONLoader from '../core/load-json';
 import errors from '../model/errors';
 import User from '../model/user';
 import UserManager from '../model/user-manager';
+import verificationPath from '../server/routers/users/verification/verification-path';
 import config from './config';
 import coreErrors from './errors';
 import RootDirectory from './root-directory';
@@ -41,8 +42,8 @@ namespace EmailManager {
      * @param changeUid The change UID of the verification link.
      * @returns The link.
      */
-    function makeVerificationLink(changeUid: Buffer): string {
-        return `${config.basic.baseURL}/user/verification/${base64url(changeUid)}`;
+    function makeVerificationLink(changeUid: string): string {
+        return `${config.basic.baseURL}/${config.basic.basePath}/${verificationPath}/${base64url.escape(changeUid)}`;
     }
 
     /**
