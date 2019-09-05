@@ -1,83 +1,55 @@
 
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../model/user';
 import UserManager from '../model/user-manager';
-import config from './config';
-import errors from './errors';
 
 namespace SessionTokenManager {
-    /**
-     * The contents of a JWT payload.
-     */
-    interface IPayload {
-        userId: number;
-        jwtId: number;
+    function makeSessionId(): string {
+        // makes 64 char string
+        return crypto.randomBytes(32).toString('base64');
     }
 
     /**
-     * Creates a new JWT for the current user.
+     * Creates a new session ID for the current user or returns the existing one (if one does exist).
      *
-     * @param user The user to create the JWT for.
+     * @param user The user to create the session ID for.
+     * @returns The session ID.
      */
     export async function create(user: User): Promise<string> {
-        const queryResult = await user.query([User.QueryData.ID, User.QueryData.JWT_ID]);
+        const oldSessionId = await user.getSessionID();
 
-        const payload: IPayload = {
-            userId: queryResult.id!,
-            jwtId: queryResult.jwtId!
-        };
-
-        const secret = config.security.sessionToken.secret;
-
-        const options = {
-            expiresIn: config.security.sessionToken.expiration
-        };
-
-        return jwt.sign(payload, secret, options);
-    }
-
-    /**
-     * Verifies a JWT and returns the user that it belongs to.
-     *
-     * @param token The JWT.
-     * @returns The user that the JWT belongs to.
-     *
-     * @throws **InvalidJWTError** If there is something wrong with the JWT.
-     */
-    export async function verify(token: string): Promise<User> {
-        const secret = config.security.sessionToken.secret;
-
-        try {
-            const obj = jwt.verify(token, secret) as IPayload;
-
-            if (!('userId' in obj) || !('jwtId' in obj)) { // payload is invalid
-                throw new errors.InvalidJWTError(token);
-            }
-
-            const user = await UserManager.get(obj.userId);
-            const jwtId = await user.getJwtID();
-
-            if (obj.jwtId !== jwtId) { // JWT IDs do not match
-                throw new errors.InvalidJWTError(token);
-            }
-
-            return user;
-        } catch (error) { // catch error while decoding JWT or while UserManager.get()
-            throw new errors.InvalidJWTError(token);
+        if (oldSessionId) {
+            return oldSessionId;
+        } else {
+            const sessionId = makeSessionId();
+            await user.setSessionId(sessionId);
+            return sessionId;
         }
     }
 
     /**
-     * Invalidates the current JWTs of a user.
+     * Verifies a session ID and returns the user that it belongs to.
      *
-     * @param token The JWT.
+     * @param token The session ID.
+     * @returns The user that the session ID belongs to.
      *
-     * @throws **InvalidJWTError** See `verify()`.
+     * @throws **InvalidCredentialsError** If there is no user with the passed session ID.
+     */
+    export async function verify(token: string): Promise<User> {
+        return await UserManager.searchForUserWithSessionId(token);
+    }
+
+    /**
+     * Invalidates the current session ID of a user.
+     *
+     * @param token The session ID.
+     *
+     * @throws **InvalidCredentialsError** See `verify()`.
      */
     export async function invalidate(token: string): Promise<void> {
         const user = await verify(token);
 
-        await user.incrementJwtId();
+        await user.invalidateSessionId();
     }
 }
 

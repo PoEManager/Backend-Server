@@ -180,6 +180,31 @@ namespace UserManager {
     }
 
     /**
+     * Searches for a user with a specific session ID.
+     *
+     * @param sessionId The session ID.
+     * @returns The user.
+     *
+     * @throws **InvalidCredentialsError** If there is no user with the passed session ID.
+     */
+    export async function searchForUserWithSessionId(sessionId: string): Promise<User> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`session_id` = ?', {
+                parameters: [
+                    sessionId
+                ],
+                expectedErrors: []
+            }
+        );
+
+        if (result.length === 1) {
+            return new User(result[0].user_id);
+        } else {
+            throw new errors.InvalidCredentialsError();
+        }
+    }
+
+    /**
      * The data that is used to create new user account with email+password authentication.
      */
     export interface IDefaultLoginCreateData {

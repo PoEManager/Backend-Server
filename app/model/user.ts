@@ -159,34 +159,53 @@ class User {
     }
 
     /**
-     * @returns The current JWT ID.
+     * @returns The current session ID.
      *
      * @throws **UserNotFoundError** If the user does not exist.
      */
-    public async getJwtID(): Promise<number> {
+    public async getSessionID(): Promise<string | null> {
         const result = await DatabaseConnection.query(
-            'SELECT `Users`.`jwt_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
+            'SELECT `Users`.`session_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
                 parameters: [
                     this.id
                 ]
             });
 
         if (result.length === 1) {
-            return result[0].jwt_id;
+            return result[0].session_id;
         } else {
             throw this.makeUserNotFoundError();
         }
     }
 
     /**
-     * Increments the current JWT ID by one.
+     * Increments the current session ID by one.
      *
      * @throws **UserNotFoundError** If the user does not exist.
      */
-    public async incrementJwtId(): Promise<void> {
+    public async invalidateSessionId(): Promise<void> {
         const result = await DatabaseConnection.query(
-            'UPDATE `Users` SET `jwt_id`=`jwt_id` + 1 WHERE `Users`.`user_id` = ?', {
+            'UPDATE `Users` SET `session_id`=NULL WHERE `Users`.`user_id` = ?', {
                 parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.affectedRows !== 1) {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Increments the current session ID by one.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async setSessionId(sessionId: string): Promise<void> {
+        const result = await DatabaseConnection.query(
+            'UPDATE `Users` SET `session_id`= ? WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    sessionId,
                     this.id
                 ]
             });
@@ -410,8 +429,8 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '`Users`.`defaultlogin_id`';
         case User.QueryData.CHANGE_UID:
             return 'TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid';
-        case User.QueryData.JWT_ID:
-            return '\`Users\`.\`jwt_id\`';
+        case User.QueryData.SESSION_ID:
+            return '\`Users\`.\`session_id\`';
         default:
             return ''; // does not happen
     }
@@ -429,7 +448,7 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
         defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
         nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
         changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
-        jwtId: queryData.includes(User.QueryData.JWT_ID) ? result.jwt_id : undefined
+        sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined
     };
 }
 
@@ -480,9 +499,9 @@ namespace User {
         CHANGE_UID,
 
         /**
-         * The user's JWT ID.
+         * The user's session ID.
          */
-        JWT_ID
+        SESSION_ID
     }
 
     /**
@@ -512,9 +531,9 @@ namespace User {
         changeUid?: Buffer;
 
         /**
-         * The current JWT ID.
+         * The current session ID.
          */
-        jwtId?: number;
+        sessionId?: number;
     }
 }
 

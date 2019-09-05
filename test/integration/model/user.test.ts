@@ -176,14 +176,14 @@ describe('model', () => {
                     User.QueryData.DEFAULT_LOGIN_ID,
                     User.QueryData.NICKNAME,
                     User.QueryData.CHANGE_UID,
-                    User.QueryData.JWT_ID
+                    User.QueryData.SESSION_ID
                 ]);
 
                 expect(result.id).toBe(user.getId());
                 expect(result.nickname).toBe('nickname');
                 expect(result.defaultLoginId).toBe(defaultLoginId);
                 expect(result.changeUid!.length).toBe(24);
-                expect(result.jwtId!).toBe(0);
+                expect(result.sessionId!).toBeNull();
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
@@ -279,8 +279,8 @@ describe('model', () => {
             });
         });
 
-        describe('incrementJwtId()', () => {
-            it('should return a valid JWT ID', async () => {
+        describe('setSessionId()', () => {
+            it('should return a valid session ID', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -289,19 +289,18 @@ describe('model', () => {
                     }
                 });
 
-                const oldJwt = await user.getJwtID();
-                await user.incrementJwtId();
-                await expect(user.getJwtID()).resolves.toBe(oldJwt + 1);
+                await user.setSessionId('abc');
+                await expect(user.getSessionID()).resolves.toBe('abc');
 
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
-                await expect(new User(-1).incrementJwtId()).rejects.toEqual(new errors.UserNotFoundError(-1));
+                await expect(new User(-1).setSessionId('abc')).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
-        describe('getJwtID()', () => {
-            it('should return a valid JWT ID', async () => {
+        describe('invalidateSessionId()', () => {
+            it('should return a valid session ID', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -310,12 +309,33 @@ describe('model', () => {
                     }
                 });
 
-                await expect(user.getJwtID()).resolves.toBe(0);
+                await user.setSessionId('abc');
+                await user.invalidateSessionId();
+                await expect(user.getSessionID()).resolves.toBeNull();
 
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
-                await expect(new User(-1).getJwtID()).rejects.toEqual(new errors.UserNotFoundError(-1));
+                await expect(new User(-1).invalidateSessionId()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getSessionID()', () => {
+            it('should return a valid session ID', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.getSessionID()).resolves.toBeNull();
+
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getSessionID()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 

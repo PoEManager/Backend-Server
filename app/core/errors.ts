@@ -164,26 +164,6 @@ namespace errors {
             super('CONFIG_EXTENSION_ERROR', { dependency });
         }
     }
-
-    /**
-     * A JWT is invalid because of one of these reasons:
-     * - the token itself can not be decoded
-     * - the payload is in an invalid format
-     * - the user that is referenced in the JWT does not exist
-     * - the JWT ID in the payload does not match the user's JWT ID
-     *
-     * The data layout is the following:
-     * ```typescript
-     * {
-     *     token: "<the invalid token>"
-     * }
-     * ```
-     */
-    export class InvalidJWTError extends Error {
-        public constructor(token: string) {
-            super('INVALID_JWT_ERROR', 'The JWT is invalid.', 401, { token });
-        }
-    }
 }
 
 export = errors;

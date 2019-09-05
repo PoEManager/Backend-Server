@@ -1,5 +1,5 @@
-import errors from '../../core/errors';
 import SessionTokenManager from '../../core/session-token-manager';
+import errors from '../../model/errors';
 import ServerUtils from '../server-utils';
 import MiddlewareFunction from './middleware-function';
 
@@ -18,7 +18,7 @@ function makeAuth(): MiddlewareFunction {
                 res.locals.user = await SessionTokenManager.verify(token);
                 next();
             } else {
-                throw new errors.InvalidJWTError('');
+                throw new errors.InvalidCredentialsError();
             }
         } catch (error) {
             ServerUtils.sendRESTError(res, error);
