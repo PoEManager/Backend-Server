@@ -3,6 +3,7 @@ import http from 'http';
 import morgan from 'morgan';
 import config from '../core/config';
 import logger from '../core/logger';
+import requestLogger from './middleware/logger';
 import requestId from './middleware/request-id';
 import router from './routers/routers/router';
 
@@ -20,7 +21,8 @@ namespace Server {
         app = express();
 
         app.use(requestId());
-        app.use(morgan('tiny'));
+        app.use(requestLogger.setupRequestLogger());
+        app.use(requestLogger.logRequests());
         app.use(express.json());
         app.use(express.urlencoded({extended: false}));
         app.use(`/${config.basic.basePath}`, router);
