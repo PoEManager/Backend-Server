@@ -1,5 +1,6 @@
 
 import mariadb from 'mariadb';
+import config from '../core/config';
 import Error from './error';
 import InternalError from './internal-error';
 
@@ -11,14 +12,6 @@ process.on('exit', async () => {
 });
 
 namespace DatabaseConnection {
-    // todo make configurable
-    const connectionInfo = {
-        host: 'localhost',
-        database: 'PoEManager-test-manual',
-        user: 'localroot',
-        password: undefined
-    };
-
     /**
      * The connection pool, or ```null``` if the pool was not initialized yet.
      */
@@ -29,10 +22,11 @@ namespace DatabaseConnection {
      */
     function initialize(): void {
         pool = mariadb.createPool({
-            host: connectionInfo.host,
-            database: connectionInfo.database,
-            user: connectionInfo.user,
-            password: connectionInfo.password,
+            host: config.database.host,
+            port: config.database.port,
+            database: config.database.database,
+            user: config.database.user,
+            password: config.database.password,
             multipleStatements: true,
             connectionLimit: 10
         });
