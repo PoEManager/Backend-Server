@@ -1,14 +1,18 @@
 import Joi from '@hapi/joi';
 import express from 'express';
+import makeAuth from './middleware/auth';
 import makeBodyValidator from './middleware/body-validator';
 import makeHeaderValidator from './middleware/header-validator';
 import MiddlewareFunction from './middleware/middleware-function';
 import makeQueryValidator from './middleware/query-validator';
+import ServerUtils from './server-utils';
+
+type RouteHandler = (req: express.Request, res: express.Response) => Promise<void> | void;
 
 interface IRouteConfiguration {
     path: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    handler: (req: express.Request, res: express.Response) => Promise<void> | void;
+    handler: RouteHandler;
     querySchema?: Joi.Schema;
     headers?: string[];
     bodySchema?: Joi.Schema;
@@ -17,6 +21,16 @@ interface IRouteConfiguration {
 }
 
 namespace IRouteConfiguration {
+    function genRouteWrapper(handler: RouteHandler): RouteHandler {
+        return async (req, res) => {
+            try {
+                await handler(req, res);
+            } catch (error) {
+                ServerUtils.sendRESTError(res, error);
+            }
+        };
+    }
+
     export function addRoute(router: express.Router, route: IRouteConfiguration): void {
         // todo auth & verification
 
@@ -25,6 +39,10 @@ namespace IRouteConfiguration {
         }
 
         const middleware: MiddlewareFunction[] = [];
+
+        if (route.auth) {
+            middleware.push(makeAuth());
+        }
 
         if (route.headers) {
             middleware.push(makeHeaderValidator(route.headers));
@@ -38,18 +56,20 @@ namespace IRouteConfiguration {
             middleware.push(makeBodyValidator(route.bodySchema));
         }
 
+        const handler = genRouteWrapper(route.handler);
+
         switch (route.method) {
             case 'GET':
-                router.get(route.path, middleware, route.handler);
+                router.get(route.path, middleware, handler);
                 break;
             case 'POST':
-                router.post(route.path, middleware, route.handler);
+                router.post(route.path, middleware, handler);
                 break;
             case 'PUT':
-                router.put(route.path, middleware, route.handler);
+                router.put(route.path, middleware, handler);
                 break;
             case 'DELETE':
-                router.delete(route.path, middleware, route.handler);
+                router.delete(route.path, middleware, handler);
                 break;
             default:
                 throw new Error('Invalid method.');
