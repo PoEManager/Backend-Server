@@ -137,7 +137,7 @@ namespace errors {
      */
     export class InvalidEmailError extends Error {
         public constructor(email: string) {
-            super('INVALID_EMAIL_ERROR', `Nickname ${email} is invalid.`, 400, {
+            super('INVALID_EMAIL_ERROR', `Email ${email} is invalid.`, 400, {
                 email
             });
         }
@@ -197,6 +197,22 @@ namespace errors {
                 is,
                 expected
             });
+        }
+    }
+
+    /**
+     * Passed credentials are invalid
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *
+     * }
+     * ```
+     */
+    export class InvalidCredentialsError extends Error {
+        public constructor() {
+            super('INVALID_CREDENTIALS_ERROR', `The credentials do not identify a user.`, 404, {});
         }
     }
 }

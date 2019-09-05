@@ -155,6 +155,31 @@ namespace UserManager {
     }
 
     /**
+     * Searches for a user that has a default login with the passed E-Mail.
+     *
+     * @param email The E-Mail address of the user.
+     * @returns The user.
+     *
+     * @throws **InvalidCredentialsError** If there is no user with the passed credentials.
+     */
+    export async function searchForUserWithEmail(email: string): Promise<User> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users`.`user_id` FROM `Users` NATURAL JOIN `DefaultLogins` WHERE `DefaultLogins`.`email` = ?', {
+                parameters: [
+                    email
+                ],
+                expectedErrors: []
+            }
+        );
+
+        if (result.length === 1) {
+            return new User(result[0].user_id);
+        } else {
+            throw new errors.InvalidCredentialsError();
+        }
+    }
+
+    /**
      * The data that is used to create new user account with email+password authentication.
      */
     export interface IDefaultLoginCreateData {
