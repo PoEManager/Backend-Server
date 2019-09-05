@@ -26,9 +26,6 @@ namespace Server {
         app.use(express.json());
         app.use(express.urlencoded({extended: false}));
         app.use(`/${config.urlPrefix}`, router);
-        app.get('/', (req, res) => {
-            res.send({text: 'It works!'});
-        });
 
         server = http.createServer(app);
         server.listen(config.port);
