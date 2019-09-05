@@ -3,6 +3,7 @@ import http from 'http';
 import morgan from 'morgan';
 import config from '../core/config';
 import logger from '../core/logger';
+import requestId from './middleware/request-id';
 import router from './routers/routers/router';
 
 namespace Server {
@@ -18,6 +19,7 @@ namespace Server {
 
         app = express();
 
+        app.use(requestId());
         app.use(morgan('tiny'));
         app.use(express.json());
         app.use(express.urlencoded({extended: false}));

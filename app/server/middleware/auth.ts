@@ -4,9 +4,9 @@ import ServerUtils from '../server-utils';
 import MiddlewareFunction from './middleware-function';
 
 /**
- * Generates a body validator middleware for a particular schema.
+ * Generates a middleware that authenticates users.
+ * Stores the authenticated user in `req.locals.user`.
  *
- * @param schema The required schema.
  * @returns The middleware function.
  */
 function makeAuth(): MiddlewareFunction {
