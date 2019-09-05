@@ -1,6 +1,6 @@
 
 import _ from 'lodash';
-import DatabaseConnection from '../core/database-connection';
+import DatabaseConnection, { query } from '../core/database-connection';
 import DefaultLogin from './default-login';
 import errors from './errors';
 import UserManager from './user-manager';
@@ -153,6 +153,26 @@ class User {
 
         if (result.length === 1) {
             return new Date(result[0].change_expire_date);
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * @returns The current JWT ID.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getJwtID(): Promise<number> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users\`.\`jwt_id\` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].jwt_id;
         } else {
             throw this.makeUserNotFoundError();
         }
@@ -372,6 +392,8 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '`Users`.`defaultlogin_id`';
         case User.QueryData.CHANGE_UID:
             return 'TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid';
+        case User.QueryData.JWT_ID:
+            return '\`Users\`.\`jwt_id\`';
         default:
             return ''; // does not happen
     }
@@ -388,7 +410,8 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
         id: queryData.includes(User.QueryData.ID) ? result.user_id : undefined,
         defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
         nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
-        changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined
+        changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
+        jwtId: queryData.includes(User.QueryData.JWT_ID) ? result.jwt_id : undefined
     };
 }
 
@@ -436,7 +459,12 @@ namespace User {
         /**
          * The user's change UID.
          */
-        CHANGE_UID
+        CHANGE_UID,
+
+        /**
+         * The user's JWT ID.
+         */
+        JWT_ID
     }
 
     /**
@@ -461,9 +489,14 @@ namespace User {
         defaultLoginId?: DefaultLogin.ID;
 
         /**
-         * The current change UID.If there is no change going on, this will be set to `null`.
+         * The current change UID. If there is no change going on, this will be set to `null`.
          */
         changeUid?: Buffer;
+
+        /**
+         * The current JWT ID.
+         */
+        jwtId?: number;
     }
 }
 

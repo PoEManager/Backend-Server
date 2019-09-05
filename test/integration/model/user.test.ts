@@ -175,13 +175,15 @@ describe('model', () => {
                     User.QueryData.ID,
                     User.QueryData.DEFAULT_LOGIN_ID,
                     User.QueryData.NICKNAME,
-                    User.QueryData.CHANGE_UID
+                    User.QueryData.CHANGE_UID,
+                    User.QueryData.JWT_ID
                 ]);
 
                 expect(result.id).toBe(user.getId());
                 expect(result.nickname).toBe('nickname');
                 expect(result.defaultLoginId).toBe(defaultLoginId);
                 expect(result.changeUid!.length).toBe(24);
+                expect(result.jwtId!).toBe(0);
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
@@ -268,12 +270,31 @@ describe('model', () => {
                 });
 
                 const changeUid = await user.getChangeUID();
-                await expect(changeUid!.length).toBe(24);
+                expect(changeUid!.length).toBe(24);
 
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
                 await expect(new User(-1).getChangeUID()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getJwtID()', () => {
+            it('should return a valid JWT ID', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.getJwtID()).resolves.toBe(0);
+
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getJwtID()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
@@ -292,7 +313,7 @@ describe('model', () => {
                 });
 
                 const changeUid = await user.getChangeUID();
-                await expect(changeUid!.length).toBe(24);
+                expect(changeUid!.length).toBe(24);
 
             });
 
