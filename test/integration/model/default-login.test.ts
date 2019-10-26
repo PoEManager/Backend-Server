@@ -165,5 +165,96 @@ describe('model', () => {
                 await expect(new DefaultLogin(-1).query([])).rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
             });
         });
+
+        describe('updateEmail()', () => {
+            it('should correctly update the E-Mail of a verified user', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const defaultLogin = await user.getDefaultLogin();
+
+                await expect(defaultLogin.getNewEmail()).resolves.toBeNull();
+                await expect(defaultLogin.updateEMail('test1@test.com')).resolves.toBeDefined();
+                await expect(defaultLogin.getNewEmail()).resolves.toBe('test1@test.com');
+            });
+
+            it('should throw if another change is already in progress', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const defaultLogin = await user.getDefaultLogin();
+
+                await expect(defaultLogin.getNewEmail()).resolves.toBeNull();
+                await expect(defaultLogin.updateEMail('test1@test.com'))
+                    .rejects.toEqual(new errors.ChangeAlreadyInProgressError(user.getId()));
+            });
+
+            it('should throw if the login / user does not exist', async () => {
+                const defaultLogin = new DefaultLogin(-1);
+
+                await expect(defaultLogin.updateEMail('test1@test.com'))
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('updatePassword()', () => {
+            it('should correctly update the E-Mail of a verified user', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const defaultLogin = await user.getDefaultLogin();
+                const password = await Password.encryptPassword('abc');
+
+                await expect(defaultLogin.getNewPassword()).resolves.toBeNull();
+                await expect(defaultLogin.updatePassword(password)).resolves.toBeDefined();
+                const newPw = await defaultLogin.getNewPassword();
+                expect(newPw).not.toBeNull();
+                expect(newPw!.getEncrypted()).toBe(password.getEncrypted());
+            });
+
+            it('should throw if another change is already in progress', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const defaultLogin = await user.getDefaultLogin();
+                const password = new Password('password');
+
+                await expect(defaultLogin.getNewPassword()).resolves.toBeNull();
+                await expect(defaultLogin.updatePassword(password))
+                    .rejects.toEqual(new errors.ChangeAlreadyInProgressError(user.getId()));
+            });
+
+            it('should throw if the login / user does not exist', async () => {
+                const defaultLogin = new DefaultLogin(-1);
+
+                const password = new Password('password');
+                await expect(defaultLogin.updatePassword(password))
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
     });
 });

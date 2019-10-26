@@ -2,6 +2,8 @@ import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
 import errors from './errors';
 import Password from './password';
+import User from './user';
+import UserChanges from './user-changes';
 import UserManager from './user-manager';
 
 /**
@@ -59,8 +61,32 @@ class DefaultLogin {
      *
      * @param email The new E-Mail.
      */
-    public updateEMail(email: string): UserManager.ChangeID {
-        return '';
+    public async updateEMail(email: string): Promise<UserManager.ChangeID> {
+        return await DatabaseConnection.transaction(async conn => {
+            const id = await this.getUserId(conn);
+
+            if (await UserChanges.getChangeState(id) !== null) {
+                throw new errors.ChangeAlreadyInProgressError(id);
+            }
+
+            // needs to be before the update of new_email, or the system thinks is already in progress
+            const changeId = await UserChanges.newChange(id, false);
+
+            const result = await conn.query(
+                'UPDATE `DefaultLogins` SET `new_email` = ? WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
+                    parameters: [
+                        email,
+                        this.id
+                    ]
+                });
+
+            if (result.affectedRows === 0) {
+                // only for safety, should not happen
+                throw new errors.UserNotFoundError(id);
+            }
+
+            return changeId;
+        });
     }
 
     /**
@@ -91,12 +117,36 @@ class DefaultLogin {
      *
      * @param password The new password.
      */
-    public updatePassword(password: Password): UserManager.ChangeID {
-        return '';
+    public async updatePassword(password: Password): Promise<UserManager.ChangeID> {
+        return await DatabaseConnection.transaction(async conn => {
+            const id = await this.getUserId(conn);
+
+            if (await UserChanges.getChangeState(id) !== null) {
+                throw new errors.ChangeAlreadyInProgressError(id);
+            }
+
+            // needs to be before the update of new_email, or the system thinks is already in progress
+            const changeId = await UserChanges.newChange(id, false);
+
+            const result = await conn.query(
+                'UPDATE `DefaultLogins` SET `new_password` = ? WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
+                    parameters: [
+                        password.getEncrypted(),
+                        this.id
+                    ]
+                });
+
+            if (result.affectedRows === 0) {
+                // only for safety, should not happen
+                throw new errors.UserNotFoundError(id);
+            }
+
+            return changeId;
+        });
     }
 
     /**
-     * @returns The new E-Mail, if a change is in progress, or ```null``` if there is no change.
+     * @returns The new E-Mail, if a change is in progress, or `null` if there is no change.
      */
     public async getNewEmail(): Promise<string | null> {
         const result = await DatabaseConnection.query(
@@ -114,7 +164,7 @@ class DefaultLogin {
     }
 
     /**
-     * @returns The new password, if a change is in progress, or ```null``` if there is no change.
+     * @returns The new password, if a change is in progress, or `null` if there is no change.
      */
     public async getNewPassword(): Promise<Password | null> {
         const result = await DatabaseConnection.query(
@@ -125,7 +175,7 @@ class DefaultLogin {
             });
 
         if (result.length === 1) {
-            return result.new_password ? new Password(result[0].new_password) : null;
+            return result[0].new_password ? new Password(result[0].new_password) : null;
         } else {
             throw this.makeLoginNotFoundError();
         }
@@ -170,6 +220,37 @@ class DefaultLogin {
      */
     private makeLoginNotFoundError(): errors.DefaultLoginNotFoundError {
         return new errors.DefaultLoginNotFoundError(this.id);
+    }
+
+    /**
+     * Queries the ID of the user, that the login belongs to.
+     *
+     * @param conn The connection that will be used for the query. When not passed, a new connection will be created.
+     */
+    private async getUserId(conn?: DatabaseConnection.Connection): Promise<User.ID> {
+        const handler = async (innerConn: DatabaseConnection.Connection): Promise<User.ID> =>  {
+            // get user ID of the login
+            const result = await innerConn.query(
+                'SELECT `Users`.`user_id` FROM `Users` NATURAL JOIN `DefaultLogins` ' +
+                'WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
+                    parameters: [
+                        this.id
+                    ]
+                });
+
+            // should not happen; there is never a default login without a user that it belongs to
+            if (result.length === 0) {
+                throw new errors.UserNotFoundError(-1);
+            }
+
+            return result[0].user_id;
+        };
+
+        if (conn) {
+            return await handler(conn);
+        } else {
+            return await DatabaseConnection.multiQuery(handler);
+        }
     }
 }
 
