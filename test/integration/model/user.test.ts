@@ -1,5 +1,6 @@
 import DatabaseConnection from '../../../app/core/database-connection';
 import errors from '../../../app/model/errors';
+import Password from '../../../app/model/password';
 import User from '../../../app/model/user';
 import UserManager from '../../../app/model/user-manager';
 
@@ -215,10 +216,10 @@ describe('model', () => {
             });
         });
 
-        describe('getVerificationState()', () => {
+        describe('getChangeState()', () => {
             // todo change state when no change is in progress
 
-            it('should correctly query the user\'s change state', async () => {
+            it('should correctly query the user\'s change state if the state is VERIFY_ACCOUNT', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -228,6 +229,86 @@ describe('model', () => {
                 });
 
                 await expect(user.getChangeState()).resolves.toBe(User.ChangeType.VERIFY_ACCOUNT);
+            });
+
+            it('should correctly query the user\'s change state if the state is NEW_EMAIL', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const login = await user.getDefaultLogin();
+
+                await expect(login.updateEMail('test1@test.com')).resolves.toBeDefined();
+                await expect(user.getChangeState()).resolves.toBe(User.ChangeType.NEW_EMAIL);
+            });
+
+            it('should correctly query the user\'s change state if the state is NEW_PASSWORD', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const login = await user.getDefaultLogin();
+
+                await expect(login.updatePassword(await Password.encryptPassword('abc'))).resolves.toBeDefined();
+                await expect(user.getChangeState()).resolves.toBe(User.ChangeType.NEW_PASSWORD);
+            });
+
+            it('should correctly reset the change if it ran out and the change is a new email', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const login = await user.getDefaultLogin();
+
+                await expect(login.updateEMail('test1@test.com')).resolves.toBeDefined();
+
+                // manually expire change
+                await DatabaseConnection.query(
+                    'UPDATE `Users` SET `Users`.`change_expire_date` = DATE_SUB(NOW(), INTERVAL 1 DAY)');
+
+                await expect(user.getChangeState()).resolves.toBe(null);
+                await expect(login.getNewEmail()).resolves.toBe(null);
+            });
+
+            it('should correctly reset the change if it ran out and the change is a new password', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await UserManager.validateChange(await user.getChangeUID() as string);
+
+                const login = await user.getDefaultLogin();
+
+                await expect(login.updatePassword(await Password.encryptPassword('abc'))).resolves.toBeDefined();
+
+                // manually expire change
+                await DatabaseConnection.query(
+                    'UPDATE `Users` SET `Users`.`change_expire_date` = DATE_SUB(NOW(), INTERVAL 1 DAY)');
+
+                await expect(user.getChangeState()).resolves.toBeNull();
+                await expect(login.getNewPassword()).resolves.toBeNull();
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
