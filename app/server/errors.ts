@@ -101,6 +101,24 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Thrown if an URL parameter (not to be confused with an URL query) is invalid.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     param: "<the invalid parameter>"
+     * }
+     * ```
+     */
+    export class InvalidParamError extends Error {
+        public constructor(param: string) {
+            super('INVALID_PARAM_ERROR', `The URL parameter ${param}.`, 400, {
+                param
+            });
+        }
+    }
 }
 
 export = errors;
