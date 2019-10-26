@@ -1,4 +1,4 @@
 {
-    "template": "verification.handlebars",
+    "template": "email-verification.handlebars",
     "subject": "Verify your PoE Manager account"
 }

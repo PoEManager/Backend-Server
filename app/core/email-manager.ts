@@ -52,10 +52,42 @@ namespace EmailManager {
      * @param user The user to send the link to.
      */
     export async function sendVerificationMail(user: User): Promise<void> {
+        await sendGenericEmail(user, User.ChangeType.VERIFY_ACCOUNT, 'verification');
+    }
+
+    /**
+     * Sends an E-Mail to a specific user to verify their new E-Mail.
+     *
+     * @param user The user to send the link to.
+     */
+    export async function sendEmailVerificationMail(user: User): Promise<void> {
+        await sendGenericEmail(user, User.ChangeType.NEW_EMAIL, 'email-verification');
+    }
+
+    /**
+     * Sends an E-Mail to a specific user to verify their new password.
+     *
+     * @param user The user to send the link to.
+     */
+    export async function sendPasswordVerificationMail(user: User): Promise<void> {
+        await sendGenericEmail(user, User.ChangeType.NEW_PASSWORD, 'password-verification');
+    }
+
+    /**
+     * A generic function that sends verification E-Mails.
+     *
+     * @param user The user that the E-Mail is for.
+     * @param desiredChangeState The change state that is required.
+     * @param mailConfig The E-Mail configuration.
+     * @param makeLink A function that generates the verification link.
+     */
+    async function sendGenericEmail(user: User, desiredChangeState: User.ChangeType, mailConfig: string):
+        Promise<void> {
+
         const currentChangeState = await user.getChangeState();
 
-        if (currentChangeState !== User.ChangeType.VERIFY_ACCOUNT) {
-            throw new errors.InvalidChangeState(currentChangeState, User.ChangeType.VERIFY_ACCOUNT);
+        if (currentChangeState !== desiredChangeState) {
+            throw new errors.InvalidChangeState(currentChangeState, desiredChangeState);
         }
 
         const result = await user.query([
@@ -67,11 +99,10 @@ namespace EmailManager {
         const email = await (await UserManager.getDefaultLogin(result.defaultLoginId!)).getEmail();
         const link = makeVerificationLink(result.changeUid!);
 
-        await sendPredefinedMail('verification', email, {
+        await sendPredefinedMail(mailConfig, email, {
                 nickname: result.nickname,
                 email,
-                link,
-                subject: 'Verify your PoE Manager account'
+                link
             });
     }
 
@@ -101,6 +132,7 @@ namespace EmailManager {
             throw new coreErrors.InvalidEmailConfigurationError(configName);
         }
 
+        context.subject = emailConfig.subject;
         const content = await compileHandlebars(emailConfig.template, context);
         const inlinedContent = await juiceResources(content, {
             webResources: {
