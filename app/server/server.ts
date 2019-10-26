@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import morgan from 'morgan';
 import config from '../core/config';
+import DatabaseConnection from '../core/database-connection';
 import logger from '../core/logger';
 import requestLogger from './middleware/logger';
 import requestId from './middleware/request-id';
@@ -10,6 +11,20 @@ import router from './routers/routers/router';
 namespace Server {
     let app: express.Express | null = null;
     let server: http.Server;
+
+    function addMiddleWare() {
+        app!.use(requestId());
+        app!.use(requestLogger.setupRequestLogger());
+        app!.use(requestLogger.logRequests());
+        app!.use(express.json());
+        app!.use(express.urlencoded({extended: false}));
+    }
+
+    function logMeta() {
+        const dbConfig = DatabaseConnection.getPublicConfiguration();
+
+        logger.info(`Using database ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}.`);
+    }
 
     export function start() {
         logger.info('Starting server...');
@@ -20,15 +35,17 @@ namespace Server {
 
         app = express();
 
-        app.use(requestId());
-        app.use(requestLogger.setupRequestLogger());
-        app.use(requestLogger.logRequests());
-        app.use(express.json());
-        app.use(express.urlencoded({extended: false}));
+        logger.info('Setting up middleware...');
+        addMiddleWare();
+        logger.info('Done setting up middleware.');
+
+        logMeta();
+
         app.use(`/${config.basic.basePath}`, router);
 
         server = http.createServer(app);
         server.listen(config.basic.port);
+
         server.on('close', () => {
             logger.info('Server is closing down.');
         });

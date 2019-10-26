@@ -18,14 +18,38 @@ namespace DatabaseConnection {
     let pool: mariadb.Pool | null = null;
 
     /**
-     * Initializes the pool connection.
+     * Return type of `getPublicConfiguration()`.
      */
-    function initialize(): void {
-        pool = mariadb.createPool({
+    interface IPublicConfiguration {
+        host: string;
+        port: number;
+        database: string;
+        user: string;
+    }
+
+    /**
+     * @returns The configuration of the database (excluding the password).
+     */
+    export function getPublicConfiguration(): IPublicConfiguration {
+        return {
             host: config.database.host,
             port: config.database.port,
             database: config.database.database,
-            user: config.database.user,
+            user: config.database.user
+        };
+    }
+
+    /**
+     * Initializes the pool connection.
+     */
+    function initialize(): void {
+        const publicConfig = getPublicConfiguration();
+
+        pool = mariadb.createPool({
+            host: publicConfig.host,
+            port: publicConfig.port,
+            database: publicConfig.database,
+            user: publicConfig.user,
             password: config.database.password,
             multipleStatements: true,
             connectionLimit: 10
