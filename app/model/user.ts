@@ -1,8 +1,9 @@
 
 import _ from 'lodash';
-import DatabaseConnection, { query } from '../core/database-connection';
+import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
 import errors from './errors';
+import UserChanges from './user-changes';
 import UserManager from './user-manager';
 
 /**
@@ -219,48 +220,7 @@ class User {
      * @returns The current change state of the user, or ```null``` if no change is currently going on.
      */
     public async getChangeState(): Promise<User.ChangeType | null> {
-        return await DatabaseConnection.multiQuery(async conn => {
-            const result = await conn.query(
-                'SELECT `change_uid`, UNIX_TIMESTAMP(`change_expire_date`) as `change_expire_date` ' +
-                'FROM `Users` WHERE `Users`.`user_id` = ?', {
-                    parameters: [
-                        this.id
-                    ]
-                });
-
-            if (result.length !== 1) {
-                throw this.makeUserNotFoundError();
-            }
-
-            if (result[0].change_uid) {
-                const changeType = await this.getChangeType(conn);
-
-                if (result[0].change_expire_date < new Date().getTime()) {
-                    // change is still valid, change is going on (has not expired yet)
-                    return changeType;
-                } else {
-                    // change has expired; clean up and return false
-                    await this.resetChange(conn, changeType);
-
-                    // reset change_uid and change_expire_date
-                    await conn.query(
-                        'UPDATE `Users` SET `change_uid` = NULL, `change_expire_date` = NULL ' +
-                        'WHERE `Users`.`user_id` = ?', {
-                            parameters: [
-                                this.id
-                            ]
-                        });
-
-                    if (result.affectedRows !== 1) {
-                        throw this.makeUserNotFoundError();
-                    }
-
-                    return null;
-                }
-            } else { // when change_uid is null, no change is in progress
-                return null;
-            }
-        });
+        return await UserChanges.getChangeState(this.id);
     }
 
     /**
@@ -343,66 +303,7 @@ class User {
      * @throws **ChangeAlreadyInProgressError** If there is already another change in progress.
      */
     public async newChange(infiniteDuration: boolean): Promise<UserManager.ChangeID> {
-        if (await this.getChangeState() !== null) { // also throws user not found error
-            throw new errors.ChangeAlreadyInProgressError(this.id);
-        }
-
-        const dateFn = infiniteDuration ? 'POEM_DATE_INFINITY()' : 'POEM_DATE_TWO_WEEKS()';
-
-        const result = await DatabaseConnection.query(`UPDATE \`Users\` ` +
-            `SET \`Users\`.\`change_uid\` = POEM_UUID(), \`Users\`.\`change_expire_date\` = ${dateFn}` +
-            `WHERE \`User\`.\`user_id\` = ?;` +
-            `SELECT TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid FROM \`Users\` ` +
-            `WHERE \`Users\`.\`user_id\` = ?;`, {
-                parameters: [
-                    this.id,
-                    this.id
-                ]
-            });
-
-        if (result[0].affectedRows !== 1 || result[1].length !== 1) {
-            throw new errors.UserNotFoundError(this.id);
-        }
-
-        return result[1][0].change_uid;
-    }
-
-    /**
-     * Resets an ongoing change (in a ROLLBACK sort of way).
-     *
-     * @param conn The connection that will be used for the query.
-     * @param change The change to reset.
-     */
-    private async resetChange(conn: DatabaseConnection.Connection, change: User.ChangeType | null): Promise<void> {
-        switch (change) {
-            case User.ChangeType.VERIFY_ACCOUNT:
-                // verification needs no reset
-                break;
-        }
-    }
-
-    /**
-     * Queries the current change type.
-     * This method ignores the change_uid and change_expire_date.
-     *
-     * @param conn The connection that will be used for the query.
-     */
-    private async getChangeType(conn: DatabaseConnection.Connection): Promise<User.ChangeType | null> {
-        const result = await conn.query('SELECT `Users`.`verified` FROM `Users` WHERE `Users`.`user_id` = ?', {
-            parameters: [
-                this.id
-            ]
-        });
-
-        if (result.length !== 1) {
-            throw this.makeUserNotFoundError();
-        }
-
-        if (!result[0].verified) { // if the user is not verified yet, this change takes precedence
-            return User.ChangeType.VERIFY_ACCOUNT;
-        } else {
-            return null;
-        }
+        return await UserChanges.newChange(this.id, infiniteDuration);
     }
 
     /**
@@ -453,23 +354,8 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
 }
 
 namespace User {
-    /**
-     * An enum with the possible types of account changes.
-     */
-    export enum ChangeType {
-        /**
-         * The account requires verification.
-         */
-        VERIFY_ACCOUNT,
-        /**
-         * The E-Mail is being changed.
-         */
-        NEW_EMAIL,
-        /**
-         * The password is being changed.
-         */
-        NEW_PASSWORD
-    }
+    export const ChangeType = UserChanges.ChangeType;
+    export type ChangeType = UserChanges.ChangeType;
 
     /**
      * The type of a user ID.

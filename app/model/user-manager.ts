@@ -4,6 +4,7 @@ import DefaultLogin from './default-login';
 import errors from './errors';
 import Password from './password';
 import User from './user';
+import UserChanges from './user-changes';
 
 /**
  * A namespace that gives access to the user system.
@@ -102,43 +103,19 @@ namespace UserManager {
      * @throws **InvalidChangeIDError** If the passed ID is invalid.
      */
     export async function validateChange(changeId: UserManager.ChangeID): Promise<void> {
-        await DatabaseConnection.transaction(async conn => {
-            let result = await conn.query(
-                'SELECT `Users`.`user_id` FROM `Users` WHERE `change_uid` = FROM_BASE64(?)', {
-                parameters: [
-                    changeId
-                ]
-            });
+        return await UserChanges.validateChange(changeId);
+    }
 
-            if (result.length !== 1) {
-                throw new errors.InvalidChangeIDError(changeId);
-            }
-
-            const user = new User(result[0].user_id);
-            const changeType = await user.getChangeState();
-
-            switch (changeType) {
-                case User.ChangeType.VERIFY_ACCOUNT:
-                    result = await conn.query('UPDATE `Users` SET `verified`= true WHERE `Users`.`user_id` = ?', {
-                        parameters: [
-                            user.getId()
-                        ]
-                    });
-
-                    if (result.affectedRows !== 1) {
-                        throw new errors.UserNotFoundError(user.getId());
-                    }
-                    break;
-            }
-
-            result = await conn.query('UPDATE `Users` SET `Users`.`change_uid`= NULL, ' +
-                '`Users`.`change_expire_date` = NULL WHERE `Users`.`user_id` = ?', {
-
-                parameters: [
-                    user.getId()
-                ]
-            });
-        });
+    /**
+     * Returns a user with a specific change ID.
+     *
+     * @param changeId The change ID.
+     * @returns The user that has the passed change ID.
+     *
+     * @throws **InvalidChangeIDError** If there is not user with the passed change ID.
+     */
+    export async function getUserFromChangeId(changeId: UserManager.ChangeID): Promise<User> {
+        return new User(await UserChanges.getUserFromChangeId(changeId));
     }
 
     /**
@@ -162,31 +139,6 @@ namespace UserManager {
             return new DefaultLogin(id);
         } else {
             throw new errors.DefaultLoginNotFoundError(id);
-        }
-    }
-
-    /**
-     * Returns a user with a specific change ID.
-     *
-     * @param changeUID The change ID.
-     * @returns The user that has the passed change ID.
-     *
-     * @throws **InvalidChangeIDError** If there is not user with the passed change ID.
-     */
-    export async function getUserFromChangeUID(changeUID: UserManager.ChangeID): Promise<User> {
-        const result = await DatabaseConnection.query(
-            'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`change_uid` = FROM_BASE64(?)', {
-                parameters: [
-                    changeUID
-                ],
-                expectedErrors: []
-            }
-        );
-
-        if (result.length === 1) {
-            return new User(result[0].user_id);
-        } else {
-            throw new errors.InvalidChangeIDError(changeUID);
         }
     }
 
