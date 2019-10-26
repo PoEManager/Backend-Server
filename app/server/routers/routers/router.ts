@@ -4,6 +4,7 @@ import loginDelete from '../login/delete';
 import loginPost from '../login/post';
 import authDefaultEmailPut from '../users/auth/default/email/put';
 import authDefaultPasswordPut from '../users/auth/default/password/put';
+import userGet from '../users/get';
 import userGetWithId from '../users/get-with-id';
 import userPost from '../users/post';
 import verificationGet from '../users/verification/get';
@@ -13,6 +14,7 @@ import verificationPost from '../users/verification/post';
 const router = express.Router();
 
 RouteConfiguration.addRoute(router, userPost); // POST /users
+RouteConfiguration.addRoute(router, userGet); // GET /users
 RouteConfiguration.addRoute(router, userGetWithId); // GET /users/:id
 RouteConfiguration.addRoute(router, loginPost); // POST /login
 RouteConfiguration.addRoute(router, loginDelete); // DELETE /login

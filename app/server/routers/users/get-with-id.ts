@@ -1,4 +1,4 @@
-import Joi, { string } from '@hapi/joi';
+import Joi from '@hapi/joi';
 import express from 'express';
 import _ from 'lodash';
 import User from '../../../model/user';
