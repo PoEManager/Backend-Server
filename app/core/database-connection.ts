@@ -213,9 +213,10 @@ namespace DatabaseConnection {
      * conn.query(<second SQL query>);
      * ```
      */
-    export async function transaction(queries: (conn: Connection) => Promise<void>) {
+    export async function transaction<T>(queries: (conn: Connection) => Promise<T>): Promise<T> {
         let conn: mariadb.Connection | null = null;
         let requiresRollback = false;
+        let ret: T;
 
         try {
             conn = await getConnection();
@@ -223,7 +224,7 @@ namespace DatabaseConnection {
 
             await conn.beginTransaction();
             requiresRollback = true;
-            await queries(connectionWrapper);
+            ret = await queries(connectionWrapper);
             await conn.commit();
 
         } catch (error) {
@@ -237,6 +238,8 @@ namespace DatabaseConnection {
                 await conn.end();
             }
         }
+
+        return ret;
     }
 
     /**
