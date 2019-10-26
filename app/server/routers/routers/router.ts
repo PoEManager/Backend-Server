@@ -11,14 +11,13 @@ import verificationPost from '../users/verification/post';
 
 const router = express.Router();
 
-RouteConfiguration.addRoute(router, userPost);
-RouteConfiguration.addRoute(router, loginPost);
-RouteConfiguration.addRoute(router, loginDelete);
-RouteConfiguration.addRoute(router, loginDelete);
-RouteConfiguration.addRoute(router, verificationPost);
-RouteConfiguration.addRoute(router, verificationGetWithId);
-RouteConfiguration.addRoute(router, verificationGet);
-RouteConfiguration.addRoute(router, authDefaultEmailPut);
-RouteConfiguration.addRoute(router, authDefaultPasswordPut);
+RouteConfiguration.addRoute(router, userPost); // POST /users
+RouteConfiguration.addRoute(router, loginPost); // POST /login
+RouteConfiguration.addRoute(router, loginDelete); // DELETE /login
+RouteConfiguration.addRoute(router, verificationPost); // POST /${verificationPath}
+RouteConfiguration.addRoute(router, verificationGetWithId); // GET /${verificationPath}/:changeId
+RouteConfiguration.addRoute(router, verificationGet); // /${verificationPath}
+RouteConfiguration.addRoute(router, authDefaultEmailPut); // PUT /users/auth/default/email
+RouteConfiguration.addRoute(router, authDefaultPasswordPut); // PUT /users/auth/default/password
 
 export = router;
