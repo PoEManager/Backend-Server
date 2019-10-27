@@ -23,7 +23,7 @@ namespace IRouteConfiguration {
     export function addRoute(router: express.Router, route: RouteLoader.IRoute): void {
         const middleware: MiddlewareFunction[] = [];
 
-        if (route.authorizationLevel === 'AUTHORIZED' || route.authorizationLevel === 'VERIFIED') {
+        if (route.authorizationLevel === 'AUTHENTICATED' || route.authorizationLevel === 'VERIFIED') {
             middleware.push(makeAuth());
         }
 
