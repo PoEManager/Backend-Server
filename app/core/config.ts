@@ -204,7 +204,7 @@ function loadConfigDefinition(configRoot: string): IConfigDefinition {
     const valid = validate(configMetaJSON);
 
     if (!valid) {
-        throw ajvErrorToConfigMetaValidationError(validate.errors!);
+        throw new errors.InternalConfigMetaValidationError(ajv);
     }
 
     return configMetaJSON as IConfigDefinition;
@@ -364,7 +364,7 @@ function loadConfiguration(root: string, sources: string[], file: IConfiguration
     const valid = validate(ret);
 
     if (!valid) {
-        throw ajvErrorToValidationError(validate.errors!);
+        throw new errors.InternalObjectValidationError(ajv);
     }
 
     return ret;
@@ -377,31 +377,6 @@ function loadConfiguration(root: string, sources: string[], file: IConfiguration
  */
 function loadConfigFile(filePath: string): any {
     return JSONLoader.loadJSONSync(filePath);
-}
-
-/**
- * Converts AJV errors into a single `ObjectValidationError`.
- *
- * @param validationErrors The AJV errors.
- * @returns The `ObjectValidationError`.
- */
-function ajvErrorToValidationError(validationErrors: Ajv.ErrorObject[]): errors.ObjectValidationError {
-    const messages = _.map(validationErrors, e => e.message ? e.message : 'undefined');
-
-    return new errors.ObjectValidationError(messages);
-}
-
-/**
- * Converts AJV errors into a single `ConfigMetaValidationError`.
- *
- * @param validationErrors The AJV errors.
- * @returns The `ConfigMetaValidationError`.
- */
-function ajvErrorToConfigMetaValidationError(validationErrors: Ajv.ErrorObject[]): errors.ObjectValidationError {
-
-    const messages = _.map(validationErrors, e => e.message ? e.message : 'undefined');
-
-    return new errors.ConfigMetaValidationError(messages);
 }
 
 export = loadConfig(DEFAULT_CONFIG_ROOT);

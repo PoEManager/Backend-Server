@@ -1,3 +1,5 @@
+import Ajv from 'ajv';
+import _ from 'lodash';
 import Error from './error';
 import InternalError from './internal-error';
 
@@ -122,14 +124,27 @@ namespace errors {
      * The data layout is the following:
      * ```typescript
      * {
-     *     properties: "<wrong properties>",
+     *     messages: [
+     *         "<error messages>"
+     *     ]
+     *     schema: "<the schema that was not met>",
      *     object: "<invalid object>"
      * }
      * ```
      */
-    export class ObjectValidationError extends InternalError {
-        public constructor(messages: string[]) {
-            super('OBJECT_VALIDATION_ERROR', { messages });
+    export class InternalObjectValidationError extends InternalError {
+        public constructor(messages: string[], schema: object, object: any);
+
+        public constructor(ajv: Ajv.Ajv);
+
+        public constructor(messagesOrAjv: string[] | Ajv.Ajv, schema?: object, object?: any) {
+            if (messagesOrAjv instanceof Ajv) {
+                const messages = _.filter(_.map(messagesOrAjv.errors, e => e.message), m => m !== undefined);
+
+                super('INTERNAL_OBJECT_VALIDATION_ERROR', { messages, schema, object });
+            } else {
+                super('INTERNAL_OBJECT_VALIDATION_ERROR', { messagesOrAjv, schema, object });
+            }
         }
     }
 
@@ -139,13 +154,26 @@ namespace errors {
      * The data layout is the following:
      * ```typescript
      * {
-     *     message: "<message that describes the problem>"
+     *     messages: [
+     *         "<error messages>"
+     *     ]
+     *     schema: "<the schema that is invalid>"
      * }
      * ```
      */
-    export class ConfigMetaValidationError extends InternalError {
-        public constructor(messages: string[]) {
-            super('CONFIG_META_VALIDATION_ERROR', { messages });
+    export class InternalConfigMetaValidationError extends InternalError {
+        public constructor(messages: string[], schema: object);
+
+        public constructor(ajv: Ajv.Ajv);
+
+        public constructor(messagesOrAjv: string[] | Ajv.Ajv, schema?: object) {
+            if (messagesOrAjv instanceof Ajv) {
+                const messages = _.filter(_.map(messagesOrAjv.errors, e => e.message), m => m !== undefined);
+
+                super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messages, schema });
+            } else {
+                super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messagesOrAjv, schema });
+            }
         }
     }
 
@@ -162,6 +190,45 @@ namespace errors {
     export class ConfigExtensionError extends InternalError {
         public constructor(dependency: string) {
             super('CONFIG_EXTENSION_ERROR', { dependency });
+        }
+    }
+
+    /**
+     * An object could not be validated.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     messages: [
+     *         "<error messages>"
+     *     ]
+     *     schema: "<the schema that was not met>",
+     *     object: "<invalid object>"
+     * }
+     * ```
+     */
+
+    export class ObjectValidationError extends Error {
+        public constructor(messages: string[], schema: object, object: any);
+
+        public constructor(ajv: Ajv.Ajv);
+
+        public constructor(messagesOrAjv: string[] | Ajv.Ajv, schema?: object, object?: any) {
+            if (messagesOrAjv instanceof Ajv) {
+                const messages = _.filter(_.map(messagesOrAjv.errors, e => e.message), m => m !== undefined);
+
+                super('OBJECT_VALIDATION_ERROR', 'An object cloud not be validated.', 400, {
+                    messages,
+                    schema,
+                    object
+                });
+            } else {
+                super('OBJECT_VALIDATION_ERROR', 'An object cloud not be validated.', 400, {
+                    messagesOrAjv,
+                    schema,
+                    object
+                });
+            }
         }
     }
 }
