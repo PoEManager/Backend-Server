@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import _ from 'lodash';
 import config from '../../../core/config';
@@ -17,3 +18,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

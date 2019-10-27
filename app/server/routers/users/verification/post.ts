@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import EmailManager from '../../../../core/email-manager';
 import User from '../../../../model/user';
@@ -30,3 +31,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

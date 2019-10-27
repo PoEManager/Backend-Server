@@ -1,3 +1,4 @@
+/*
 import Joi from '@hapi/joi';
 import express from 'express';
 import EmailManager from '../../../../../../core/email-manager';
@@ -26,3 +27,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

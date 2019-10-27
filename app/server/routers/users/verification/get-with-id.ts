@@ -1,3 +1,4 @@
+/*
 import base64url from 'base64-url';
 import express from 'express';
 import User from '../../../../model/user';
@@ -30,3 +31,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

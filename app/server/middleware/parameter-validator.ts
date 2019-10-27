@@ -3,23 +3,23 @@ import ServerUtils from '../server-utils';
 import MiddlewareFunction from './middleware-function';
 
 /**
- * Generates a body validator middleware for a particular schema.
+ * Generates a parameter validator middleware for a particular schema.
  *
  * @param schema The required schema.
  * @returns The middleware function.
  */
-function makeBodyValidator(schema: object): MiddlewareFunction {
+function makeHeaderValidator(schema: object): MiddlewareFunction {
     return async (req, res, next) => {
         try {
-            req.locals.logger.info('Validating body.');
+            req.locals.logger.info('Validating URL parameters.');
             await JSONValidator.validate(req.body, schema);
-            req.locals.logger.info('Body validation successful.');
+            req.locals.logger.info('URL parameter validation successful.');
             next();
         } catch (error) {
-            req.locals.logger.info('Body validation failed.');
+            req.locals.logger.info('URL parameter validation failed.');
             ServerUtils.sendRESTError(req, res, error);
         }
     };
 }
 
-export = makeBodyValidator;
+export = makeHeaderValidator;

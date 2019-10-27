@@ -1,3 +1,4 @@
+/*
 import SessionTokenManager from '../../../core/session-token-manager';
 import RouteConfiguration from '../../route-configuration';
 
@@ -14,3 +15,4 @@ const route: RouteConfiguration = {
 };
 
 export = route;
+*/

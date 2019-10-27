@@ -1,3 +1,4 @@
+/*
 import Joi from '@hapi/joi';
 import SessionTokenManager from '../../../core/session-token-manager';
 import errors from '../../../model/errors';
@@ -27,3 +28,4 @@ const route: RouteConfiguration = {
 };
 
 export = route;
+*/

@@ -1,3 +1,4 @@
+/*
 import Joi from '@hapi/joi';
 import express from 'express';
 import logger from '../../../core/logger';
@@ -34,3 +35,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

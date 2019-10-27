@@ -6,24 +6,53 @@ import DatabaseConnection from '../core/database-connection';
 import logger from '../core/logger';
 import requestLogger from './middleware/logger';
 import requestId from './middleware/request-id';
-import router from './routers/routers/router';
+import RouteLoader from './route-loader';
 
 namespace Server {
     let app: express.Express | null = null;
     let server: http.Server;
 
     function addMiddleWare() {
+        logger.info('Setting up middleware...');
         app!.use(requestId());
         app!.use(requestLogger.setupRequestLogger());
         app!.use(requestLogger.logRequests());
         app!.use(express.json());
         app!.use(express.urlencoded({extended: false}));
+        logger.info('Done setting up middleware.');
     }
 
     function logMeta() {
         const dbConfig = DatabaseConnection.getPublicConfiguration();
 
         logger.info(`Using database ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}.`);
+    }
+
+    function setupRouterAndRoutes() {
+        const router = express.Router();
+        app!.use(`/${config.basic.basePath}`, router);
+
+        RouteLoader.addRoutes(router)
+        .then(() => {
+            server = http.createServer(app!);
+            server.listen(config.basic.port);
+
+            server.on('close', () => {
+                logger.info('Server is closing down.');
+            });
+
+            server.on('error', error => {
+                logger.error(`Error in server: ${error.message}`);
+            });
+
+            server.on('listening', () => {
+                logger.info('Server is now listening.');
+            });
+        })
+        .catch(e => {
+            console.log('ERROR');
+            console.log(e);
+        });
     }
 
     export function start() {
@@ -35,28 +64,9 @@ namespace Server {
 
         app = express();
 
-        logger.info('Setting up middleware...');
         addMiddleWare();
-        logger.info('Done setting up middleware.');
-
         logMeta();
-
-        app.use(`/${config.basic.basePath}`, router);
-
-        server = http.createServer(app);
-        server.listen(config.basic.port);
-
-        server.on('close', () => {
-            logger.info('Server is closing down.');
-        });
-
-        server.on('error', error => {
-            logger.error(`Error in server: ${error.message}`);
-        });
-
-        server.on('listening', () => {
-            logger.info('Server is now listening.');
-        });
+        setupRouterAndRoutes();
     }
 
     export async function stop(): Promise<void> {

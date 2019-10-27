@@ -1,28 +1,16 @@
-import Joi from '@hapi/joi';
 import express from 'express';
 import makeAuth from './middleware/auth';
 import makeBodyValidator from './middleware/body-validator';
 import makeHeaderValidator from './middleware/header-validator';
 import makeIsVerified from './middleware/is-verified';
 import MiddlewareFunction from './middleware/middleware-function';
+import makeParameterValidator from './middleware/parameter-validator';
 import makeQueryValidator from './middleware/query-validator';
+import RouteLoader from './route-loader';
 import ServerUtils from './server-utils';
 
-type RouteHandler = (req: express.Request, res: express.Response) => Promise<void> | void;
-
-interface IRouteConfiguration {
-    path: string;
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    handler: RouteHandler;
-    querySchema?: Joi.Schema;
-    headers?: string[];
-    bodySchema?: Joi.Schema;
-    auth?: boolean;
-    verified?: boolean;
-}
-
 namespace IRouteConfiguration {
-    function genRouteWrapper(handler: RouteHandler): RouteHandler {
+    function genRouteWrapper(handler: RouteLoader.RouteHandler): RouteLoader.RouteHandler {
         return async (req, res) => {
             try {
                 await handler(req, res);
@@ -32,23 +20,23 @@ namespace IRouteConfiguration {
         };
     }
 
-    export function addRoute(router: express.Router, route: IRouteConfiguration): void {
-        if (!route.auth && route.verified) {
-            throw new Error('Verification requires authentication');
-        }
-
+    export function addRoute(router: express.Router, route: RouteLoader.IRoute): void {
         const middleware: MiddlewareFunction[] = [];
 
-        if (route.auth) {
+        if (route.authorizationLevel === 'AUTHORIZED' || route.authorizationLevel === 'VERIFIED') {
             middleware.push(makeAuth());
         }
 
-        if (route.verified) {
+        if (route.authorizationLevel === 'VERIFIED') {
             middleware.push(makeIsVerified());
         }
 
-        if (route.headers) {
-            middleware.push(makeHeaderValidator(route.headers));
+        if (route.parameterSchema) {
+            middleware.push(makeParameterValidator(route.parameterSchema));
+        }
+
+        if (route.headerSchema) {
+            middleware.push(makeHeaderValidator(route.headerSchema));
         }
 
         if (route.querySchema) {

@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import User from '../../../../model/user';
 import RouteConfiguration from '../../../route-configuration';
@@ -18,3 +19,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
 }
 
 export = route;
+*/

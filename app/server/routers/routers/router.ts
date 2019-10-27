@@ -1,5 +1,7 @@
+/*
 import express from 'express';
 import RouteConfiguration from '../../route-configuration';
+import RouteLoader from '../../route-loader';
 import loginDelete from '../login/delete';
 import loginPost from '../login/post';
 import authDefaultEmailPut from '../users/auth/default/email/put';
@@ -25,3 +27,4 @@ RouteConfiguration.addRoute(router, authDefaultEmailPut); // PUT /users/auth/def
 RouteConfiguration.addRoute(router, authDefaultPasswordPut); // PUT /users/auth/default/password
 
 export = router;
+*/

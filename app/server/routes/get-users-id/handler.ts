@@ -1,11 +1,8 @@
-/*
-import Joi from '@hapi/joi';
 import express from 'express';
 import _ from 'lodash';
 import User from '../../../model/user';
 import UserManager from '../../../model/user-manager';
 import errors from '../../errors';
-import RouteConfiguration from '../../route-configuration';
 
 const paramMap: {[key: string]: number} = {
     nickname: User.QueryData.NICKNAME
@@ -16,16 +13,6 @@ const paramMap: {[key: string]: number} = {
 // Also, this decouples the model and the interface.
 const resultMap: {[key: string]: string} = {
     nickname: 'nickname'
-};
-
-// todo query verification
-// todo param verification
-
-const route: RouteConfiguration = {
-    method: 'GET',
-    path: '/users/:id',
-    querySchema: Joi.object().unknown(true), // Joi.string().allow(Object.keys(paramMap)
-    handler
 };
 
 function urlQueryToUserQueryParams(params: any): User.QueryData[] {
@@ -56,5 +43,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
     res.send(resultBody);
 }
 
-export = route;
-*/
+export = handler;
