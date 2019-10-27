@@ -6,10 +6,10 @@ import logger from '../core/logger';
 import RootDirectory from '../core/root-directory';
 import RouteConfiguration from './route-configuration';
 
-/* 
+/*
 ERROR HANDLING:
 
-The error handling in this file is often done via error codes and not regular error objects. This is because the 
+The error handling in this file is often done via error codes and not regular error objects. This is because the
 differentiation between error codes is simpler than the differentiation between regular errors.
 
 The enum 'ErrorCodes' contains all of the error codes.
@@ -54,7 +54,7 @@ namespace RouteLoader {
     interface IRouteDefinition {
         method: 'GET' | 'POST' | 'PUT' | 'DELETE';
         path: string;
-        authorizationLevel: 'NONE' | 'AUTHORIZED' | 'VERIFIED';
+        authorizationLevel: 'NONE' | 'AUTHENTICATED' | 'VERIFIED';
     }
 
     export interface IRoute extends IRouteDefinition {

@@ -1,22 +1,5 @@
-/*
-import Joi from '@hapi/joi';
 import express from 'express';
-import logger from '../../../core/logger';
 import UserManager from '../../../model/user-manager';
-import RouteConfiguration from '../../route-configuration';
-
-const route: RouteConfiguration = {
-    method: 'POST',
-    path: '/users',
-    handler,
-    bodySchema: Joi.object({
-        nickname: Joi.string().required(),
-        loginData: Joi.object({
-            email: Joi.string().required(),
-            password: Joi.string().required()
-        }).required()
-    })
-};
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
     req.locals.logger.info(`Creating new user with nickname ${req.body.nickname}.`);
@@ -34,5 +17,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
     res.send();
 }
 
-export = route;
-*/
+export = handler;
