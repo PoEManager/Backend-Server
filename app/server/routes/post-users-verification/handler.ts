@@ -1,17 +1,7 @@
-/*
 import express from 'express';
-import EmailManager from '../../../../core/email-manager';
-import User from '../../../../model/user';
-import errors from '../../../errors';
-import RouteConfiguration from '../../../route-configuration';
-import verificationPath from './verification-path';
-
-const route: RouteConfiguration = {
-    method: 'POST',
-    path: `/${verificationPath}`,
-    auth: true,
-    handler
-};
+import EmailManager from '../../../core/email-manager';
+import User from '../../../model/user';
+import errors from '../../errors';
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
     req.locals.logger.info('User is making a verification request.');
@@ -30,5 +20,4 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
     }
 }
 
-export = route;
-*/
+export = handler;

@@ -1,5 +1,5 @@
 {
     "method": "GET",
-    "path": "/users/:id([0-9]+)",
+    "path": "/users/verification/:changeId",
     "authorizationLevel": "NONE"
 }

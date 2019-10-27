@@ -1,0 +1,5 @@
+{
+    "method": "PUT",
+    "path": "/users/auth/default/password",
+    "authorizationLevel": "VERIFIED"
+}

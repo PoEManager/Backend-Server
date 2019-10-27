@@ -9,12 +9,13 @@ import JSONLoader from '../core/load-json';
 import errors from '../model/errors';
 import User from '../model/user';
 import UserManager from '../model/user-manager';
-import verificationPath from '../server/routers/users/verification/verification-path';
 import config from './config';
 import coreErrors from './errors';
 import RootDirectory from './root-directory';
 
 namespace EmailManager {
+    const VERIFICATION_ROUTE_PATH = 'users/verification';
+
     /**
      * A promise wrapper for `juice.juiceResources()`.
      *
@@ -43,7 +44,8 @@ namespace EmailManager {
      * @returns The link.
      */
     function makeVerificationLink(changeUid: string): string {
-        return `${config.basic.baseURL}/${config.basic.basePath}/${verificationPath}/${base64url.escape(changeUid)}`;
+        return `${config.basic.baseURL}/${config.basic.basePath}/` +
+            `${VERIFICATION_ROUTE_PATH}/${base64url.escape(changeUid)}`;
     }
 
     /**
