@@ -1,0 +1,5 @@
+{
+    "method": "GET",
+    "path": "/users/auth/default/email",
+    "authorizationLevel": "AUTHENTICATED"
+}
