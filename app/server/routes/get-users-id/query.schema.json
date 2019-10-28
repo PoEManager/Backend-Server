@@ -5,6 +5,10 @@
         "nickname": {
             "type": "string",
             "maxLength": 0
+        },
+        "createdTime": {
+            "type": "string",
+            "maxLength": 0
         }
     }
 }
