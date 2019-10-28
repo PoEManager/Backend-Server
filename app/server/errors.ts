@@ -55,6 +55,26 @@ namespace errors {
             });
         }
     }
+
+    /**
+     * Thrown if a route is accessed, that does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     method: "<the HTTP method>"
+     *     path: "<the used path>",
+     * }
+     * ```
+     */
+    export class InvalidRouteError extends Error {
+        public constructor(method: string, path: string) {
+            super('INVALID_ROUTE_ERROR', `Cannot ${method} ${path}.`, 404, {
+                method,
+                path
+            });
+        }
+    }
 }
 
 export = errors;

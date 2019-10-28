@@ -1,12 +1,13 @@
 import express from 'express';
 import http from 'http';
-import morgan from 'morgan';
 import config from '../core/config';
 import DatabaseConnection from '../core/database-connection';
 import logger from '../core/logger';
+import errors from './errors';
 import requestLogger from './middleware/logger';
 import requestId from './middleware/request-id';
 import RouteLoader from './route-loader';
+import ServerUtils from './server-utils';
 
 namespace Server {
     let app: express.Express | null = null;
@@ -28,9 +29,19 @@ namespace Server {
         logger.info(`Using database ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}.`);
     }
 
+    function setupErrorRoute() {
+        app!.use((req, res, next) => {
+            ServerUtils.sendRESTError(req, res, new errors.InvalidRouteError(req.method, req.path));
+        });
+    }
+
     function setupRouterAndRoutes() {
         const router = express.Router();
+
+        // these two need to be in this order
         app!.use(`/${config.basic.basePath}`, router);
+        setupErrorRoute();
+        // ======
 
         RouteLoader.addRoutes(router)
         .then(() => {
@@ -50,8 +61,9 @@ namespace Server {
             });
         })
         .catch(e => {
-            console.log('ERROR');
-            console.log(e);
+            logger.error('Unexpected error occurred while setting up the routes.');
+            logger.error(e.message);
+            logger.error('The server has not been started.');
         });
     }
 

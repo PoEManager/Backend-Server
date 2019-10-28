@@ -269,11 +269,16 @@ namespace RouteLoader {
      * @param router The router that the routes will be added to.
      */
     export async function addRoutes(router: express.Router) {
-        const routes = await loadRoutes();
+        try {
+            const routes = await loadRoutes();
 
-        for (const route of routes) {
-            RouteConfiguration.addRoute(router, route);
-            logger.info(`Added route ${route.method} ${route.path}.`);
+            for (const route of routes) {
+                RouteConfiguration.addRoute(router, route);
+                logger.info(`Added route ${route.method} ${route.path}.`);
+            }
+        } catch (error) {
+            // todo
+            throw error;
         }
     }
 }
