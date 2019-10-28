@@ -53,7 +53,8 @@
                     "required": [
                         "baseURL",
                         "basePath",
-                        "port"
+                        "port",
+                        "avatarUploadMaxInKb"
                     ],
                     "properties": {
                         "baseURL": {
@@ -63,7 +64,11 @@
                             "type": "string"
                         },
                         "port": {
-                            "type": "number"
+                            "type": "integer"
+                        },
+                        "avatarUploadMaxInKb": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     }
                 }
@@ -94,7 +99,7 @@
                             "type": "string"
                         },
                         "port": {
-                            "type": "number"
+                            "type": "integer"
                         }
                     }
                 }
@@ -110,7 +115,7 @@
                     ],
                     "properties": {
                         "passwordSaltRounds": {
-                            "type": "number"
+                            "type": "integer"
                         }
                     }
                 }

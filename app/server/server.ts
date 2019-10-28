@@ -1,4 +1,5 @@
 import express from 'express';
+import fileUpload from 'express-fileupload';
 import http from 'http';
 import config from '../core/config';
 import DatabaseConnection from '../core/database-connection';
@@ -20,6 +21,7 @@ namespace Server {
         app!.use(requestLogger.logRequests());
         app!.use(express.json());
         app!.use(express.urlencoded({extended: false}));
+        app!.use(fileUpload({limits: { fileSize: config.basic.avatarUploadMaxInKb * 1024 }}));
         logger.info('Done setting up middleware.');
     }
 
