@@ -4,3 +4,9 @@
 /docs/typedoc
 /coverage
 /logs
+
+# exclude user-data except /user-data/avatars/default.jpg
+/user-data/*
+!/user-data/avatars
+/user-data/avatars/*
+!/user-data/avatars/default.jpg

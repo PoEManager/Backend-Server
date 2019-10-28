@@ -475,5 +475,48 @@ describe('model', () => {
             });
         });
 
+        describe('getAvatarState()', () => {
+            it('should return the correct state', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const avatarState = await user.getAvatarState();
+                expect(avatarState).toEqual('default');
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getAvatarState()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('setAvatarState()', () => {
+            it('should return the correct state', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                let avatarState = await user.getAvatarState();
+                expect(avatarState).toEqual('default');
+
+                await user.setAvatarState(User.AvatarState.CUSTOM);
+
+                avatarState = await user.getAvatarState();
+                expect(avatarState).toEqual('custom');
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).setAvatarState(User.AvatarState.CUSTOM))
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
     });
 });

@@ -263,6 +263,45 @@ class User {
     }
 
     /**
+     * @returns The current avatar state of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getAvatarState(): Promise<User.AvatarState> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users`.`avatar_state` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].avatar_state;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Sets a new avatar state.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async setAvatarState(avatarState: User.AvatarState): Promise<void> {
+        const result = await DatabaseConnection.query(
+            'UPDATE `Users` SET `avatar_state`= ? WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    avatarState,
+                    this.id
+                ]
+            });
+
+        if (result.affectedRows !== 1) {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
      * Query data about the user. This method unites all of the other getters (such as getNickname() and getId()) into
      * one. This can improve the performance, because it reduces the amount of SQL calls to the database.
      *
@@ -354,6 +393,8 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '\`Users\`.\`session_id\`';
         case User.QueryData.CREATED_TIME:
             return '\`Users\`.\`created_time\`';
+        case User.QueryData.AVATAR_STATE:
+            return '\`Users\`.\`avatar_state\`';
         default:
             return ''; // does not happen
     }
@@ -372,7 +413,8 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
         nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
         changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
         sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined,
-        createdTime: queryData.includes(User.QueryData.CREATED_TIME) ? result.created_time : undefined
+        createdTime: queryData.includes(User.QueryData.CREATED_TIME) ? result.created_time : undefined,
+        avatarState: queryData.includes(User.QueryData.AVATAR_STATE) ? result.avatar_state : undefined
     };
 }
 
@@ -415,7 +457,17 @@ namespace User {
         /**
          * The timestamp of the account creation.
          */
-        CREATED_TIME
+        CREATED_TIME,
+
+        /**
+         * The current state of the user's avatar.
+         */
+        AVATAR_STATE
+    }
+
+    export enum AvatarState {
+        DEFAULT = 'default',
+        CUSTOM = 'custom'
     }
 
     /**
@@ -453,6 +505,11 @@ namespace User {
          * The timestamp of the account creation.
          */
         createdTime?: Date;
+
+        /**
+         * The current state of the user's avatar.
+         */
+        avatarState?: AvatarState;
     }
 }
 
