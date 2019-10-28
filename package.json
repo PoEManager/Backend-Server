@@ -18,12 +18,10 @@
         "url": "https://github.com/PoEManager/Backend-Server"
     },
     "dependencies": {
-        "@hapi/joi": "^15.1.1",
         "@types/base64-url": "^2.2.0",
         "@types/bcrypt": "^3.0.0",
         "@types/config": "0.0.34",
         "@types/express": "^4.17.1",
-        "@types/hapi__joi": "^15.0.4",
         "@types/lodash": "^4.14.144",
         "@types/morgan": "^1.7.37",
         "@types/node": "^12.11.7",
