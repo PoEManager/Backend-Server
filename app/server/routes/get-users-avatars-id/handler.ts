@@ -15,7 +15,7 @@ async function handler(req: express.Request, res: express.Response) {
 
     const user = await UserManager.get(id);
 
-    const avatar = await AvatarManager.getAvatarData(user);
+    const avatar = await AvatarManager.getAvatarData(user, req.query.resolution);
 
     req.locals.logger.info('Avatar retrieval done.');
 

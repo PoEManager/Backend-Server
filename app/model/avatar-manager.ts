@@ -5,39 +5,44 @@ import RootDirectory from '../core/root-directory';
 import User from './user';
 
 const AVATAR_ROOT = path.join(RootDirectory.getSync(), 'user-data', 'avatars');
-const DEFAULT_AVATAR_PATH = path.join(AVATAR_ROOT, 'default.jpg');
 
 namespace AvatarManager {
-    async function getDefaultAvatar(): Promise<Buffer> {
-        return fs.readFileSync(DEFAULT_AVATAR_PATH);
+    type Resolution = 16 | 32 | 64 | 128 | 265;
+
+    function makeDefaultAvatarPath(resolution: Resolution) {
+        return path.join(AVATAR_ROOT, `default-${resolution}.jpg`);
     }
 
-    function makeAvatarPath(user: User): string {
+    async function getDefaultAvatar(resolution: Resolution): Promise<Buffer> {
+        return fs.readFileSync(makeDefaultAvatarPath(resolution));
+    }
+
+    function makeAvatarPath(user: User, resolution: Resolution): string {
         const userID = user.getId();
-        return path.join(AVATAR_ROOT, `${userID}.jpg`);
+        return path.join(AVATAR_ROOT, `${userID}-${resolution}.jpg`);
     }
 
-    async function getCustomAvatar(user: User): Promise<Buffer> {
-        const avatarPath = makeAvatarPath(user);
+    async function getCustomAvatar(user: User, resolution: Resolution): Promise<Buffer> {
+        const avatarPath = makeAvatarPath(user, resolution);
 
         if (!fs.existsSync(avatarPath)) {
             logger.error(`Custom avatar for user ${user.getId()} does not exist although it should.` +
                 `The default avatar will be used.`);
-            return getDefaultAvatar();
+            return getDefaultAvatar(resolution);
         } else {
             return fs.readFileSync(avatarPath);
         }
     }
 
-    export async function getAvatarData(user: User): Promise<Buffer> {
+    export async function getAvatarData(user: User, resolution: Resolution): Promise<Buffer> {
         const avatarState = await user.getAvatarState();
 
         switch (avatarState) {
             case User.AvatarState.DEFAULT:
             default:
-                return getDefaultAvatar();
+                return getDefaultAvatar(resolution);
             case User.AvatarState.CUSTOM:
-                    return getCustomAvatar(user);
+                return getCustomAvatar(user, resolution);
         }
     }
 }

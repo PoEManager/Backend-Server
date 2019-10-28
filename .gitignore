@@ -5,8 +5,12 @@
 /coverage
 /logs
 
-# exclude user-data except /user-data/avatars/default.jpg
+# exclude user-data except the default-*.jpg files
 /user-data/*
 !/user-data/avatars
 /user-data/avatars/*
-!/user-data/avatars/default.jpg
+!/user-data/avatars/default-16.jpg
+!/user-data/avatars/default-32.jpg
+!/user-data/avatars/default-64.jpg
+!/user-data/avatars/default-128.jpg
+!/user-data/avatars/default-256.jpg
