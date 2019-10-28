@@ -172,19 +172,27 @@ describe('model', () => {
 
                 const defaultLoginId = (await user.getDefaultLogin()).getId();
 
+                const timeBefore = new Date();
+                timeBefore.setMilliseconds(0);
+
                 const result = await user.query([
                     User.QueryData.ID,
                     User.QueryData.DEFAULT_LOGIN_ID,
                     User.QueryData.NICKNAME,
                     User.QueryData.CHANGE_UID,
-                    User.QueryData.SESSION_ID
+                    User.QueryData.SESSION_ID,
+                    User.QueryData.CREATED_TIME
                 ]);
+
+                const timeAfter = new Date();
 
                 expect(result.id).toBe(user.getId());
                 expect(result.nickname).toBe('nickname');
                 expect(result.defaultLoginId).toBe(defaultLoginId);
                 expect(result.changeUid!.length).toBe(24);
                 expect(result.sessionId!).toBeNull();
+                expect(result.createdTime!.getTime()).toBeGreaterThanOrEqual(timeBefore.getTime());
+                expect(result.createdTime!.getTime()).toBeLessThanOrEqual(timeAfter.getTime());
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
@@ -443,5 +451,29 @@ describe('model', () => {
                 await expect(new User(-1).getChangeUID()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
+
+        describe('getCreatedTime()', () => {
+            it('should return the correct time', async () => {
+                const timeBefore = new Date();
+                timeBefore.setMilliseconds(0); // MariaDB uses second precision and not micros
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+                const timeAfter = new Date();
+
+                const createdTime = await user.getCreatedTime();
+                expect(createdTime.getTime()).toBeGreaterThanOrEqual(timeBefore.getTime());
+                expect(createdTime.getTime()).toBeLessThanOrEqual(timeAfter.getTime());
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getCreatedTime()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
     });
 });

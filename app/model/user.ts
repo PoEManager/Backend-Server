@@ -243,6 +243,26 @@ class User {
     }
 
     /**
+     * @returns The date-time at which the user account was created.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getCreatedTime(): Promise<Date> {
+        const result = await DatabaseConnection.query(
+            'SELECT `Users`.`created_time` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].created_time;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
      * Query data about the user. This method unites all of the other getters (such as getNickname() and getId()) into
      * one. This can improve the performance, because it reduces the amount of SQL calls to the database.
      *
@@ -332,6 +352,8 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return 'TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid';
         case User.QueryData.SESSION_ID:
             return '\`Users\`.\`session_id\`';
+        case User.QueryData.CREATED_TIME:
+            return '\`Users\`.\`created_time\`';
         default:
             return ''; // does not happen
     }
@@ -349,7 +371,8 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
         defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
         nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
         changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
-        sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined
+        sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined,
+        createdTime: queryData.includes(User.QueryData.CREATED_TIME) ? result.created_time : undefined
     };
 }
 
@@ -387,7 +410,12 @@ namespace User {
         /**
          * The user's session ID.
          */
-        SESSION_ID
+        SESSION_ID,
+
+        /**
+         * The timestamp of the account creation.
+         */
+        CREATED_TIME
     }
 
     /**
@@ -420,6 +448,11 @@ namespace User {
          * The current session ID.
          */
         sessionId?: number;
+
+        /**
+         * The timestamp of the account creation.
+         */
+        createdTime?: Date;
     }
 }
 
