@@ -204,7 +204,7 @@ function loadConfigDefinition(configRoot: string): IConfigDefinition {
     const valid = validate(configMetaJSON);
 
     if (!valid) {
-        throw new errors.InternalConfigMetaValidationError(ajv);
+        throw new errors.InternalConfigMetaValidationError(validate.errors!, validate.schema as object);
     }
 
     return configMetaJSON as IConfigDefinition;
@@ -364,7 +364,7 @@ function loadConfiguration(root: string, sources: string[], file: IConfiguration
     const valid = validate(ret);
 
     if (!valid) {
-        throw new errors.InternalObjectValidationError(ajv);
+        throw new errors.InternalObjectValidationError(validate.errors!, validate.schema as object, ret);
     }
 
     return ret;

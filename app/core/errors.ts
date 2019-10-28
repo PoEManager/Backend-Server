@@ -133,17 +133,18 @@ namespace errors {
      * ```
      */
     export class InternalObjectValidationError extends InternalError {
-        public constructor(messages: string[], schema: object, object: any);
+        public constructor(messagesOrErrors: string[] | Ajv.ErrorObject[], schema?: object, object?: any) {
+            if (messagesOrErrors.length >= 1) {
+                if (typeof messagesOrErrors[0] === 'string') {
+                    super('INTERNAL_OBJECT_VALIDATION_ERROR', { messages: messagesOrErrors, schema, object });
+                } else {
+                    const errorsArray = messagesOrErrors as Ajv.ErrorObject[];
+                    const messages = _.filter(_.map(errorsArray, e => e.message), m => m !== undefined);
 
-        public constructor(ajv: Ajv.Ajv);
-
-        public constructor(messagesOrAjv: string[] | Ajv.Ajv, schema?: object, object?: any) {
-            if (messagesOrAjv instanceof Ajv) {
-                const messages = _.filter(_.map(messagesOrAjv.errors, e => e.message), m => m !== undefined);
-
-                super('INTERNAL_OBJECT_VALIDATION_ERROR', { messages, schema, object });
+                    super('INTERNAL_OBJECT_VALIDATION_ERROR', { messages, schema, object });
+                }
             } else {
-                super('INTERNAL_OBJECT_VALIDATION_ERROR', { messagesOrAjv, schema, object });
+                super('INTERNAL_OBJECT_VALIDATION_ERROR', { messages: [], schema, object });
             }
         }
     }
@@ -162,17 +163,18 @@ namespace errors {
      * ```
      */
     export class InternalConfigMetaValidationError extends InternalError {
-        public constructor(messages: string[], schema: object);
+        public constructor(messagesOrErrors: string[] | Ajv.ErrorObject[], schema?: object) {
+            if (messagesOrErrors.length >= 1) {
+                if (typeof messagesOrErrors[0] === 'string') {
+                    super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messages: messagesOrErrors, schema });
+                } else {
+                    const errorsArray = messagesOrErrors as Ajv.ErrorObject[];
+                    const messages = _.filter(_.map(errorsArray, e => e.message), m => m !== undefined);
 
-        public constructor(ajv: Ajv.Ajv);
-
-        public constructor(messagesOrAjv: string[] | Ajv.Ajv, schema?: object) {
-            if (messagesOrAjv instanceof Ajv) {
-                const messages = _.filter(_.map(messagesOrAjv.errors, e => e.message), m => m !== undefined);
-
-                super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messages, schema });
+                    super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messages, schema });
+                }
             } else {
-                super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messagesOrAjv, schema });
+                super('INTERNAL_CONFIG_META_VALIDATION_ERROR', { messages: [], schema });
             }
         }
     }
@@ -224,7 +226,7 @@ namespace errors {
                 });
             } else {
                 super('OBJECT_VALIDATION_ERROR', 'An object cloud not be validated.', 400, {
-                    messagesOrAjv,
+                    messages: messagesOrAjv,
                     schema,
                     object
                 });

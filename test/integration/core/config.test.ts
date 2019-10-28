@@ -35,12 +35,93 @@ describe('core', () => {
 
         it('should throw if the config is in an invalid schema', () => {
             expect(() => config._loadDbgConfig('test/integration/res/config/cfg7'))
-                .toThrow(new errors.ObjectValidationError(['should have required property \'test\'']));
+                .toThrow(new errors.InternalObjectValidationError(['should have required property \'test\''], {
+                    $schema: 'http://json-schema.org/draft-07/schema',
+                    type: 'object',
+                    additionalProperties: false,
+                    required: [
+                        'test'
+                    ],
+                    properties: {
+                        test: {
+                            type: 'string'
+                        }
+                    }
+                }, {}));
         });
 
         it('should throw if the config metadata is in an invalid schema', () => {
             expect(() => config._loadDbgConfig('test/integration/res/config/cfg8'))
-                .toThrow(new errors.ConfigMetaValidationError(['should NOT have additional properties']));
+                .toThrow(new errors.InternalConfigMetaValidationError(['should NOT have additional properties'], {
+                    $schema: 'http://json-schema.org/draft-07/schema',
+                    title: 'PoE Manager config meta definition schema',
+                    type: 'object',
+                    additionalProperties: false,
+                    patternProperties: {
+                        '^[a-zA-Z0-9-_.]+$': {
+                            $ref: '#/definitions/configEnvironment'
+                        }
+                    },
+                    properties: {
+                        default: {
+                            $ref: '#/definitions/configEnvironment'
+                        }
+                    },
+                    definitions: {
+                        configEnvironment: {
+                            type: 'object',
+                            properties: {
+                                sources: {
+                                    type: 'array',
+                                    additionalItems: false,
+                                    uniqueItems: true,
+                                    items: {
+                                        anyOf: [
+                                            {
+                                                type: 'string',
+                                                enum: [
+                                                    '$config-env'
+                                                ]
+                                            },
+                                            {
+                                                type: 'string',
+                                                regex: '^[a-zA-Z0-9-_.]+$'
+                                            }
+                                        ]
+                                    }
+                                },
+                                configs: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'object',
+                                        additionalProperties: false,
+                                        properties: {
+                                            name: {
+                                                type: 'string'
+                                            },
+                                            schema: {
+                                                $ref: 'http://json-schema.org/draft-07/schema'
+                                            }
+                                        }
+                                    },
+                                    additionalItems: false
+                                },
+                                extends: {
+                                    default: null,
+                                    oneOf: [
+                                        {
+                                            type: 'string',
+                                            regex: '^[a-zA-Z0-9-_.]+$'
+                                        },
+                                        {
+                                            type: 'null'
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }));
         });
 
         it('should throw if a config file can not be parsed', () => {

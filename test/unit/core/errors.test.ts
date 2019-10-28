@@ -154,18 +154,18 @@ describe('core', () => {
 
         describe('ObjectValidationError', () => {
             it('should correctly set the properties', () => {
-                const error = new errors.ObjectValidationError(['msg1', 'msg2']);
+                const error = new errors.InternalConfigMetaValidationError(['msg1', 'msg2'], {});
 
                 expect(error.name).toBe('INTERNAL_ERROR');
                 expect(error.message).toContain('msg1');
                 expect(error.message).toContain('msg2');
-                expect(error.data.name).toBe('OBJECT_VALIDATION_ERROR');
+                expect(error.data.name).toBe('INTERNAL_CONFIG_META_VALIDATION_ERROR');
                 expect(error.data.additional.messages).toEqual(['msg1', 'msg2']);
                 expect(error.httpCode).toBe(500);
             });
 
             it('should correctly generate a REST error', () => {
-                const error = new errors.ObjectValidationError(['msg1', 'msg2']).asRESTError();
+                const error = new errors.InternalConfigMetaValidationError(['msg1', 'msg2'], {}).asRESTError();
 
                 expect(error.isError).toBeTruthy();
                 expect(error.name).toBe('INTERNAL_ERROR');
@@ -176,18 +176,18 @@ describe('core', () => {
 
         describe('ConfigMetaValidationError', () => {
             it('should correctly set the properties', () => {
-                const error = new errors.ConfigMetaValidationError(['msg1', 'msg2']);
+                const error = new errors.InternalConfigMetaValidationError(['msg1', 'msg2'], {});
 
                 expect(error.name).toBe('INTERNAL_ERROR');
                 expect(error.message).toContain('msg1');
                 expect(error.message).toContain('msg2');
-                expect(error.data.name).toBe('CONFIG_META_VALIDATION_ERROR');
+                expect(error.data.name).toBe('INTERNAL_CONFIG_META_VALIDATION_ERROR');
                 expect(error.data.additional.messages).toEqual(['msg1', 'msg2']);
                 expect(error.httpCode).toBe(500);
             });
 
             it('should correctly generate a REST error', () => {
-                const error = new errors.ConfigMetaValidationError(['msg1', 'msg2']).asRESTError();
+                const error = new errors.InternalConfigMetaValidationError(['msg1', 'msg2'], {}).asRESTError();
 
                 expect(error.isError).toBeTruthy();
                 expect(error.name).toBe('INTERNAL_ERROR');
