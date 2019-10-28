@@ -1,0 +1,5 @@
+{
+    "method": "GET",
+    "path": "/users/avatars/:id([0-9]+)",
+    "authorizationLevel": "NONE"
+}
