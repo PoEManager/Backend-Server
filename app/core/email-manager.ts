@@ -1,4 +1,3 @@
-import Joi from '@hapi/joi';
 import base64url from 'base64-url';
 import fs from 'fs';
 import Handlebars from 'handlebars';
@@ -11,10 +10,12 @@ import User from '../model/user';
 import UserManager from '../model/user-manager';
 import config from './config';
 import coreErrors from './errors';
+import JSONValidator from './json-validator';
 import RootDirectory from './root-directory';
 
 namespace EmailManager {
     const VERIFICATION_ROUTE_PATH = 'users/verification';
+    const EMAIL_CONFIG_SCHEMA_FILE = path.join(RootDirectory.getSync(), 'res', 'schema', 'email-config.schema.json');
 
     /**
      * A promise wrapper for `juice.juiceResources()`.
@@ -123,13 +124,7 @@ namespace EmailManager {
 
         try {
             emailConfig = await JSONLoader.loadJSON(path.join(await getEmailDir(), `${configName}.json`));
-
-            const schema = Joi.object({
-                template: Joi.string().required(),
-                subject: Joi.string().required()
-            });
-
-            await schema.validate(emailConfig);
+            await JSONValidator.validate(emailConfig, await import(EMAIL_CONFIG_SCHEMA_FILE));
         } catch (error) {
             throw new coreErrors.InvalidEmailConfigurationError(configName);
         }
