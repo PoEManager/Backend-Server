@@ -31,6 +31,10 @@ namespace UserManager {
         let result: any;
 
         await DatabaseConnection.transaction(async conn => {
+            result = await conn.query('INSERT INTO `WalletRestrictions` () VALUES ()');
+
+            const walletId = result.insertId;
+
             result = await conn.query(
                 'INSERT INTO `DefaultLogins` (`email`, `password`) VALUES (?, ?)', {
                     parameters: [
@@ -49,11 +53,14 @@ namespace UserManager {
                     ]
                 });
 
+            const loginId = result.insertId;
+
             result = await conn.query(
-                'INSERT INTO `Users` (`defaultlogin_id`, `nickname`, `verified`, ' +
-                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, POEM_UUID(), POEM_DATE_INFINITY())', {
+                'INSERT INTO `Users` (`wallet_restriction_id`, `defaultlogin_id`, `nickname`, `verified`, ' +
+                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, ?, POEM_UUID(), POEM_DATE_INFINITY())', {
                     parameters: [
-                        result.insertId,
+                        walletId,
+                        loginId,
                         createData.nickname,
                         false
                     ],

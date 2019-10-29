@@ -192,7 +192,7 @@ class DefaultLogin {
 
         let columns: string;
 
-        // if no data is queried, just check if the user exists (if not, an error will be thrown)
+        // if no data is queried, just check if the login exists (if not, an error will be thrown)
         if (queryData.length === 0) {
             columns = '1';
         } else {
@@ -216,7 +216,7 @@ class DefaultLogin {
     }
 
     /**
-     * @returns A DefaultLoginNotFoundError with the proper user ID.
+     * @returns A DefaultLoginNotFoundError with the proper ID.
      */
     private makeLoginNotFoundError(): errors.DefaultLoginNotFoundError {
         return new errors.DefaultLoginNotFoundError(this.id);

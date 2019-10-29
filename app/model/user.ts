@@ -5,6 +5,7 @@ import DefaultLogin from './default-login';
 import errors from './errors';
 import UserChanges from './user-changes';
 import UserManager from './user-manager';
+import WalletRestrictions from './wallet-restrictions';
 
 /**
  * The representation of a single user account.
@@ -114,6 +115,26 @@ class User {
 
         if (result.length === 1) {
             return new DefaultLogin(result[0].defaultlogin_id);
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * @returns A reference to the wallet restriction of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getWalletRestrictions(): Promise<WalletRestrictions> {
+        const result = await DatabaseConnection.query(
+            'SELECT `wallet_restriction_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return new WalletRestrictions(result[0].wallet_restriction_id);
         } else {
             throw this.makeUserNotFoundError();
         }

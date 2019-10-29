@@ -2,6 +2,7 @@ import Error from '../core/error';
 import DefaultLogin from './default-login';
 import User from './user';
 import UserManager from './user-manager';
+import WalletRestrictions from './wallet-restrictions';
 
 namespace errors {
     /**
@@ -86,6 +87,24 @@ namespace errors {
     export class DefaultLoginNotFoundError extends LoginNotFoundError {
         constructor(id: DefaultLogin.ID) {
             super(id, LoginNotFoundError.LoginType.DEFAULT);
+        }
+    }
+
+    /**
+     * Thrown if a wallet restriction does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the wallet restriction that was not found>",
+     * }
+     * ```
+     */
+    export class WalletRestrictionsNotFoundError extends Error {
+        constructor(id: WalletRestrictions.ID) {
+            super('WALLET_RESTRICTIONS_NOT_FOUND_ERROR', `Wallet Restriction with the ID ${id} does not exist`, 404, {
+                id
+            });
         }
     }
 
