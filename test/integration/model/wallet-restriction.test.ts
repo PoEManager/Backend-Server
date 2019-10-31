@@ -11,13 +11,11 @@ describe('model', () => {
             });
         });
 
-        afterEach(async () => {
+        afterAll(async () => {
             await DatabaseConnection.transaction(async conn => {
                 await conn.query('DELETE FROM `Users`');
             });
-        });
 
-        afterAll(async () => {
             await DatabaseConnection.reset();
         });
 

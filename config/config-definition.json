@@ -126,7 +126,8 @@
         "sources": [
             "default",
             "$config-env",
-            "local"
+            "local",
+            "$config-env-local"
         ],
         "extends": "default",
         "configs": [

@@ -12,6 +12,10 @@ describe('core', () => {
         });
 
         afterAll(async () => {
+            await DatabaseConnection.transaction(async conn => {
+                await conn.query('DELETE FROM `Users`');
+            });
+
             await DatabaseConnection.reset();
         });
 
