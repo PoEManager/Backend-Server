@@ -84,7 +84,6 @@ class WalletRestrictions {
      * @returns The queried data.
      */
     public async query(queryData: WalletRestrictions.QueryData[]): Promise<WalletRestrictions.IQueryResult> {
-
         let columns: string;
 
         // if no data is queried, just check if the wallet restriction exists (if not, an error will be thrown)
@@ -111,6 +110,26 @@ class WalletRestrictions {
         }
     }
 
+    public async update(restrictionData: WalletRestrictions.IWalletRestrictionData) {
+        const columns = walletRestrictionDataToColumnList(restrictionData);
+
+        if (columns.length === 0) { // no columns to update; no need to continue
+            return;
+        }
+
+        const processedColumns = _.map(columns, (c, i) => `\`WalletRestrictions\`.\`${c}\`= ?`);
+
+        const sql = `UPDATE \`WalletRestrictions\` SET ${processedColumns.join(', ')}`;
+
+        const result = await DatabaseConnection.query(sql, {
+            parameters: walletRestrictionDataToValueList(restrictionData)
+        });
+
+        if (result.affectedRows === 0) {
+            throw this.makeWalletRestrictionNotFoundError();
+        }
+    }
+
     /**
      * @returns A WalletRestrictionNotFoundError with the proper ID.
      */
@@ -118,11 +137,16 @@ class WalletRestrictions {
         return new errors.WalletRestrictionsNotFoundError(this.id);
     }
 
+    /*
+    ============================================
+    UNUSED FOR NOW
+    May be required in the future.
+    ============================================
     /**
      * Queries the ID of the user, that the wallet restriction belongs to.
      *
      * @param conn The connection that will be used for the query. When not passed, a new connection will be created.
-     */
+     *\/
     private async getUserId(conn?: DatabaseConnection.Connection): Promise<User.ID> {
         const handler = async (innerConn: DatabaseConnection.Connection): Promise<User.ID> =>  {
             // get user ID of the login
@@ -147,7 +171,7 @@ class WalletRestrictions {
         } else {
             return await DatabaseConnection.multiQuery(handler);
         }
-    }
+    } */
 }
 
 /**
@@ -195,6 +219,162 @@ function queryDataToColumn(queryData: WalletRestrictions.QueryData): string {
         default:
             return ''; // does not happen
     }
+}
+
+/**
+ * Depending on the presence of their respective keys in the passed object, returns the column names of currency items.
+ *
+ * @param walletRestrictionData The wallet restriction data to get the columns for.
+ *
+ * @returns The columns.
+ */
+function walletRestrictionDataToColumnList(walletRestrictionData: WalletRestrictions.IWalletRestrictionData): string[] {
+    const ret: string[] = [];
+
+    if (walletRestrictionData.ignoreAlt) {
+        ret.push('ignore_alt');
+    }
+
+    if (walletRestrictionData.ignoreFuse) {
+        ret.push('ignore_fuse');
+    }
+
+    if (walletRestrictionData.ignoreAlch) {
+        ret.push('ignore_alch');
+    }
+
+    if (walletRestrictionData.ignoreChaos) {
+        ret.push('ignore_chaos');
+    }
+
+    if (walletRestrictionData.ignoreGcp) {
+        ret.push('ignore_gcp');
+    }
+
+    if (walletRestrictionData.ignoreExa) {
+        ret.push('ignore_exa');
+    }
+
+    if (walletRestrictionData.ignoreChrom) {
+        ret.push('ignore_chrom');
+    }
+
+    if (walletRestrictionData.ignoreJew) {
+        ret.push('ignore_jew');
+    }
+
+    if (walletRestrictionData.ignoreChance) {
+        ret.push('ignore_chance');
+    }
+
+    if (walletRestrictionData.ignoreChisel) {
+        ret.push('ignore_chisel');
+    }
+
+    if (walletRestrictionData.ignoreScour) {
+        ret.push('ignore_scour');
+    }
+
+    if (walletRestrictionData.ignoreBlessed) {
+        ret.push('ignore_blessed');
+    }
+
+    if (walletRestrictionData.ignoreRegret) {
+        ret.push('ignore_regret');
+    }
+
+    if (walletRestrictionData.ignoreRegal) {
+        ret.push('ignore_regal');
+    }
+
+    if (walletRestrictionData.ignoreDivine) {
+        ret.push('ignore_divine');
+    }
+
+    if (walletRestrictionData.ignoreVaal) {
+        ret.push('ignore_vaal');
+    }
+
+    return ret;
+}
+
+/**
+ * Depending on the presence of their respective keys in the passed object, returns the column names of currency items.
+ *
+ * @param walletRestrictionData The wallet restriction data to get the columns for.
+ *
+ * @returns The columns.
+ */
+function walletRestrictionDataToValueList(walletRestrictionData: WalletRestrictions.IWalletRestrictionData): number[] {
+    // IMPORTANT: the order of the properties needs to be the same as it is in walletRestrictionDataToColumnList()
+
+    const ret: number[] = [];
+
+    if (walletRestrictionData.ignoreAlt) {
+        ret.push(walletRestrictionData.ignoreAlt);
+    }
+
+    if (walletRestrictionData.ignoreFuse) {
+        ret.push(walletRestrictionData.ignoreFuse);
+    }
+
+    if (walletRestrictionData.ignoreAlch) {
+        ret.push(walletRestrictionData.ignoreAlch);
+    }
+
+    if (walletRestrictionData.ignoreChaos) {
+        ret.push(walletRestrictionData.ignoreChaos);
+    }
+
+    if (walletRestrictionData.ignoreGcp) {
+        ret.push(walletRestrictionData.ignoreGcp);
+    }
+
+    if (walletRestrictionData.ignoreExa) {
+        ret.push(walletRestrictionData.ignoreExa);
+    }
+
+    if (walletRestrictionData.ignoreChrom) {
+        ret.push(walletRestrictionData.ignoreChrom);
+    }
+
+    if (walletRestrictionData.ignoreJew) {
+        ret.push(walletRestrictionData.ignoreJew);
+    }
+
+    if (walletRestrictionData.ignoreChance) {
+        ret.push(walletRestrictionData.ignoreChance);
+    }
+
+    if (walletRestrictionData.ignoreChisel) {
+        ret.push(walletRestrictionData.ignoreChisel);
+    }
+
+    if (walletRestrictionData.ignoreScour) {
+        ret.push(walletRestrictionData.ignoreScour);
+    }
+
+    if (walletRestrictionData.ignoreBlessed) {
+        ret.push(walletRestrictionData.ignoreBlessed);
+    }
+
+    if (walletRestrictionData.ignoreRegret) {
+        ret.push(walletRestrictionData.ignoreRegret);
+    }
+
+    if (walletRestrictionData.ignoreRegal) {
+        ret.push(walletRestrictionData.ignoreRegal);
+    }
+
+    if (walletRestrictionData.ignoreDivine) {
+        ret.push(walletRestrictionData.ignoreDivine);
+    }
+
+    if (walletRestrictionData.ignoreVaal) {
+        ret.push(walletRestrictionData.ignoreVaal);
+    }
+
+    return ret;
 }
 
 /**
@@ -274,17 +454,7 @@ namespace WalletRestrictions {
         IGNORE_VAAL
     }
 
-    /**
-     * The result of DefaultLogin.query().
-     *
-     * For data that was not queried, the fields will be ```undefined```.
-     */
-    export interface IQueryResult {
-        /**
-         * The ID of the login.
-         */
-        id?: ID;
-
+    export interface IWalletRestrictionData {
         /**
          * The amount of ignored Orb of Alteration.
          */
@@ -364,6 +534,18 @@ namespace WalletRestrictions {
          * The amount of ignored Orb of Alteration.
          */
         ignoreVaal?: number;
+    }
+
+    /**
+     * The result of DefaultLogin.query().
+     *
+     * For data that was not queried, the fields will be ```undefined```.
+     */
+    export interface IQueryResult extends IWalletRestrictionData {
+        /**
+         * The ID of the login.
+         */
+        id?: ID;
     }
 }
 

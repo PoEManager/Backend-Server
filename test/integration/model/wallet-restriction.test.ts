@@ -135,7 +135,7 @@ describe('model', () => {
                 });
             });
 
-            it('should not set attributes that were not queried (some queried attributes)', async () => {
+            it('should not set attributes that were not queried (no queried attributes)', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -149,7 +149,7 @@ describe('model', () => {
                 await expect(restrictions.query([])).resolves.toMatchObject({});
             });
 
-            it('should not set attributes that were not queried (no queried attributes)', async () => {
+            it('should not set attributes that were not queried (some queried attributes)', async () => {
                 const user = await UserManager.create({
                     nickname: 'nickname',
                     loginData: {
@@ -162,6 +162,181 @@ describe('model', () => {
 
                 await expect(restrictions.query([WalletRestrictions.QueryData.ID]))
                     .resolves.toMatchObject({id: restrictions.getId()});
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new WalletRestrictions(-1).query([]))
+                    .rejects.toEqual(new errors.WalletRestrictionsNotFoundError(-1));
+            });
+        });
+
+        describe('update()', () => {
+            it('should correctly update the wallet restriction\'s attributes', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const restrictions = await user.getWalletRestrictions();
+
+                await restrictions.update({
+                    ignoreAlt: 0,
+                    ignoreFuse: 1,
+                    ignoreAlch: 2,
+                    ignoreChaos: 3,
+                    ignoreGcp: 4,
+                    ignoreExa: 5,
+                    ignoreChrom: 6,
+                    ignoreJew: 7,
+                    ignoreChance: 8,
+                    ignoreChisel: 9,
+                    ignoreScour: 10,
+                    ignoreBlessed: 11,
+                    ignoreRegret: 12,
+                    ignoreRegal: 13,
+                    ignoreDivine: 14,
+                    ignoreVaal: 15
+                });
+
+                await expect(restrictions.query([
+                    WalletRestrictions.QueryData.IGNORE_ALT,
+                    WalletRestrictions.QueryData.IGNORE_FUSE,
+                    WalletRestrictions.QueryData.IGNORE_ALCH,
+                    WalletRestrictions.QueryData.IGNORE_CHAOS,
+                    WalletRestrictions.QueryData.IGNORE_GCP,
+                    WalletRestrictions.QueryData.IGNORE_EXA,
+                    WalletRestrictions.QueryData.IGNORE_CHROM,
+                    WalletRestrictions.QueryData.IGNORE_JEW,
+                    WalletRestrictions.QueryData.IGNORE_CHANCE,
+                    WalletRestrictions.QueryData.IGNORE_CHISEL,
+                    WalletRestrictions.QueryData.IGNORE_SCOUR,
+                    WalletRestrictions.QueryData.IGNORE_BLESSED,
+                    WalletRestrictions.QueryData.IGNORE_REGRET,
+                    WalletRestrictions.QueryData.IGNORE_REGAL,
+                    WalletRestrictions.QueryData.IGNORE_DIVINE,
+                    WalletRestrictions.QueryData.IGNORE_VAAL
+                ])).resolves.toMatchObject({
+                    ignoreAlt: 0,
+                    ignoreFuse: 1,
+                    ignoreAlch: 2,
+                    ignoreChaos: 3,
+                    ignoreGcp: 4,
+                    ignoreExa: 5,
+                    ignoreChrom: 6,
+                    ignoreJew: 7,
+                    ignoreChance: 8,
+                    ignoreChisel: 9,
+                    ignoreScour: 10,
+                    ignoreBlessed: 11,
+                    ignoreRegret: 12,
+                    ignoreRegal: 13,
+                    ignoreDivine: 14,
+                    ignoreVaal: 15
+                });
+            });
+
+            it('should not update attributes that were not set (no set attributes)', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const restrictions = await user.getWalletRestrictions();
+                await restrictions.update({});
+
+                await expect(restrictions.query([
+                    WalletRestrictions.QueryData.IGNORE_ALT,
+                    WalletRestrictions.QueryData.IGNORE_FUSE,
+                    WalletRestrictions.QueryData.IGNORE_ALCH,
+                    WalletRestrictions.QueryData.IGNORE_CHAOS,
+                    WalletRestrictions.QueryData.IGNORE_GCP,
+                    WalletRestrictions.QueryData.IGNORE_EXA,
+                    WalletRestrictions.QueryData.IGNORE_CHROM,
+                    WalletRestrictions.QueryData.IGNORE_JEW,
+                    WalletRestrictions.QueryData.IGNORE_CHANCE,
+                    WalletRestrictions.QueryData.IGNORE_CHISEL,
+                    WalletRestrictions.QueryData.IGNORE_SCOUR,
+                    WalletRestrictions.QueryData.IGNORE_BLESSED,
+                    WalletRestrictions.QueryData.IGNORE_REGRET,
+                    WalletRestrictions.QueryData.IGNORE_REGAL,
+                    WalletRestrictions.QueryData.IGNORE_DIVINE,
+                    WalletRestrictions.QueryData.IGNORE_VAAL
+                ])).resolves.toMatchObject({
+                    ignoreAlt: 0,
+                    ignoreFuse: 0,
+                    ignoreAlch: 0,
+                    ignoreChaos: 0,
+                    ignoreGcp: 0,
+                    ignoreExa: 0,
+                    ignoreChrom: 0,
+                    ignoreJew: 0,
+                    ignoreChance: 0,
+                    ignoreChisel: 0,
+                    ignoreScour: 0,
+                    ignoreBlessed: 0,
+                    ignoreRegret: 0,
+                    ignoreRegal: 0,
+                    ignoreDivine: 0,
+                    ignoreVaal: 0
+                });
+            });
+
+            it('should not update attributes that were not set (some set attributes)', async () => {
+                const user = await UserManager.create({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                const restrictions = await user.getWalletRestrictions();
+                await restrictions.update({
+                    ignoreBlessed: 1,
+                    ignoreExa: 2
+                });
+
+                await expect(restrictions.query([
+                    WalletRestrictions.QueryData.IGNORE_ALT,
+                    WalletRestrictions.QueryData.IGNORE_FUSE,
+                    WalletRestrictions.QueryData.IGNORE_ALCH,
+                    WalletRestrictions.QueryData.IGNORE_CHAOS,
+                    WalletRestrictions.QueryData.IGNORE_GCP,
+                    WalletRestrictions.QueryData.IGNORE_EXA,
+                    WalletRestrictions.QueryData.IGNORE_CHROM,
+                    WalletRestrictions.QueryData.IGNORE_JEW,
+                    WalletRestrictions.QueryData.IGNORE_CHANCE,
+                    WalletRestrictions.QueryData.IGNORE_CHISEL,
+                    WalletRestrictions.QueryData.IGNORE_SCOUR,
+                    WalletRestrictions.QueryData.IGNORE_BLESSED,
+                    WalletRestrictions.QueryData.IGNORE_REGRET,
+                    WalletRestrictions.QueryData.IGNORE_REGAL,
+                    WalletRestrictions.QueryData.IGNORE_DIVINE,
+                    WalletRestrictions.QueryData.IGNORE_VAAL
+                ])).resolves.toMatchObject({
+                    ignoreAlt: 0,
+                    ignoreFuse: 0,
+                    ignoreAlch: 0,
+                    ignoreChaos: 0,
+                    ignoreGcp: 0,
+                    ignoreExa: 2,
+                    ignoreChrom: 0,
+                    ignoreJew: 0,
+                    ignoreChance: 0,
+                    ignoreChisel: 0,
+                    ignoreScour: 0,
+                    ignoreBlessed: 1,
+                    ignoreRegret: 0,
+                    ignoreRegal: 0,
+                    ignoreDivine: 0,
+                    ignoreVaal: 0
+                });
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
