@@ -1,0 +1,5 @@
+{
+    "method": "PUT",
+    "path": "/users/walletRestrictions",
+    "authorizationLevel": "VERIFIED"
+}

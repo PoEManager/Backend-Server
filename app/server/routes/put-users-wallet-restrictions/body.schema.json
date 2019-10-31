@@ -1,0 +1,54 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "properties": {
+        "ignoreAlt": {
+            "type": "integer"
+        },
+        "ignoreFuse": {
+            "type": "integer"
+        },
+        "ignoreAlch": {
+            "type": "integer"
+        },
+        "ignoreChaos": {
+            "type": "integer"
+        },
+        "ignoreGcp": {
+            "type": "integer"
+        },
+        "ignoreExa": {
+            "type": "integer"
+        },
+        "ignoreChrom": {
+            "type": "integer"
+        },
+        "ignoreJew": {
+            "type": "integer"
+        },
+        "ignoreChance": {
+            "type": "integer"
+        },
+        "ignoreChisel": {
+            "type": "integer"
+        },
+        "ignoreScour": {
+            "type": "integer"
+        },
+        "ignoreBlessed": {
+            "type": "integer"
+        },
+        "ignoreRegret": {
+            "type": "integer"
+        },
+        "ignoreRegal": {
+            "type": "integer"
+        },
+        "ignoreDivine": {
+            "type": "integer"
+        },
+        "ignoreVaal": {
+            "type": "integer"
+        }
+    }
+}
