@@ -23,6 +23,7 @@ namespace RouteLoader {
     const QUERY_SCHEMA_FILE = 'query.schema.json';
     const HEADER_SCHEMA_FILE = 'header.schema.json';
     const BODY_SCHEMA_FILE = 'body.schema.json';
+    const JS_MAP_EXT = '.js.map'; // *.js.map files will be ignored
 
     const SCHEMA_ROOT = path.join(RootDirectory.getSync(), 'res', 'schema');
     const ROUTE_DEF_SCHEMA = path.join(SCHEMA_ROOT, 'route-definition.schema.json');
@@ -210,6 +211,21 @@ namespace RouteLoader {
     }
 
     /**
+     * Returns wether the passed file path points to one of the files that can be part of a route definition.
+     */
+    function isAcceptedFile(routeFile: string): boolean {
+        if (path.basename(routeFile) !== ROUTE_DEF_FILE && path.basename(routeFile) !== HANDLER_FILE &&
+            path.basename(routeFile) !== PARAMETER_SCHEMA_FILE && path.basename(routeFile) !== QUERY_SCHEMA_FILE &&
+            path.basename(routeFile) !== HEADER_SCHEMA_FILE && path.basename(routeFile) !== BODY_SCHEMA_FILE &&
+            !routeFile.endsWith(JS_MAP_EXT)) {
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Loads a single route from a single directory.
      *
      * @param routeDir The directory of the route.
@@ -225,10 +241,7 @@ namespace RouteLoader {
         const bodySchema = await importSchema(routeFiles, BODY_SCHEMA_FILE);
 
         for (const routeFile of routeFiles) {
-            if (path.basename(routeFile) !== ROUTE_DEF_FILE && path.basename(routeFile) !== HANDLER_FILE &&
-               path.basename(routeFile) !== PARAMETER_SCHEMA_FILE && path.basename(routeFile) !== QUERY_SCHEMA_FILE &&
-               path.basename(routeFile) !== HEADER_SCHEMA_FILE && path.basename(routeFile) !== BODY_SCHEMA_FILE) {
-
+            if (!isAcceptedFile(routeFile)) {
                 logger.warn(`Found unexpected file in route directory: ${path.relative(routeDir, routeFile)}. ` +
                 `The file will be ignored.`);
             }
@@ -255,7 +268,7 @@ namespace RouteLoader {
         const routes = await listRouteDirs();
 
         for (const routeDir of routes) {
-            logger.info(`Loading route from ${path.join(ROUTE_DIR, routeDir)}.`);
+            logger.info(`Loading route from: ${path.relative(ROUTE_DIR, routeDir)}.`);
             ret.push(await loadRoute(routeDir));
             logger.info(`Loading route done.`);
         }
