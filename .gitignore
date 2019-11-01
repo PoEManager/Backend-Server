@@ -14,3 +14,6 @@
 !/user-data/avatars/default-64.jpg
 !/user-data/avatars/default-128.jpg
 !/user-data/avatars/default-256.jpg
+
+# Ignore all certificates
+/res/certs

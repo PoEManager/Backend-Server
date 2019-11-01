@@ -111,11 +111,52 @@
                     "type": "object",
                     "additionalProperties": true,
                     "required": [
-                        "passwordSaltRounds"
+                        "passwordSaltRounds",
+                        "sslSettings"
                     ],
                     "properties": {
                         "passwordSaltRounds": {
                             "type": "integer"
+                        },
+                        "sslSettings": {
+                            "oneOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "useSSL": {
+                                            "type": "boolean",
+                                            "enum": [
+                                                false
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "useSSL"
+                                    ]
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "useSSL": {
+                                            "type": "boolean",
+                                            "enum": [
+                                                true
+                                            ]
+                                        },
+                                        "certFile": {
+                                            "type": "string"
+                                        },
+                                        "keyFile": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "useSSL",
+                                        "certFile",
+                                        "keyFile"
+                                    ]
+                                }
+                            ]
                         }
                     }
                 }
