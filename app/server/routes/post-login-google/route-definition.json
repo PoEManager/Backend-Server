@@ -1,5 +1,5 @@
 {
     "method": "POST",
-    "path": "/login",
+    "path": "/login/google",
     "authorizationLevel": "NONE"
 }

@@ -11,8 +11,8 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
     const avatar = req.files.avatar as fileUpload.UploadedFile;
     const data = avatar.data;
 
-    await AvatarManager.importAvatar(req.locals.user, data);
-    await req.locals.user.setAvatarState(User.AvatarState.CUSTOM);
+    await AvatarManager.importAvatar(req.user, data);
+    await req.user.setAvatarState(User.AvatarState.CUSTOM);
     res.send();
 }
 

@@ -3,11 +3,16 @@ import fileUpload from 'express-fileupload';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import passport from 'passport';
 import path from 'path';
 import config from '../core/config';
 import DatabaseConnection from '../core/database-connection';
 import logger from '../core/logger';
 import RootDirectory from '../core/root-directory';
+import BasicAuthConfig from './authentication/basic';
+import BearerAuthConfig from './authentication/bearer';
+import GoogleAuthConfig from './authentication/google';
+import UserSerializerSetup from './authentication/user-serializer';
 import errors from './errors';
 import requestLogger from './middleware/logger';
 import requestId from './middleware/request-id';
@@ -18,6 +23,15 @@ namespace Server {
     let app: express.Express | null = null;
     let server: http.Server;
 
+    function initAuthMethods() {
+        logger.info('Setting authentication methods...');
+        GoogleAuthConfig.run();
+        BasicAuthConfig.run();
+        BearerAuthConfig.run();
+        UserSerializerSetup.run();
+        logger.info('Done setting up authentication methods.');
+    }
+
     function addMiddleWare() {
         logger.info('Setting up middleware...');
         app!.use(requestId());
@@ -26,6 +40,7 @@ namespace Server {
         app!.use(express.json());
         app!.use(express.urlencoded({extended: false}));
         app!.use(fileUpload({limits: { fileSize: config.basic.avatarUploadMaxInKb * 1024 }}));
+        app!.use(passport.initialize());
         logger.info('Done setting up middleware.');
     }
 
@@ -85,6 +100,7 @@ namespace Server {
 
         app = express();
 
+        initAuthMethods();
         addMiddleWare();
         logMeta();
         setupRouterAndRoutes()

@@ -1,5 +1,6 @@
 import express from 'express';
 import config from '../../../core/config';
+import ServerUtils from '../../server-utils';
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
     const params: string[] = [];
@@ -10,7 +11,7 @@ async function handler(req: express.Request, res: express.Response): Promise<voi
         }
     }
 
-    res.redirect(`/${config.basic.basePath}/users/avatars/${req.locals.user.getId()}?${params.join('&')}`);
+    res.redirect(ServerUtils.makeRoutePath(`/users/avatars/${req.user.getId()}?${params.join('&')}`));
 }
 
 export = handler;

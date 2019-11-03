@@ -15,7 +15,7 @@ import UserChanges from './user-changes';
 namespace UserManager {
 
     /**
-     * Create a new user.
+     * Create a new user with a default login.
      *
      * @param createData The data that is used to create the new user.
      * @returns A reference to the new user.
@@ -25,7 +25,7 @@ namespace UserManager {
      * @throws **InvalidEmailError** The passed email is invalid.
      * @throws **InvalidNicknameError** The passed nickname is invalid.
      */
-    export async function create(createData: UserManager.IUserCreateData): Promise<User> {
+    export async function createWithDefaultLogin(createData: UserManager.IDefaultLoginUserCreateData): Promise<User> {
         const password = await Password.encryptPassword(createData.loginData.unencryptedPassword);
 
         let result: any;
@@ -81,6 +81,38 @@ namespace UserManager {
     }
 
     /**
+     * Create a new user wit a Google login.
+     *
+     * @param googleID The Google user ID.
+     * @returns A reference to the new user.
+     *
+     * @throws **LoginAlreadyPresentError** An account with the same Google user ID already exists.
+     */
+    // todo LoginAlreadyPresentError wont be thrown, fix this
+    export async function createWithGoogleUID(googleID: string): Promise<User> {
+        let result: any;
+
+        await DatabaseConnection.transaction(async conn => {
+            result = await conn.query('INSERT INTO `WalletRestrictions` () VALUES ()');
+
+            const walletId = result.insertId;
+
+            result = await conn.query(
+                'INSERT INTO `Users` (`wallet_restriction_id`, `google_uid`, `nickname`, `verified`, ' +
+                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, ?, NULL, NULL)', {
+                    parameters: [
+                        walletId,
+                        googleID,
+                        'todo-todo', // todo query nickname from google
+                        true
+                    ]
+                });
+        });
+
+        return new User(result.insertId);
+    }
+
+    /**
      * Get the reference to a user.
      *
      * @param id The ID of the user to obtain.
@@ -100,6 +132,28 @@ namespace UserManager {
             return new User(id);
         } else {
             throw new errors.UserNotFoundError(id);
+        }
+    }
+
+    /**
+     * Queries a user account with a specific Google ID or creates a new account if one does not exist yet.
+     *
+     * @param googleID The Google user ID.
+     * @returns The queried or created user.
+     */
+    export async function getFromGoogleID(googleID: string): Promise<User> {
+        const sql = 'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`google_uid` = ?';
+
+        const result = await DatabaseConnection.query(sql, {
+            parameters: [
+                googleID
+            ]
+        });
+
+        if (result.length === 1) {
+            return new User(result[0].user_id);
+        } else {
+            return await createWithGoogleUID(googleID);
         }
     }
 
@@ -200,24 +254,9 @@ namespace UserManager {
     }
 
     /**
-     * The data that is used to create new user account with email+password authentication.
-     */
-    export interface IDefaultLoginCreateData {
-        /**
-         * The E-Mail address of the new user.
-         */
-        email: string;
-
-        /**
-         * The (unencrypted) password of the new user.
-         */
-        unencryptedPassword: string;
-    }
-
-    /**
      * The data that is used to create a new user.
      */
-    export interface IUserCreateData {
+    export interface IDefaultLoginUserCreateData {
         /**
          * The nickname of the new user.
          */
@@ -229,7 +268,17 @@ namespace UserManager {
          * In the future, when new authentication methods are implemented, this field will also hold the create data
          * of the other authentication methods.
          */
-        loginData: IDefaultLoginCreateData;
+        loginData: {
+            /**
+             * The E-Mail address of the new user.
+             */
+            email: string;
+
+            /**
+             * The (unencrypted) password of the new user.
+             */
+            unencryptedPassword: string;
+        };
     }
 
     /**

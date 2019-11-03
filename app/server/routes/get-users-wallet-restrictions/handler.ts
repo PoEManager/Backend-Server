@@ -3,7 +3,7 @@ import WalletRestrictions from '../../../model/wallet-restrictions';
 
 async function handler(req: express.Request, res: express.Response) {
     req.locals.logger.info('Querying user wallet restrictions.');
-    const walletRestrictions = await req.locals.user.getWalletRestrictions();
+    const walletRestrictions = await req.user.getWalletRestrictions();
     const restrictions = await walletRestrictions.query([ // query them all
         WalletRestrictions.QueryData.IGNORE_ALT,
         WalletRestrictions.QueryData.IGNORE_FUSE,

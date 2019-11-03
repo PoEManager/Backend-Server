@@ -1,0 +1,8 @@
+{
+    "passwordSaltRounds": 15,
+    "sslSettings": {
+        "useSSL": true,
+        "certFile": "res/certs/cert.pem",
+        "keyFile": "res/certs/key.pem"
+    }
+}

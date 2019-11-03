@@ -17,3 +17,8 @@
 
 # Ignore all certificates
 /res/certs
+
+# Ignore config files, apart from default and test files
+/config/*
+!/config/default
+!/config/test

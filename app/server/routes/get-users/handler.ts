@@ -1,10 +1,11 @@
 import express from 'express';
 import config from '../../../core/config';
+import ServerUtils from '../../server-utils';
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
     const params = Object.keys(req.query);
 
-    res.redirect(`/${config.basic.basePath}/users/${req.locals.user.getId()}?${params.join('&')}`);
+    res.redirect(ServerUtils.makeRoutePath(`/users/${req.user.getId()}?${params.join('&')}`));
 }
 
 export = handler;

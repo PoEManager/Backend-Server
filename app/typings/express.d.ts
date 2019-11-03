@@ -3,9 +3,9 @@ import winston from 'winston'
 
 declare module 'express-serve-static-core' {
      interface Request {
+        user: User;
         locals: {
             requestId: string;
-            user: User;
             logger: winston.Logger;
             startTime: Date;
         }

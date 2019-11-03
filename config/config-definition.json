@@ -112,7 +112,8 @@
                     "additionalProperties": true,
                     "required": [
                         "passwordSaltRounds",
-                        "sslSettings"
+                        "sslSettings",
+                        "auth"
                     ],
                     "properties": {
                         "passwordSaltRounds": {
@@ -157,6 +158,29 @@
                                     ]
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "object",
+                            "required": [
+                                "google"
+                            ],
+                            "properties": {
+                                "google": {
+                                    "type": "object",
+                                    "required": [
+                                        "clientId",
+                                        "clientSecret"
+                                    ],
+                                    "properties": {
+                                        "clientId": {
+                                            "type": "string"
+                                        },
+                                        "clientSecret": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

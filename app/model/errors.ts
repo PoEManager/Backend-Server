@@ -42,6 +42,24 @@ namespace errors {
     }
 
     /**
+     * Thrown if a default login does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the login that was not found>",
+     * }
+     * ```
+     */
+    export class DefaultLoginNotFoundError extends Error {
+        constructor(id: DefaultLogin.ID) {
+            super('DEFAULT_LOGIN_NOT_FOUND_ERROR', `Default Login with ID ${id} does not exist`, 404, {
+                id
+            });
+        }
+    }
+
+    /**
      * Thrown if a login method does not exist.
      *
      * The data layout is the following:
@@ -52,9 +70,10 @@ namespace errors {
      * }
      * ```
      */
-    export class LoginNotFoundError extends Error {
-        public constructor(id: DefaultLogin.ID, type: LoginNotFoundError.LoginType) {
-            super('LOGIN_NOT_FOUND_ERROR', `Login of type ${type} with ID '${id}' does not exist.`, 404, {
+    export class LoginNotPresentError extends Error {
+        public constructor(id: DefaultLogin.ID, type: LoginNotPresentError.LoginType) {
+            super('LOGIN_NOT_FOUND_ERROR',
+                `Login of type ${type} for the user with the ID '${id}' does not exist.`, 404, {
                 id,
                 type
             });
@@ -64,12 +83,13 @@ namespace errors {
     /**
      * The types of logins that are supported by LoginNotFoundError.
      */
-    export namespace LoginNotFoundError {
+    export namespace LoginNotPresentError {
         /**
          * The identifiers of the different login types.
          */
         export enum LoginType {
-            DEFAULT = 'DEFAULT'
+            DEFAULT = 'DEFAULT',
+            GOOGLE = 'GOOGLE'
         }
     }
 
@@ -79,14 +99,31 @@ namespace errors {
      * The data layout is the following:
      * ```typescript
      * {
-     *     id: "<the ID of the login that was not found>",
+     *     id: "<ID of the user that does not have the Default login>",
      *     type: "DEFAULT"
      * }
      * ```
      */
-    export class DefaultLoginNotFoundError extends LoginNotFoundError {
-        constructor(id: DefaultLogin.ID) {
-            super(id, LoginNotFoundError.LoginType.DEFAULT);
+    export class DefaultLoginNotPresentError extends LoginNotPresentError {
+        constructor(id: User.ID) {
+            super(id, LoginNotPresentError.LoginType.DEFAULT);
+        }
+    }
+
+    /**
+     * Thrown if a Google login does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<ID of the user that does not have the Google login>",
+     *     type: "GOOGLE"
+     * }
+     * ```
+     */
+    export class GoogleLoginNotPresentError extends LoginNotPresentError {
+        constructor(id: User.ID) {
+            super(id, LoginNotPresentError.LoginType.GOOGLE);
         }
     }
 

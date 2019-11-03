@@ -1,8 +1,5 @@
 import winston from 'winston';
-import SessionTokenManager from '../../core/session-token-manager';
-import errors from '../../model/errors';
 import User from '../../model/user';
-import ServerUtils from '../server-utils';
 import MiddlewareFunction from './middleware-function';
 
 /**
@@ -17,11 +14,11 @@ function makeRequestId(): MiddlewareFunction {
     return async (req, res, next) => {
         const milliseconds = new Date().getTime();
 
+        req.user = undefined as unknown as User;
         req.locals = {
             logger: undefined as unknown as winston.Logger,
             requestId: '',
-            startTime: undefined as unknown as Date,
-            user: undefined as unknown as User
+            startTime: undefined as unknown as Date
         };
 
         req.locals.requestId = `${milliseconds}-${subCounter++}`;

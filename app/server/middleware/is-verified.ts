@@ -10,14 +10,14 @@ import MiddlewareFunction from './middleware-function';
 function makeAuth(): MiddlewareFunction {
     return async (req, res, next) => {
         try {
-            req.locals.logger.info(`Making sure user with ID ${req.locals.user.getId()} is verified...`);
+            req.locals.logger.info(`Making sure user with ID ${req.user.getId()} is verified...`);
 
-            if (await req.locals.user.isVerified()) {
+            if (await req.user.isVerified()) {
                 req.locals.logger.info('User is verified.');
                 next();
             } else {
                 req.locals.logger.info('User is not verified.');
-                throw new errors.NotVerifiedError(req.locals.user.getId());
+                throw new errors.NotVerifiedError(req.user.getId());
             }
         } catch (error) {
             req.locals.logger.info('User is not verified.');

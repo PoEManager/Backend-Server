@@ -15,7 +15,7 @@ function setupRequestLogger(): MiddlewareFunction {
 
 /**
  * Generates a middleware that logs incoming requests.
- * Stores the authenticated user in `req.locals.user`.
+ * Stores the authenticated user in `req.user`.
  *
  * @returns The middleware function.
  */

@@ -47,7 +47,14 @@ namespace IRouteConfiguration {
             middleware.push(makeBodyValidator(route.bodySchema));
         }
 
-        const handler = genRouteWrapper(route.handler);
+        let handler: RouteLoader.RouteHandler;
+
+        if (typeof route.handler === 'function') {
+            handler = genRouteWrapper(route.handler);
+        } else {
+            handler = genRouteWrapper(route.handler.handler);
+            route.handler.middleware.forEach(m => middleware.push(m));
+        }
 
         switch (route.method) {
             case 'GET':

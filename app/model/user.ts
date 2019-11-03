@@ -83,7 +83,7 @@ class User {
     }
 
     /**
-     * @returns ```true```, if the user has a default login, ```false``` if not.
+     * @returns `true`, if the user has a default login, `false` if not.
      *
      * @throws **UserNotFoundError** If the user does not exist.
      */
@@ -93,7 +93,7 @@ class User {
             await this.getDefaultLogin();
             return true;
         } catch (error) {
-            if (error instanceof errors.LoginNotFoundError) {
+            if (error instanceof errors.LoginNotPresentError) {
                 return false;
             }
 
@@ -115,7 +115,70 @@ class User {
 
         if (result.length === 1) {
             return new DefaultLogin(result[0].defaultlogin_id);
+        } else if (!result[0].google_uid) {
+            throw new errors.DefaultLoginNotFoundError(this.id);
         } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * @returns `true`, if the user has a Google user ID, `false` if not.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async hasGoogleUID(): Promise<boolean> {
+        try {
+            // check if this function throws or not
+            await this.getGoogleUID();
+            return true;
+        } catch (error) {
+            if (error instanceof errors.LoginNotPresentError) {
+                return false;
+            }
+
+            throw error;
+        }
+    }
+
+    /**
+     * @returns The Google user ID of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async getGoogleUID(): Promise<string> {
+        const result = await DatabaseConnection.query('SELECT `google_uid` FROM `Users` WHERE `Users`.`user_id` = ?', {
+            parameters: [
+                this.id
+            ]
+        });
+
+        if (result.length !== 1) {
+            throw this.makeUserNotFoundError();
+        } else if (!result[0].google_uid) {
+            throw new errors.GoogleLoginNotPresentError(this.id);
+        } else {
+            return result[0].google_uid;
+        }
+    }
+
+    /**
+     * Sets a new Google user ID.
+     *
+     * @param uid The new ID.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     */
+    public async setGoogleUID(uid: string): Promise<void> {
+        const result = await DatabaseConnection.query(
+            'UPDATE `Users` SET `Users`.`google_uid` = ? WHERE `Users`.`user_id` = ?', {
+            parameters: [
+                uid,
+                this.id
+            ]
+        });
+
+        if (result.affectedRows !== 1) {
             throw this.makeUserNotFoundError();
         }
     }

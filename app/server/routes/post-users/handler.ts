@@ -3,7 +3,7 @@ import UserManager from '../../../model/user-manager';
 
 async function handler(req: express.Request, res: express.Response): Promise<void> {
     req.locals.logger.info(`Creating new user with nickname ${req.body.nickname}.`);
-    const user = await UserManager.create({
+    const user = await UserManager.createWithDefaultLogin({
         nickname: req.body.nickname,
         loginData: {
             email: req.body.loginData.email,

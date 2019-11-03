@@ -51,6 +51,8 @@ namespace RouteLoader {
     }
 
     export type RouteHandler = (req: express.Request, res: express.Response) => Promise<void> | void;
+    export type MiddlewareHandler =
+        (req: express.Request, res: express.Response, done: express.NextFunction) => Promise<void> | void;
 
     interface IRouteDefinition {
         method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -59,7 +61,7 @@ namespace RouteLoader {
     }
 
     export interface IRoute extends IRouteDefinition {
-        handler: RouteHandler;
+        handler: RouteHandler | {handler: RouteHandler; middleware: MiddlewareHandler[]};
         parameterSchema?: object;
         querySchema?: object;
         headerSchema?: object;

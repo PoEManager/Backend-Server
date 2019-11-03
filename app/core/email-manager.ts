@@ -8,6 +8,7 @@ import JSONLoader from '../core/load-json';
 import errors from '../model/errors';
 import User from '../model/user';
 import UserManager from '../model/user-manager';
+import ServerUtils from '../server/server-utils';
 import config from './config';
 import coreErrors from './errors';
 import JSONValidator from './json-validator';
@@ -45,8 +46,8 @@ namespace EmailManager {
      * @returns The link.
      */
     function makeVerificationLink(changeUid: string): string {
-        return `${config.basic.baseURL}/${config.basic.basePath}/` +
-            `${VERIFICATION_ROUTE_PATH}/${base64url.escape(changeUid)}`;
+        return `${config.basic.baseURL}/${
+            ServerUtils.makeRoutePath(`${VERIFICATION_ROUTE_PATH}/${base64url.escape(changeUid)}`)}`;
     }
 
     /**
