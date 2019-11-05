@@ -23,7 +23,7 @@ describe('model', () => {
 
         describe('delete()', () => {
             it('should correctly delete an existing user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -39,7 +39,7 @@ describe('model', () => {
             });
 
             it('should return false when deleting a user that does not exist', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -54,7 +54,7 @@ describe('model', () => {
             });
 
             it('should also delete the users credential data', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -73,7 +73,7 @@ describe('model', () => {
 
         describe('getNickname()', () => {
             it('should return the correct nickname of a user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -91,7 +91,7 @@ describe('model', () => {
 
         describe('setNickname()', () => {
             it('should correctly update the nickname of a user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -105,7 +105,7 @@ describe('model', () => {
             });
 
             it('should throw InvalidNicknameError if the new nickname is invalid', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -124,9 +124,8 @@ describe('model', () => {
         });
 
         describe('hasDefaultLogin()', () => {
-            // todo needs to be expanded as soon as other logins are possible
             it('should return correctly if the user has a default login', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -137,15 +136,20 @@ describe('model', () => {
                 await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
             });
 
+            it('should return correctly if the user does not have a default login', async () => {
+                const user = await UserManager.createWithGoogleUID('google-uid');
+
+                await expect(user.hasDefaultLogin()).resolves.toBeFalsy();
+            });
+
             it('should throw UserNotFound error if the user does note exist', async () => {
                 await expect(new User(-1).hasDefaultLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
         describe('getDefaultLogin()', () => {
-            // todo needs to be expanded as soon as other logins are possible
             it('should return correctly if the user has a default login', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -156,17 +160,24 @@ describe('model', () => {
                 const defaultlogin = await user.getDefaultLogin();
                 await expect(defaultlogin.getEmail()).resolves.toBe('test@test.com');
                 // bcrypt generates 60 character hashes
-                await expect((await defaultlogin.getPassword()).getEncrypted().length).toBe(60);
+                expect((await defaultlogin.getPassword()).getEncrypted().length).toBe(60);
+            });
+
+            it('should throw if the user does not have a default login', async () => {
+                const user = await UserManager.createWithGoogleUID('google-uid');
+
+                await expect(user.getDefaultLogin())
+                    .rejects.toEqual(new errors.DefaultLoginNotPresentError(user.getId()));
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
-                await expect(new User(-1).hasDefaultLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
+                await expect(new User(-1).getDefaultLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
         describe('query()', () => {
             it('should correctly query the user\'s attributes', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -185,7 +196,8 @@ describe('model', () => {
                     User.QueryData.NICKNAME,
                     User.QueryData.CHANGE_UID,
                     User.QueryData.SESSION_ID,
-                    User.QueryData.CREATED_TIME
+                    User.QueryData.CREATED_TIME,
+                    User.QueryData.AVATAR_STATE
                 ]);
 
                 const timeAfter = new Date();
@@ -197,10 +209,11 @@ describe('model', () => {
                 expect(result.sessionId!).toBeNull();
                 expect(result.createdTime!.getTime()).toBeGreaterThanOrEqual(timeBefore.getTime());
                 expect(result.createdTime!.getTime()).toBeLessThanOrEqual(timeAfter.getTime());
+                expect(result.avatarState!).toBe(User.AvatarState.DEFAULT);
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -212,7 +225,7 @@ describe('model', () => {
             });
 
             it('should not set attributes that were not queried (no queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -232,7 +245,7 @@ describe('model', () => {
             // todo change state when no change is in progress
 
             it('should correctly query the user\'s change state if the state is VERIFY_ACCOUNT', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -244,7 +257,7 @@ describe('model', () => {
             });
 
             it('should correctly query the user\'s change state if the state is NEW_EMAIL', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -261,7 +274,7 @@ describe('model', () => {
             });
 
             it('should correctly query the user\'s change state if the state is NEW_PASSWORD', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -278,7 +291,7 @@ describe('model', () => {
             });
 
             it('should correctly reset the change if it ran out and the change is a new email', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -301,7 +314,7 @@ describe('model', () => {
             });
 
             it('should correctly reset the change if it ran out and the change is a new password', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -330,7 +343,7 @@ describe('model', () => {
 
         describe('isVerified()', () => {
             it('should return false if the user is not verified', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -348,13 +361,33 @@ describe('model', () => {
             });
         });
 
+        describe('getWalletRestrictions()', () => {
+            it('should return a proper object, if the user exists', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.getWalletRestrictions()).resolves.toBeDefined();
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getWalletRestrictions()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
         describe('getChangeUID()', () => {
             it('should return null if no change is going on', async () => {
-                // todo
+                const user = await UserManager.createWithGoogleUID('google-uid');
+
+                await expect(user.getChangeState()).resolves.toBeNull();
             });
 
             it('should return a valid change uid if a change is in progress', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -374,7 +407,7 @@ describe('model', () => {
 
         describe('setSessionId()', () => {
             it('should return a valid session ID', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -394,7 +427,7 @@ describe('model', () => {
 
         describe('invalidateSessionId()', () => {
             it('should return a valid session ID', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -415,7 +448,7 @@ describe('model', () => {
 
         describe('getSessionID()', () => {
             it('should return a valid session ID', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -438,7 +471,7 @@ describe('model', () => {
             });
 
             it('should return a valid change date if a change is in progress', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -446,13 +479,16 @@ describe('model', () => {
                     }
                 });
 
-                const changeUid = await user.getChangeUID();
-                expect(changeUid!.length).toBe(24);
+                const afterTime = new Date();
+                afterTime.setFullYear(afterTime.getFullYear() + 10); // 10 years in the future
+
+                const changeExpireDate = await user.getChangeExpireDate();
+                expect(changeExpireDate.getTime()).toBeGreaterThan(afterTime.getTime());
 
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
-                await expect(new User(-1).getChangeUID()).rejects.toEqual(new errors.UserNotFoundError(-1));
+                await expect(new User(-1).getChangeExpireDate()).rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
@@ -460,7 +496,7 @@ describe('model', () => {
             it('should return the correct time', async () => {
                 const timeBefore = new Date();
                 timeBefore.setMilliseconds(0); // MariaDB uses second precision and not micros
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -481,7 +517,7 @@ describe('model', () => {
 
         describe('getAvatarState()', () => {
             it('should return the correct state', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -500,7 +536,7 @@ describe('model', () => {
 
         describe('setAvatarState()', () => {
             it('should return the correct state', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',

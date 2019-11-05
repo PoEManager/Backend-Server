@@ -23,7 +23,7 @@ describe('model', () => {
 
         describe('getEmail()', () => {
             it('should return the correct email', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -43,7 +43,7 @@ describe('model', () => {
 
         describe('getPassword()', () => {
             it('should return the correct password', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -67,7 +67,7 @@ describe('model', () => {
         // todo update as soon as emails can be updated
         describe('getNewEmail()', () => {
             it('should return the correct email', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -89,7 +89,7 @@ describe('model', () => {
         // todo update as soon as emails can be updated
         describe('getNewPassword()', () => {
             it('should return the correct password', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -110,7 +110,7 @@ describe('model', () => {
 
         describe('query()', () => {
             it('should correctly query the login\'s attributes', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -137,7 +137,7 @@ describe('model', () => {
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -151,7 +151,7 @@ describe('model', () => {
             });
 
             it('should not set attributes that were not queried (no queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -172,7 +172,7 @@ describe('model', () => {
 
         describe('updateEmail()', () => {
             it('should correctly update the E-Mail of a verified user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -190,7 +190,7 @@ describe('model', () => {
             });
 
             it('should throw if another change is already in progress', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -215,7 +215,7 @@ describe('model', () => {
 
         describe('updatePassword()', () => {
             it('should correctly update the E-Mail of a verified user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -236,7 +236,7 @@ describe('model', () => {
             });
 
             it('should throw if another change is already in progress', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',

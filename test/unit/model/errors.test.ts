@@ -45,26 +45,26 @@ describe('model', () => {
 
         describe('LoginNotFoundError', () => {
             it('should correctly set the properties', () => {
-                const error = new errors.LoginNotFoundError(5, errors.LoginNotFoundError.LoginType.DEFAULT);
+                const error = new errors.LoginNotPresentError(5, errors.LoginNotPresentError.LoginType.DEFAULT);
 
                 expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
                 expect(error.message).toContain('5');
-                expect(error.message).toContain(errors.LoginNotFoundError.LoginType.DEFAULT);
+                expect(error.message).toContain(errors.LoginNotPresentError.LoginType.DEFAULT);
                 expect(error.data.id).toBe(5);
-                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
+                expect(error.data.type).toBe(errors.LoginNotPresentError.LoginType.DEFAULT);
                 expect(error.httpCode).toBe(404);
             });
 
             it('should correctly generate a REST error', () => {
-                const error = new errors.LoginNotFoundError(5, errors.LoginNotFoundError.LoginType.DEFAULT)
+                const error = new errors.LoginNotPresentError(5, errors.LoginNotPresentError.LoginType.DEFAULT)
                     .asRESTError();
 
                 expect(error.isError).toBeTruthy();
                 expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
                 expect(error.message).toContain('5');
-                expect(error.message).toContain(errors.LoginNotFoundError.LoginType.DEFAULT);
+                expect(error.message).toContain(errors.LoginNotPresentError.LoginType.DEFAULT);
                 expect(error.data.id).toBe(5);
-                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
+                expect(error.data.type).toBe(errors.LoginNotPresentError.LoginType.DEFAULT);
             });
         });
 
@@ -72,10 +72,9 @@ describe('model', () => {
             it('should correctly set the properties', () => {
                 const error = new errors.DefaultLoginNotFoundError(5);
 
-                expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
+                expect(error.name).toBe('DEFAULT_LOGIN_NOT_FOUND_ERROR');
                 expect(error.message).toContain(5);
                 expect(error.data.id).toBe(5);
-                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
                 expect(error.httpCode).toBe(404);
             });
 
@@ -84,10 +83,9 @@ describe('model', () => {
                     .asRESTError();
 
                 expect(error.isError).toBeTruthy();
-                expect(error.name).toBe('LOGIN_NOT_FOUND_ERROR');
+                expect(error.name).toBe('DEFAULT_LOGIN_NOT_FOUND_ERROR');
                 expect(error.message).toContain(5);
                 expect(error.data.id).toBe(5);
-                expect(error.data.type).toBe(errors.LoginNotFoundError.LoginType.DEFAULT);
             });
         });
 

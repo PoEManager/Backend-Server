@@ -105,6 +105,7 @@ class User {
      * @returns A reference to the default login of the user.
      *
      * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **DefaultLoginNotFoundError** If the user does not have a default login.
      */
     public async getDefaultLogin(): Promise<DefaultLogin> {
         const result = await DatabaseConnection.query('SELECT `defaultlogin_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
@@ -113,12 +114,12 @@ class User {
                 ]
             });
 
-        if (result.length === 1) {
+        if (result.length === 1 && result[0].defaultlogin_id !== null) {
             return new DefaultLogin(result[0].defaultlogin_id);
-        } else if (!result[0].google_uid) {
-            throw new errors.DefaultLoginNotFoundError(this.id);
-        } else {
+        } else if (result[0] === undefined) {
             throw this.makeUserNotFoundError();
+        } else {
+            throw new errors.DefaultLoginNotPresentError(this.id);
         }
     }
 
@@ -230,14 +231,14 @@ class User {
      */
     public async getChangeExpireDate(): Promise<Date> {
         const result = await DatabaseConnection.query(
-            'SELECT UNIX_TIMESTAMP(`Users`.`change_expire_date`) FROM `Users` WHERE `Users`.`user_id` = ?', {
+            'SELECT `Users`.`change_expire_date` FROM `Users` WHERE `Users`.`user_id` = ?', {
                 parameters: [
                     this.id
                 ]
             });
 
         if (result.length === 1) {
-            return new Date(result[0].change_expire_date);
+            return result[0].change_expire_date;
         } else {
             throw this.makeUserNotFoundError();
         }
@@ -479,6 +480,7 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '\`Users\`.\`created_time\`';
         case User.QueryData.AVATAR_STATE:
             return '\`Users\`.\`avatar_state\`';
+        /* istanbul ignore next */
         default:
             return ''; // does not happen
     }
@@ -502,6 +504,7 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
     };
 }
 
+/* istanbul ignore next ; weird typescript behavior, the namespace will be turned into an (uncovered) branch*/
 namespace User {
     export const ChangeType = UserChanges.ChangeType;
     export type ChangeType = UserChanges.ChangeType;

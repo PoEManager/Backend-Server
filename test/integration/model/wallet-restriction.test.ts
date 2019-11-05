@@ -21,7 +21,7 @@ describe('model', () => {
 
         describe('getRestriction()', () => {
             it('should correctly query a restriction', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -43,7 +43,7 @@ describe('model', () => {
 
         describe('setRestriction()', () => {
             it('should correctly set a restriction', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -69,7 +69,7 @@ describe('model', () => {
 
         describe('query()', () => {
             it('should correctly query the wallet restriction\'s attributes', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -136,7 +136,7 @@ describe('model', () => {
             });
 
             it('should not set attributes that were not queried (no queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -150,7 +150,7 @@ describe('model', () => {
             });
 
             it('should not set attributes that were not queried (some queried attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -172,7 +172,7 @@ describe('model', () => {
 
         describe('update()', () => {
             it('should correctly update the wallet restriction\'s attributes', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -239,7 +239,7 @@ describe('model', () => {
             });
 
             it('should not update attributes that were not set (no set attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -288,7 +288,7 @@ describe('model', () => {
             });
 
             it('should not update attributes that were not set (some set attributes)', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -339,8 +339,17 @@ describe('model', () => {
                 });
             });
 
-            it('should throw UserNotFound error if the user does note exist', async () => {
-                await expect(new WalletRestrictions(-1).query([]))
+            it('should throw WalletRestrictionsNotFoundError error if the wallet restrictions' +
+                ' does note exist (no params)', async () => {
+
+                await expect(new WalletRestrictions(-1).update({}))
+                    .rejects.toEqual(new errors.WalletRestrictionsNotFoundError(-1));
+            });
+
+            it('should throw WalletRestrictionsNotFoundError error if the wallet restrictions' +
+                ' does note exist (with params)', async () => {
+
+                await expect(new WalletRestrictions(-1).update({ignoreAlt: 0}))
                     .rejects.toEqual(new errors.WalletRestrictionsNotFoundError(-1));
             });
         });

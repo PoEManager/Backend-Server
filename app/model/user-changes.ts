@@ -12,11 +12,12 @@ Places marked with <add here> need to be expanded when adding new change states
 namespace UserChanges {
     /**
      * @param id The user ID.
-     * @param conn A connection that can be used for the queries. If not passed, a new transaction will be created.
+     * // @param conn A connection that can be used for the queries. If not passed, a new transaction will be created.
      *
      * @returns The current change state of the user, or `null` if no change is currently going on.
      */
-    export async function getChangeState(id: User.ID, conn?: DatabaseConnection.Connection):
+    // version with connection as parameter is currently not in use
+    export async function getChangeState(id: User.ID /*, conn?: DatabaseConnection.Connection*/ ):
         Promise<ChangeType | null> {
 
         const handler = async (innerConn: DatabaseConnection.Connection) => {
@@ -33,11 +34,11 @@ namespace UserChanges {
             }
         };
 
-        if (conn) {
+        /* if (conn) {
             return await handler(conn);
-        } else {
-            return await DatabaseConnection.transaction(handler);
-        }
+        } else { */
+        return await DatabaseConnection.transaction(handler);
+        /* } */
     }
 
     /**
@@ -134,7 +135,9 @@ namespace UserChanges {
     async function _getChangeState(conn: DatabaseConnection.Connection, id: User.ID): Promise<ChangeType | null> {
         const result = await conn.query(
             'SELECT `Users`.`verified`, `DefaultLogins`.`new_email`, `DefaultLogins`.`new_password` ' +
-            'FROM `Users` NATURAL JOIN `DefaultLogins` WHERE `Users`.`user_id` = ?', {
+            'FROM `Users` LEFT JOIN `DefaultLogins` ON ' +
+                '(`DefaultLogins`.`defaultlogin_id` = `Users`.`defaultlogin_id`) ' +
+            'WHERE `Users`.`user_id` = ?', {
             parameters: [
                 id
             ]

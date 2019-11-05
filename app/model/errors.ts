@@ -65,13 +65,13 @@ namespace errors {
      * The data layout is the following:
      * ```typescript
      * {
-     *     id: "<the ID of the login that was not found>",
-     *     type: "DEFAULT"
+     *     id: "<the ID of the user that does not have the login>",
+     *     type: "<the type of the login that is not present>"
      * }
      * ```
      */
     export class LoginNotPresentError extends Error {
-        public constructor(id: DefaultLogin.ID, type: LoginNotPresentError.LoginType) {
+        public constructor(id: User.ID, type: LoginNotPresentError.LoginType) {
             super('LOGIN_NOT_FOUND_ERROR',
                 `Login of type ${type} for the user with the ID '${id}' does not exist.`, 404, {
                 id,
@@ -83,6 +83,7 @@ namespace errors {
     /**
      * The types of logins that are supported by LoginNotFoundError.
      */
+    /* istanbul ignore next ; weird typescript behavior, the namespace will be turned into an (uncovered) branch*/
     export namespace LoginNotPresentError {
         /**
          * The identifiers of the different login types.

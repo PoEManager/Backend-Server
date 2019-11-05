@@ -1,10 +1,6 @@
 import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
 import errors from './errors';
-import Password from './password';
-import User from './user';
-import UserChanges from './user-changes';
-import UserManager from './user-manager';
 
 /**
  * The representation of a single user login.
@@ -114,6 +110,7 @@ class WalletRestrictions {
         const columns = walletRestrictionDataToColumnList(restrictionData);
 
         if (columns.length === 0) { // no columns to update; no need to continue
+            await this.query([]); // throws if the wallet restrictions was not found
             return;
         }
 
@@ -216,6 +213,7 @@ function queryDataToColumn(queryData: WalletRestrictions.QueryData): string {
             return 'ignore_divine';
         case WalletRestrictions.QueryData.IGNORE_VAAL:
             return 'ignore_vaal';
+        /* istanbul ignore next */
         default:
             return ''; // does not happen
     }
@@ -231,67 +229,67 @@ function queryDataToColumn(queryData: WalletRestrictions.QueryData): string {
 function walletRestrictionDataToColumnList(walletRestrictionData: WalletRestrictions.IWalletRestrictionData): string[] {
     const ret: string[] = [];
 
-    if (walletRestrictionData.ignoreAlt) {
+    if (walletRestrictionData.ignoreAlt !== undefined) {
         ret.push('ignore_alt');
     }
 
-    if (walletRestrictionData.ignoreFuse) {
+    if (walletRestrictionData.ignoreFuse !== undefined) {
         ret.push('ignore_fuse');
     }
 
-    if (walletRestrictionData.ignoreAlch) {
+    if (walletRestrictionData.ignoreAlch !== undefined) {
         ret.push('ignore_alch');
     }
 
-    if (walletRestrictionData.ignoreChaos) {
+    if (walletRestrictionData.ignoreChaos !== undefined) {
         ret.push('ignore_chaos');
     }
 
-    if (walletRestrictionData.ignoreGcp) {
+    if (walletRestrictionData.ignoreGcp !== undefined) {
         ret.push('ignore_gcp');
     }
 
-    if (walletRestrictionData.ignoreExa) {
+    if (walletRestrictionData.ignoreExa !== undefined) {
         ret.push('ignore_exa');
     }
 
-    if (walletRestrictionData.ignoreChrom) {
+    if (walletRestrictionData.ignoreChrom !== undefined) {
         ret.push('ignore_chrom');
     }
 
-    if (walletRestrictionData.ignoreJew) {
+    if (walletRestrictionData.ignoreJew !== undefined) {
         ret.push('ignore_jew');
     }
 
-    if (walletRestrictionData.ignoreChance) {
+    if (walletRestrictionData.ignoreChance !== undefined) {
         ret.push('ignore_chance');
     }
 
-    if (walletRestrictionData.ignoreChisel) {
+    if (walletRestrictionData.ignoreChisel !== undefined) {
         ret.push('ignore_chisel');
     }
 
-    if (walletRestrictionData.ignoreScour) {
+    if (walletRestrictionData.ignoreScour !== undefined) {
         ret.push('ignore_scour');
     }
 
-    if (walletRestrictionData.ignoreBlessed) {
+    if (walletRestrictionData.ignoreBlessed !== undefined) {
         ret.push('ignore_blessed');
     }
 
-    if (walletRestrictionData.ignoreRegret) {
+    if (walletRestrictionData.ignoreRegret !== undefined) {
         ret.push('ignore_regret');
     }
 
-    if (walletRestrictionData.ignoreRegal) {
+    if (walletRestrictionData.ignoreRegal !== undefined) {
         ret.push('ignore_regal');
     }
 
-    if (walletRestrictionData.ignoreDivine) {
+    if (walletRestrictionData.ignoreDivine !== undefined) {
         ret.push('ignore_divine');
     }
 
-    if (walletRestrictionData.ignoreVaal) {
+    if (walletRestrictionData.ignoreVaal !== undefined) {
         ret.push('ignore_vaal');
     }
 
@@ -310,67 +308,67 @@ function walletRestrictionDataToValueList(walletRestrictionData: WalletRestricti
 
     const ret: number[] = [];
 
-    if (walletRestrictionData.ignoreAlt) {
+    if (walletRestrictionData.ignoreAlt !== undefined) {
         ret.push(walletRestrictionData.ignoreAlt);
     }
 
-    if (walletRestrictionData.ignoreFuse) {
+    if (walletRestrictionData.ignoreFuse !== undefined) {
         ret.push(walletRestrictionData.ignoreFuse);
     }
 
-    if (walletRestrictionData.ignoreAlch) {
+    if (walletRestrictionData.ignoreAlch !== undefined) {
         ret.push(walletRestrictionData.ignoreAlch);
     }
 
-    if (walletRestrictionData.ignoreChaos) {
+    if (walletRestrictionData.ignoreChaos !== undefined) {
         ret.push(walletRestrictionData.ignoreChaos);
     }
 
-    if (walletRestrictionData.ignoreGcp) {
+    if (walletRestrictionData.ignoreGcp !== undefined) {
         ret.push(walletRestrictionData.ignoreGcp);
     }
 
-    if (walletRestrictionData.ignoreExa) {
+    if (walletRestrictionData.ignoreExa !== undefined) {
         ret.push(walletRestrictionData.ignoreExa);
     }
 
-    if (walletRestrictionData.ignoreChrom) {
+    if (walletRestrictionData.ignoreChrom !== undefined) {
         ret.push(walletRestrictionData.ignoreChrom);
     }
 
-    if (walletRestrictionData.ignoreJew) {
+    if (walletRestrictionData.ignoreJew !== undefined) {
         ret.push(walletRestrictionData.ignoreJew);
     }
 
-    if (walletRestrictionData.ignoreChance) {
+    if (walletRestrictionData.ignoreChance !== undefined) {
         ret.push(walletRestrictionData.ignoreChance);
     }
 
-    if (walletRestrictionData.ignoreChisel) {
+    if (walletRestrictionData.ignoreChisel !== undefined) {
         ret.push(walletRestrictionData.ignoreChisel);
     }
 
-    if (walletRestrictionData.ignoreScour) {
+    if (walletRestrictionData.ignoreScour !== undefined) {
         ret.push(walletRestrictionData.ignoreScour);
     }
 
-    if (walletRestrictionData.ignoreBlessed) {
+    if (walletRestrictionData.ignoreBlessed !== undefined) {
         ret.push(walletRestrictionData.ignoreBlessed);
     }
 
-    if (walletRestrictionData.ignoreRegret) {
+    if (walletRestrictionData.ignoreRegret !== undefined) {
         ret.push(walletRestrictionData.ignoreRegret);
     }
 
-    if (walletRestrictionData.ignoreRegal) {
+    if (walletRestrictionData.ignoreRegal !== undefined) {
         ret.push(walletRestrictionData.ignoreRegal);
     }
 
-    if (walletRestrictionData.ignoreDivine) {
+    if (walletRestrictionData.ignoreDivine !== undefined) {
         ret.push(walletRestrictionData.ignoreDivine);
     }
 
-    if (walletRestrictionData.ignoreVaal) {
+    if (walletRestrictionData.ignoreVaal !== undefined) {
         ret.push(walletRestrictionData.ignoreVaal);
     }
 
@@ -390,26 +388,27 @@ function sqlResultToQueryResult(result: any, queryData: WalletRestrictions.Query
     const QueryData = WalletRestrictions.QueryData;
 
     return {
-        id: queryData.includes(QueryData.ID) ? result.wallet_restriction_id : undefined,
-        ignoreAlt: queryData.includes(QueryData.IGNORE_ALT) ? result.ignore_alt : undefined,
-        ignoreFuse: queryData.includes(QueryData.IGNORE_FUSE) ? result.ignore_fuse : undefined,
-        ignoreAlch: queryData.includes(QueryData.IGNORE_ALCH) ? result.ignore_alch : undefined,
-        ignoreChaos: queryData.includes(QueryData.IGNORE_CHAOS) ? result.ignore_chaos : undefined,
-        ignoreGcp: queryData.includes(QueryData.IGNORE_GCP) ? result.ignore_gcp : undefined,
-        ignoreExa: queryData.includes(QueryData.IGNORE_EXA) ? result.ignore_exa : undefined,
-        ignoreChrom: queryData.includes(QueryData.IGNORE_CHROM) ? result.ignore_chrom : undefined,
-        ignoreJew: queryData.includes(QueryData.IGNORE_JEW) ? result.ignore_jew : undefined,
-        ignoreChance: queryData.includes(QueryData.IGNORE_CHANCE) ? result.ignore_chance : undefined,
-        ignoreChisel: queryData.includes(QueryData.IGNORE_CHISEL) ? result.ignore_chisel : undefined,
-        ignoreScour: queryData.includes(QueryData.IGNORE_SCOUR) ? result.ignore_scour : undefined,
-        ignoreBlessed: queryData.includes(QueryData.IGNORE_BLESSED) ? result.ignore_blessed : undefined,
-        ignoreRegret: queryData.includes(QueryData.IGNORE_REGRET) ? result.ignore_regret : undefined,
-        ignoreRegal: queryData.includes(QueryData.IGNORE_REGAL) ? result.ignore_regal : undefined,
-        ignoreDivine: queryData.includes(QueryData.IGNORE_DIVINE) ? result.ignore_divine : undefined,
-        ignoreVaal: queryData.includes(QueryData.IGNORE_VAAL) ? result.ignore_vaal : undefined
+        id: result.wallet_restriction_id,
+        ignoreAlt: result.ignore_alt,
+        ignoreFuse: result.ignore_fuse,
+        ignoreAlch: result.ignore_alch,
+        ignoreChaos: result.ignore_chaos,
+        ignoreGcp: result.ignore_gcp,
+        ignoreExa: result.ignore_exa,
+        ignoreChrom: result.ignore_chrom,
+        ignoreJew: result.ignore_jew,
+        ignoreChance: result.ignore_chance,
+        ignoreChisel: result.ignore_chisel,
+        ignoreScour: result.ignore_scour,
+        ignoreBlessed: result.ignore_blessed,
+        ignoreRegret: result.ignore_regret,
+        ignoreRegal: result.ignore_regal,
+        ignoreDivine: result.ignore_divine,
+        ignoreVaal: result.ignore_vaal
     };
 }
 
+/* istanbul ignore next ; weird typescript behavior, the namespace will be turned into an (uncovered) branch*/
 namespace WalletRestrictions {
     /**
      * The type of a login ID.
@@ -424,33 +423,85 @@ namespace WalletRestrictions {
          * Query the ID of the login. Equivalent to User.getId().
          */
         ID,
+
         /**
-         * Query the E-Mail of the login. Equivalent to User.getEmail().
+         * Query the amount of ignored Orb of Alteration.
          */
         IGNORE_ALT,
+
         /**
-         * Query the password of the login. Equivalent to User.getPassword().
+         * Query the amount of ignored Orb of Fusing.
          */
         IGNORE_FUSE,
+
         /**
-         * Query the new E-Mail of the login. Equivalent to User.getNewEmail().
+         * Query the amount of ignored Orb of Alchemy.
          */
         IGNORE_ALCH,
+
         /**
-         * Query the new password of the login. Equivalent to User.getNewPassword().
+         * Query the amount of ignored Chaos Orbs.
          */
         IGNORE_CHAOS,
+
+        /**
+         * Query the amount of ignored Gemcutters Prisms.
+         */
         IGNORE_GCP,
+
+        /**
+         * Query the amount of ignored Exalted Orbs.
+         */
         IGNORE_EXA,
+
+        /**
+         * Query the amount of ignored Chromatic Orbs.
+         */
         IGNORE_CHROM,
+
+        /**
+         * Query the amount of ignored Jeweller's Orbs.
+         */
         IGNORE_JEW,
+
+        /**
+         * Query the amount of ignored Orb of Chance.
+         */
         IGNORE_CHANCE,
+
+        /**
+         * Query the amount of ignored Cartographer's Chisel.
+         */
         IGNORE_CHISEL,
+
+        /**
+         * Query the amount of ignored Orb of Scouring.
+         */
         IGNORE_SCOUR,
+
+        /**
+         * Query the amount of ignored Blessed Orbs.
+         */
         IGNORE_BLESSED,
+
+        /**
+         * Query the amount of ignored Orb of Regret.
+         */
         IGNORE_REGRET,
+
+        /**
+         * Query the amount of ignored Regal Orbs.
+         */
         IGNORE_REGAL,
+
+        /**
+         * Query the amount of ignored Divine Orbs.
+         */
         IGNORE_DIVINE,
+
+        /**
+         * Query the amount of ignored Vaal Orbs.
+         */
         IGNORE_VAAL
     }
 
@@ -461,77 +512,77 @@ namespace WalletRestrictions {
         ignoreAlt?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Fusing.
          */
         ignoreFuse?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Alchemy.
          */
         ignoreAlch?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Chaos Orbs.
          */
         ignoreChaos?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Gemcutters Prisms.
          */
         ignoreGcp?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Exalted Orbs.
          */
         ignoreExa?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Chromatic Orbs.
          */
         ignoreChrom?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Fusing.
          */
         ignoreJew?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Chance.
          */
         ignoreChance?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Cartographer's Chisel.
          */
         ignoreChisel?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Scouring.
          */
         ignoreScour?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Blessed Orbs.
          */
         ignoreBlessed?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Orb of Regret.
          */
         ignoreRegret?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Regal Orbs.
          */
         ignoreRegal?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Divine Orbs.
          */
         ignoreDivine?: number;
 
         /**
-         * The amount of ignored Orb of Alteration.
+         * The amount of ignored Vaal Orbs.
          */
         ignoreVaal?: number;
     }

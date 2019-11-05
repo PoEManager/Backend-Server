@@ -21,7 +21,7 @@ describe('core', () => {
 
         describe('create()', () => {
             it('should correctly generate a session ID for a user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'test123',
                     loginData: {
                         email: 'test@test.com',
@@ -35,7 +35,7 @@ describe('core', () => {
 
         describe('verify()', () => {
             it('should correctly verify a session ID for an existing user', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'test123',
                     loginData: {
                         email: 'test@test.com',
@@ -55,7 +55,7 @@ describe('core', () => {
 
         describe('invalidate()', () => {
             it('should not validate a session ID after it has been invalidated', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'test123',
                     loginData: {
                         email: 'test@test.com',

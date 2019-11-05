@@ -21,9 +21,9 @@ describe('model', () => {
             await DatabaseConnection.reset();
         });
 
-        describe('create()', () => {
-            it('should correctly create a new user', async () => {
-                const user = await UserManager.create({
+        describe('createWithDefaultLogin()', () => {
+            it('should correctly createWithDefaultLogin a new user', async () => {
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -38,8 +38,8 @@ describe('model', () => {
                 expect(user.getId()).toBe(checkUser.getId());
             });
 
-            it('should create different users each time', async () => {
-                const user1 = await UserManager.create({
+            it('should createWithDefaultLogin different users each time', async () => {
+                const user1 = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname1',
                     loginData: {
                         email: 'test1@test.com',
@@ -47,7 +47,7 @@ describe('model', () => {
                     }
                 });
 
-                const user2 = await UserManager.create({
+                const user2 = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname2',
                     loginData: {
                         email: 'test2@test.com',
@@ -68,7 +68,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
                 });
 
@@ -81,7 +81,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
                 });
 
@@ -94,7 +94,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
                 });
 
@@ -107,7 +107,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
                 });
 
@@ -120,7 +120,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidNicknameError(createData.nickname));
                 });
             });
@@ -135,7 +135,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData))
+                    await expect(UserManager.createWithDefaultLogin(createData))
                         .rejects.toEqual(new errors.InvalidEmailError(createData.loginData.email));
                 });
 
@@ -148,7 +148,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData1)).resolves.not.toBeNull();
+                    await expect(UserManager.createWithDefaultLogin(createData1)).resolves.not.toBeNull();
 
                     const createData2 = {
                         nickname: 'nickname',
@@ -158,7 +158,7 @@ describe('model', () => {
                         }
                     };
 
-                    await expect(UserManager.create(createData2))
+                    await expect(UserManager.createWithDefaultLogin(createData2))
                         .rejects.toEqual(new errors.DuplicateEmailError(createData2.loginData.email));
                 });
             });
@@ -166,7 +166,7 @@ describe('model', () => {
 
         describe('get()', () => {
             it('should return the correct user if it exists', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -184,7 +184,7 @@ describe('model', () => {
 
         describe('getDefaultLogin()', () => {
             it('should return the correct login if it exists', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -205,7 +205,7 @@ describe('model', () => {
 
         describe('searchForUserWithEmail()', () => {
             it('should return the correct user if it exists', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -226,7 +226,7 @@ describe('model', () => {
 
         describe('validateChange()', () => {
             it('should correctly validate a verification change', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -241,7 +241,7 @@ describe('model', () => {
             });
 
             it('should correctly validate an E-Mail change', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -259,7 +259,7 @@ describe('model', () => {
             });
 
             it('should correctly validate a password change', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',
@@ -285,7 +285,7 @@ describe('model', () => {
 
         describe('getUserFromChangeId()', () => {
             it('should return the correct user if it exists', async () => {
-                const user = await UserManager.create({
+                const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
                         email: 'test@test.com',

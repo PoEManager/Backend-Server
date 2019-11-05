@@ -80,6 +80,7 @@ class DefaultLogin {
                     ]
                 });
 
+            /* istanbul ignore if */
             if (result.affectedRows === 0) {
                 // only for safety, should not happen
                 throw new errors.UserNotFoundError(id);
@@ -136,6 +137,7 @@ class DefaultLogin {
                     ]
                 });
 
+            /* istanbul ignore if */
             if (result.affectedRows === 0) {
                 // only for safety, should not happen
                 throw new errors.UserNotFoundError(id);
@@ -227,7 +229,7 @@ class DefaultLogin {
      *
      * @param conn The connection that will be used for the query. When not passed, a new connection will be created.
      */
-    private async getUserId(conn?: DatabaseConnection.Connection): Promise<User.ID> {
+    private async getUserId(conn: DatabaseConnection.Connection): Promise<User.ID> {
         const handler = async (innerConn: DatabaseConnection.Connection): Promise<User.ID> =>  {
             // get user ID of the login
             const result = await innerConn.query(
@@ -246,11 +248,12 @@ class DefaultLogin {
             return result[0].user_id;
         };
 
-        if (conn) {
-            return await handler(conn);
-        } else {
+        // the version, that does not use a connection is currently not required, but can be activated if needed
+        /* if (conn) { */
+        return await handler(conn);
+        /*}  else {
             return await DatabaseConnection.multiQuery(handler);
-        }
+        }*/
     }
 }
 
@@ -272,6 +275,7 @@ function queryDataToColumn(queryData: DefaultLogin.QueryData): string {
             return 'new_email';
         case DefaultLogin.QueryData.NEW_PASSWORD:
             return 'new_password';
+        /* istanbul ignore next */
         default:
             return ''; // does not happen
     }
@@ -293,6 +297,7 @@ function sqlResultToQueryResult(result: any, queryData: DefaultLogin.QueryData[]
     };
 }
 
+/* istanbul ignore next ; weird typescript behavior, the namespace will be turned into an (uncovered) branch*/
 namespace DefaultLogin {
     /**
      * The type of a login ID.
