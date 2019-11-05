@@ -34,63 +34,6 @@ class DefaultLogin {
     }
 
     /**
-     * @returns The E-Mail that the login has.
-     *
-     * @throws **DefaultLoginNotFoundError** If the default login does not exist.
-     */
-    public async getEmail(): Promise<string> {
-        const result = await DatabaseConnection.query(
-            'SELECT `email` FROM `DefaultLogins` WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
-                parameters: [
-                    this.id
-                ]
-            });
-
-        if (result.length === 1) {
-            return result[0].email;
-        } else {
-            throw this.makeLoginNotFoundError();
-        }
-    }
-
-    /**
-     * Updates the E-Mail of the login.
-     *
-     * This method only initiates the change of the E-Mail. The actual change has to be confirmed with
-     * UserManager.validateChange().
-     *
-     * @param email The new E-Mail.
-     */
-    public async updateEMail(email: string): Promise<UserManager.ChangeID> {
-        return await DatabaseConnection.transaction(async conn => {
-            const id = await this.getUserId(conn);
-
-            if (await UserChanges.getChangeState(id) !== null) {
-                throw new errors.ChangeAlreadyInProgressError(id);
-            }
-
-            // needs to be before the update of new_email, or the system thinks is already in progress
-            const changeId = await UserChanges.newChange(id, false);
-
-            const result = await conn.query(
-                'UPDATE `DefaultLogins` SET `new_email` = ? WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
-                    parameters: [
-                        email,
-                        this.id
-                    ]
-                });
-
-            /* istanbul ignore if */
-            if (result.affectedRows === 0) {
-                // only for safety, should not happen
-                throw new errors.UserNotFoundError(id);
-            }
-
-            return changeId;
-        });
-    }
-
-    /**
      * @returns The encrypted password of the user.
      *
      * @throws **DefaultLoginNotFoundError** If the default login does not exist.
@@ -126,7 +69,7 @@ class DefaultLogin {
                 throw new errors.ChangeAlreadyInProgressError(id);
             }
 
-            // needs to be before the update of new_email, or the system thinks is already in progress
+            // needs to be before the update of new_password, or the system thinks is already in progress
             const changeId = await UserChanges.newChange(id, false);
 
             const result = await conn.query(
@@ -148,24 +91,6 @@ class DefaultLogin {
     }
 
     /**
-     * @returns The new E-Mail, if a change is in progress, or `null` if there is no change.
-     */
-    public async getNewEmail(): Promise<string | null> {
-        const result = await DatabaseConnection.query(
-            'SELECT `new_email` FROM `DefaultLogins` WHERE `DefaultLogins`.`defaultlogin_id` = ?', {
-                parameters: [
-                    this.id
-                ]
-            });
-
-        if (result.length === 1) {
-            return result[0].new_email;
-        } else {
-            throw this.makeLoginNotFoundError();
-        }
-    }
-
-    /**
      * @returns The new password, if a change is in progress, or `null` if there is no change.
      */
     public async getNewPassword(): Promise<Password | null> {
@@ -184,7 +109,7 @@ class DefaultLogin {
     }
 
     /**
-     * Query data about the login. This method unites all of the other getters (such as getEmail() and getPassword())
+     * Query data about the login. This method unites all of the other getters (such as getPassword())
      * into one. This can improve the performance, because it reduces the amount of SQL calls to the database.
      *
      * @param queryData A list of the data that should be queried.
@@ -267,12 +192,8 @@ function queryDataToColumn(queryData: DefaultLogin.QueryData): string {
     switch (queryData) {
         case DefaultLogin.QueryData.ID:
             return 'defaultlogin_id';
-        case DefaultLogin.QueryData.EMAIL:
-            return 'email';
         case DefaultLogin.QueryData.PASSWORD:
             return 'password';
-        case DefaultLogin.QueryData.NEW_EMAIL:
-            return 'new_email';
         case DefaultLogin.QueryData.NEW_PASSWORD:
             return 'new_password';
         /* istanbul ignore next */
@@ -290,9 +211,7 @@ function queryDataToColumn(queryData: DefaultLogin.QueryData): string {
 function sqlResultToQueryResult(result: any, queryData: DefaultLogin.QueryData[]): DefaultLogin.IQueryResult {
     return {
         id: queryData.includes(DefaultLogin.QueryData.ID) ? result.defaultlogin_id : undefined,
-        email: queryData.includes(DefaultLogin.QueryData.EMAIL) ? result.email : undefined,
         password: queryData.includes(DefaultLogin.QueryData.PASSWORD) ? result.password : undefined,
-        newEmail: queryData.includes(DefaultLogin.QueryData.NEW_EMAIL) ? result.new_email : undefined,
         newPassword: queryData.includes(DefaultLogin.QueryData.NEW_PASSWORD) ? result.new_password : undefined
     };
 }
@@ -313,17 +232,9 @@ namespace DefaultLogin {
          */
         ID,
         /**
-         * Query the E-Mail of the login. Equivalent to User.getEmail().
-         */
-        EMAIL,
-        /**
          * Query the password of the login. Equivalent to User.getPassword().
          */
         PASSWORD,
-        /**
-         * Query the new E-Mail of the login. Equivalent to User.getNewEmail().
-         */
-        NEW_EMAIL,
         /**
          * Query the new password of the login. Equivalent to User.getNewPassword().
          */
@@ -342,19 +253,9 @@ namespace DefaultLogin {
         id?: ID;
 
         /**
-         * The E-Mail of the login.
-         */
-        email?: string;
-
-        /**
          * The encrypted password of the login.
          */
         password?: Password;
-
-        /**
-         * The new E-Mail of the login. If no change is in progress, this will be set to ```null```.
-         */
-        newEmail?: string;
 
         /**
          * The new password of the login. If no change is in progress, this will be set to ```null```.

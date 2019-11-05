@@ -1,4 +1,5 @@
 
+import _, { Many } from 'lodash';
 import mariadb from 'mariadb';
 import config from '../core/config';
 import Error from './error';
@@ -82,12 +83,25 @@ namespace DatabaseConnection {
     }
 
     /**
-     * Used to match SQL error codes to a throwable error.
+     * Used to match SQL error codes to a throwable error code.
      */
-    export interface IErrorMatcher {
+    export interface IErrorMatcherCode {
         code: number;
         error: Error;
     }
+
+    /**
+     * Used to match SQL error codes to a throwable error by using a callback.
+     */
+    export interface IErrorMatcherCallback {
+        callback: (error: mariadb.MariaDbError) => Promise<boolean> | boolean;
+        error: Error;
+    }
+
+    /**
+     * Used to match SQL error codes to a throwable error.
+     */
+    export type IErrorMatcher = IErrorMatcherCode | IErrorMatcherCallback;
 
     /**
      * Additional data that can be passed to a SQL query.
@@ -211,14 +225,18 @@ namespace DatabaseConnection {
             } catch (error) {
                 if (additional && additional.expectedErrors) { // are there any matchers?
 
-                    // find a matcher with for the error
-                    const matcher = additional.expectedErrors.find(e => {
-                        return e.code === error.errno;
-                    });
+                    for (const matcher of additional.expectedErrors) {
+                        let result: boolean;
 
-                    // if a matcher was found, throw the error
-                    if (matcher) {
-                        throw matcher.error;
+                        if ('callback' in matcher) {
+                            result = await matcher.callback(error as mariadb.MariaDbError);
+                        } else {
+                            result = matcher.code === error.errno;
+                        }
+
+                        if (result) {
+                            throw matcher.error;
+                        }
                     }
                 }
 

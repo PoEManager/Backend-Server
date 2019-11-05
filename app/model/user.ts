@@ -451,6 +451,79 @@ class User {
     }
 
     /**
+     * @returns The E-Mail that the login has.
+     *
+     * @throws **DefaultLoginNotFoundError** If the default login does not exist.
+     */
+    public async getEmail(): Promise<string> {
+        const result = await DatabaseConnection.query(
+            'SELECT `email` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].email;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Updates the E-Mail of the login.
+     *
+     * This method only initiates the change of the E-Mail. The actual change has to be confirmed with
+     * UserManager.validateChange().
+     *
+     * @param email The new E-Mail.
+     */
+    public async updateEMail(email: string): Promise<UserManager.ChangeID> {
+        return await DatabaseConnection.transaction(async conn => {
+            if (await UserChanges.getChangeState(this.id) !== null) {
+                throw new errors.ChangeAlreadyInProgressError(this.id);
+            }
+
+            // needs to be before the update of new_email, or the system thinks is already in progress
+            const changeId = await UserChanges.newChange(this.id, false);
+
+            const result = await conn.query(
+                'UPDATE `Users` SET `new_email` = ? WHERE `Users`.`user_id` = ?', {
+                    parameters: [
+                        email,
+                        this.id
+                    ]
+                });
+
+            /* istanbul ignore if */
+            if (result.affectedRows === 0) {
+                // only for safety, should not happen
+                throw new errors.UserNotFoundError(this.id);
+            }
+
+            return changeId;
+        });
+    }
+
+    /**
+     * @returns The new E-Mail, if a change is in progress, or `null` if there is no change.
+     */
+    public async getNewEmail(): Promise<string | null> {
+        const result = await DatabaseConnection.query(
+            'SELECT `new_email` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
+
+        if (result.length === 1) {
+            return result[0].new_email;
+        } else {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
      * @returns A UserNotFoundError with the proper user ID.
      */
     private makeUserNotFoundError(): errors.UserNotFoundError {
@@ -480,6 +553,10 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '\`Users\`.\`created_time\`';
         case User.QueryData.AVATAR_STATE:
             return '\`Users\`.\`avatar_state\`';
+        case User.QueryData.EMAIL:
+            return 'email';
+        case User.QueryData.NEW_EMAIL:
+            return 'new_email';
         /* istanbul ignore next */
         default:
             return ''; // does not happen
@@ -500,7 +577,9 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
         changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
         sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined,
         createdTime: queryData.includes(User.QueryData.CREATED_TIME) ? result.created_time : undefined,
-        avatarState: queryData.includes(User.QueryData.AVATAR_STATE) ? result.avatar_state : undefined
+        avatarState: queryData.includes(User.QueryData.AVATAR_STATE) ? result.avatar_state : undefined,
+        email: queryData.includes(User.QueryData.EMAIL) ? result.email : undefined,
+        newEmail: queryData.includes(User.QueryData.NEW_EMAIL) ? result.new_email : undefined
     };
 }
 
@@ -549,7 +628,17 @@ namespace User {
         /**
          * The current state of the user's avatar.
          */
-        AVATAR_STATE
+        AVATAR_STATE,
+
+        /**
+         * Query the E-Mail of the login. Equivalent to User.getEmail().
+         */
+        EMAIL,
+
+        /**
+         * Query the new E-Mail of the login. Equivalent to User.getNewEmail().
+         */
+        NEW_EMAIL
     }
 
     export enum AvatarState {
@@ -597,6 +686,16 @@ namespace User {
          * The current state of the user's avatar.
          */
         avatarState?: AvatarState;
+
+        /**
+         * The E-Mail of the login.
+         */
+        email?: string;
+
+        /**
+         * The new E-Mail of the login. If no change is in progress, this will be set to ```null```.
+         */
+        newEmail?: string;
     }
 }
 

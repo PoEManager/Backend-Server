@@ -251,11 +251,9 @@ describe('model', () => {
 
                 await UserManager.validateChange(await user.getChangeUID() as string);
 
-                const login = await user.getDefaultLogin();
-
-                await expect(login.updateEMail('test1@test.com')).resolves.toBeDefined();
+                await expect(user.updateEMail('test1@test.com')).resolves.toBeDefined();
                 await expect(UserManager.validateChange(await user.getChangeUID() as string)).resolves.toBeUndefined();
-                await expect(login.getEmail()).resolves.toBe('test1@test.com');
+                await expect(user.getEmail()).resolves.toBe('test1@test.com');
             });
 
             it('should correctly validate a password change', async () => {

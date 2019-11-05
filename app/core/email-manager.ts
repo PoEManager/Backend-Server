@@ -97,15 +97,15 @@ namespace EmailManager {
         const result = await user.query([
             User.QueryData.NICKNAME,
             User.QueryData.DEFAULT_LOGIN_ID,
-            User.QueryData.CHANGE_UID
+            User.QueryData.CHANGE_UID,
+            User.QueryData.EMAIL
         ]);
 
-        const email = await (await UserManager.getDefaultLogin(result.defaultLoginId!)).getEmail();
         const link = makeVerificationLink(result.changeUid!);
 
-        await sendPredefinedMail(mailConfig, email, {
+        await sendPredefinedMail(mailConfig, result.email!, {
                 nickname: result.nickname,
-                email,
+                email: result.email,
                 link
             });
     }

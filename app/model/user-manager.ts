@@ -36,20 +36,11 @@ namespace UserManager {
             const walletId = result.insertId;
 
             result = await conn.query(
-                'INSERT INTO `DefaultLogins` (`email`, `password`) VALUES (?, ?)', {
+                'INSERT INTO `DefaultLogins` (`password`) VALUES (?)', {
                     parameters: [
-                        createData.loginData.email,
                         password.getEncrypted()
                     ],
                     expectedErrors: [
-                        {
-                            code: DatabaseConnection.ErrorCodes.DUPLICATE_ENTRY,
-                            error: new errors.DuplicateEmailError(createData.loginData.email)
-                        },
-                        {
-                            code: DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL,
-                            error: new errors.InvalidEmailError(createData.loginData.email)
-                        }
                     ]
                 });
 
@@ -57,21 +48,37 @@ namespace UserManager {
 
             result = await conn.query(
                 'INSERT INTO `Users` (`wallet_restriction_id`, `defaultlogin_id`, `nickname`, `verified`, ' +
-                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, ?, POEM_UUID(), POEM_DATE_INFINITY())', {
+                '`change_uid`, `change_expire_date`, `email`) VALUES ' +
+                '(?, ?, ?, ?, POEM_UUID(), POEM_DATE_INFINITY(), ?)', {
                     parameters: [
                         walletId,
                         loginId,
                         createData.nickname,
-                        false
+                        false,
+                        createData.loginData.email
                     ],
                     expectedErrors: [
                         {
-                            code: DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL,
+                            code: DatabaseConnection.ErrorCodes.DATA_TOO_LONG,
                             error: new errors.InvalidNicknameError(createData.nickname)
                         },
                         {
-                            code: DatabaseConnection.ErrorCodes.DATA_TOO_LONG,
+                            code: DatabaseConnection.ErrorCodes.DUPLICATE_ENTRY,
+                            error: new errors.DuplicateEmailError(createData.loginData.email)
+                        },
+                        {
+                            callback: error => {
+                                return error.errno === DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL
+                                && error.message.includes('CHECK_nickname');
+                            },
                             error: new errors.InvalidNicknameError(createData.nickname)
+                        },
+                        {
+                            callback: error => {
+                                return error.errno === DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL
+                                && error.message.includes('CHECK_email');
+                            },
+                            error: new errors.InvalidEmailError(createData.loginData.email)
                         }
                     ]
                 });
@@ -89,6 +96,7 @@ namespace UserManager {
      * @throws **LoginAlreadyPresentError** An account with the same Google user ID already exists.
      */
     // todo LoginAlreadyPresentError wont be thrown, fix this
+    /*
     export async function createWithGoogleUID(googleID: string): Promise<User> {
         let result: any;
 
@@ -110,7 +118,7 @@ namespace UserManager {
         });
 
         return new User(result.insertId);
-    }
+    }*/
 
     /**
      * Get the reference to a user.
@@ -153,7 +161,7 @@ namespace UserManager {
         if (result.length === 1) {
             return new User(result[0].user_id);
         } else {
-            return await createWithGoogleUID(googleID);
+            return null as unknown as User; // await createWithGoogleUID(googleID);
         }
     }
 
@@ -213,7 +221,7 @@ namespace UserManager {
      */
     export async function searchForUserWithEmail(email: string): Promise<User> {
         const result = await DatabaseConnection.query(
-            'SELECT `Users`.`user_id` FROM `Users` NATURAL JOIN `DefaultLogins` WHERE `DefaultLogins`.`email` = ?', {
+            'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`email` = ?', {
                 parameters: [
                     email
                 ],

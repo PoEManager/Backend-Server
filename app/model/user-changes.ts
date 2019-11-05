@@ -85,8 +85,7 @@ namespace UserChanges {
                 break;
             case ChangeType.NEW_EMAIL:
                 await conn.query(
-                    'UPDATE `DefaultLogins` SET `new_email` = null WHERE `DefaultLogins`.`defaultlogin_id` = ' +
-                    '(SELECT `Users`.`defaultlogin_id` FROM `Users` WHERE `Users`.`user_id` = ?)', {
+                    'UPDATE `Users` SET `new_email` = null WHERE `Users`.`user_id` = ?', {
 
                     parameters: [
                         id
@@ -134,7 +133,7 @@ namespace UserChanges {
      */
     async function _getChangeState(conn: DatabaseConnection.Connection, id: User.ID): Promise<ChangeType | null> {
         const result = await conn.query(
-            'SELECT `Users`.`verified`, `DefaultLogins`.`new_email`, `DefaultLogins`.`new_password` ' +
+            'SELECT `Users`.`verified`, `Users`.`new_email`, `DefaultLogins`.`new_password` ' +
             'FROM `Users` LEFT JOIN `DefaultLogins` ON ' +
                 '(`DefaultLogins`.`defaultlogin_id` = `Users`.`defaultlogin_id`) ' +
             'WHERE `Users`.`user_id` = ?', {
@@ -264,9 +263,7 @@ namespace UserChanges {
      */
     async function validateNewEmailChange(id: User.ID, conn: DatabaseConnection.Connection): Promise <void> {
         const result = await conn.query(
-            'UPDATE `DefaultLogins` SET `email`= `new_email`, `new_email` = NULL ' +
-            ' WHERE `DefaultLogins`.`defaultlogin_id` = ' +
-            '(SELECT `Users`.`defaultlogin_id` FROM `Users` WHERE `Users`.`user_id` = ?)', {
+            'UPDATE `Users` SET `email`= `new_email`, `new_email` = NULL WHERE `Users`.`user_id` = ?', {
 
             parameters: [
                 id

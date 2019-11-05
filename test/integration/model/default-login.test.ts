@@ -21,26 +21,6 @@ describe('model', () => {
             await DatabaseConnection.reset();
         });
 
-        describe('getEmail()', () => {
-            it('should return the correct email', async () => {
-                const user = await UserManager.createWithDefaultLogin({
-                    nickname: 'nickname',
-                    loginData: {
-                        email: 'test@test.com',
-                        unencryptedPassword: 'password'
-                    }
-                });
-
-                const defaultLogin = await user.getDefaultLogin();
-
-                await expect(defaultLogin.getEmail()).resolves.toBe('test@test.com');
-            });
-
-            it('should throw DefaultLoginNotFoundError error if the login does note exist', async () => {
-                await expect(new DefaultLogin(-1).getEmail()).rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
-            });
-        });
-
         describe('getPassword()', () => {
             it('should return the correct password', async () => {
                 const user = await UserManager.createWithDefaultLogin({
@@ -60,28 +40,6 @@ describe('model', () => {
 
             it('should throw DefaultLoginNotFoundError error if the login does note exist', async () => {
                 await expect(new DefaultLogin(-1).getPassword())
-                    .rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
-            });
-        });
-
-        // todo update as soon as emails can be updated
-        describe('getNewEmail()', () => {
-            it('should return the correct email', async () => {
-                const user = await UserManager.createWithDefaultLogin({
-                    nickname: 'nickname',
-                    loginData: {
-                        email: 'test@test.com',
-                        unencryptedPassword: 'password'
-                    }
-                });
-
-                const defaultLogin = await user.getDefaultLogin();
-
-                await expect(defaultLogin.getNewEmail()).resolves.toBeNull();
-            });
-
-            it('should throw DefaultLoginNotFoundError error if the login does note exist', async () => {
-                await expect(new DefaultLogin(-1).getNewEmail())
                     .rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
             });
         });
@@ -123,15 +81,11 @@ describe('model', () => {
 
                 await expect(defaultLogin.query([
                     DefaultLogin.QueryData.ID,
-                    DefaultLogin.QueryData.EMAIL,
                     DefaultLogin.QueryData.PASSWORD,
-                    DefaultLogin.QueryData.NEW_EMAIL,
                     DefaultLogin.QueryData.NEW_PASSWORD
                 ])).resolves.toMatchObject({
                     id: defaultLogin.getId(),
-                    email: 'test@test.com',
                     password: password.getEncrypted(),
-                    newEmail: null,
                     newPassword: null
                 });
             });
@@ -167,49 +121,6 @@ describe('model', () => {
 
             it('should throw UserNotFound error if the user does note exist', async () => {
                 await expect(new DefaultLogin(-1).query([])).rejects.toEqual(new errors.DefaultLoginNotFoundError(-1));
-            });
-        });
-
-        describe('updateEmail()', () => {
-            it('should correctly update the E-Mail of a verified user', async () => {
-                const user = await UserManager.createWithDefaultLogin({
-                    nickname: 'nickname',
-                    loginData: {
-                        email: 'test@test.com',
-                        unencryptedPassword: 'password'
-                    }
-                });
-
-                await UserManager.validateChange(await user.getChangeUID() as string);
-
-                const defaultLogin = await user.getDefaultLogin();
-
-                await expect(defaultLogin.getNewEmail()).resolves.toBeNull();
-                await expect(defaultLogin.updateEMail('test1@test.com')).resolves.toBeDefined();
-                await expect(defaultLogin.getNewEmail()).resolves.toBe('test1@test.com');
-            });
-
-            it('should throw if another change is already in progress', async () => {
-                const user = await UserManager.createWithDefaultLogin({
-                    nickname: 'nickname',
-                    loginData: {
-                        email: 'test@test.com',
-                        unencryptedPassword: 'password'
-                    }
-                });
-
-                const defaultLogin = await user.getDefaultLogin();
-
-                await expect(defaultLogin.getNewEmail()).resolves.toBeNull();
-                await expect(defaultLogin.updateEMail('test1@test.com'))
-                    .rejects.toEqual(new errors.ChangeAlreadyInProgressError(user.getId()));
-            });
-
-            it('should throw if the login / user does not exist', async () => {
-                const defaultLogin = new DefaultLogin(-1);
-
-                await expect(defaultLogin.updateEMail('test1@test.com'))
-                    .rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
