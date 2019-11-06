@@ -44,10 +44,22 @@ namespace ServerUtils {
         const e = makeRESTableError(error);
 
         if (error instanceof Error) {
-            req.locals.logger.info('An expected error occurred: ');
-            req.locals.logger.info(`name: ${error.name}`);
-            req.locals.logger.info(`message: ${error.message}`);
-            req.locals.logger.info(`data: ${JSON.stringify(error.data)}`);
+            if (error instanceof InternalError) {
+                req.locals.logger.error('An internal error occurred: ');
+                req.locals.logger.error(`name: ${error.name}`);
+                req.locals.logger.error(`message: ${error.message}`);
+                JSON.stringify(error.data, null, 4).split('\n').forEach(line => {
+                    req.locals.logger.info(`data: ${line}`);
+                });
+            } else {
+                req.locals.logger.info('An expected error occurred: ');
+                req.locals.logger.info(`name: ${error.name}`);
+                req.locals.logger.info(`message: ${error.message}`);
+                JSON.stringify(error.data, null, 4).split('\n').forEach(line => {
+                    req.locals.logger.info(`data: ${line}`);
+                });
+            }
+
         } else {
             req.locals.logger.error('An unexpected error has been caught in makeRESTError():');
             req.locals.logger.error(error);

@@ -1,0 +1,5 @@
+{
+    "method": "DELETE",
+    "path": "/users/auth/google",
+    "authorizationLevel": "VERIFIED"
+}
