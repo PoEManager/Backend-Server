@@ -22,7 +22,7 @@ describe('model', () => {
         });
 
         describe('createWithDefaultLogin()', () => {
-            it('should correctly createWithDefaultLogin a new user', async () => {
+            it('should correctly create a new user', async () => {
                 const user = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname',
                     loginData: {
@@ -38,7 +38,7 @@ describe('model', () => {
                 expect(user.getId()).toBe(checkUser.getId());
             });
 
-            it('should createWithDefaultLogin different users each time', async () => {
+            it('should create different users each time', async () => {
                 const user1 = await UserManager.createWithDefaultLogin({
                     nickname: 'nickname1',
                     loginData: {
@@ -164,6 +164,77 @@ describe('model', () => {
             });
         });
 
+        describe('createWithGoogleLogin()', () => {
+            it('should correctly create a new user', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                // make sure the user actually exists
+                const checkUser = await UserManager.get(user.getId());
+
+                // make sure the IDs match
+                expect(user.getId()).toBe(checkUser.getId());
+            });
+
+            it('should create different users each time', async () => {
+                const user1 = await UserManager.createWithGoogleLogin('google-uid1', 'nickname1', 'test1@test.com');
+
+                const user2 = await UserManager.createWithGoogleLogin('google-uid2', 'nickname2', 'test2@test.com');
+
+                expect(user1.getId()).not.toBe(user2.getId());
+            });
+
+            it('should not allow duplicate Google user IDs', async () => {
+                await expect(UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test1@test.com'))
+                    .resolves.not.toBeNull();
+
+                await expect(UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test2@test.com'))
+                    .rejects.toEqual(new errors.DuplicateGoogleUIDError('google-uid'));
+            });
+
+            describe('nicknames', () => {
+                it('should reject nicknames with spaces', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'nick name', 'test@test.com'))
+                        .rejects.toEqual(new errors.InvalidNicknameError('nick name'));
+                });
+
+                it('should reject nicknames with a special character', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'nick\u0015name', 'test@test.com'))
+                        .rejects.toEqual(new errors.InvalidNicknameError('nick\u0015name'));
+                });
+
+                it('should reject nicknames with a line break', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'nick\nname', 'test@test.com'))
+                        .rejects.toEqual(new errors.InvalidNicknameError('nick\nname'));
+                });
+
+                it('should reject short nicknames', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'nick', 'test@test.com'))
+                        .rejects.toEqual(new errors.InvalidNicknameError('nick'));
+                });
+
+                it('should reject long nicknames', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'this-is-an-incredibly-long-nickname',
+                        'test@test.com')).rejects
+                        .toEqual(new errors.InvalidNicknameError('this-is-an-incredibly-long-nickname'));
+                });
+            });
+
+            describe('emails', () => {
+                it('should reject invalid E-Mails', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid', 'nickname', 'invalid'))
+                        .rejects.toEqual(new errors.InvalidEmailError('invalid'));
+                });
+
+                it('should reject duplicate E-Mails', async () => {
+                    await expect(UserManager.createWithGoogleLogin('google-uid1', 'nickname', 'test@test.com'))
+                        .resolves.not.toBeNull();
+
+                    await expect(UserManager.createWithGoogleLogin('google-uid2', 'nickname', 'test@test.com'))
+                        .rejects.toEqual(new errors.DuplicateEmailError('test@test.com'));
+                });
+            });
+        });
+
         describe('get()', () => {
             it('should return the correct user if it exists', async () => {
                 const user = await UserManager.createWithDefaultLogin({
@@ -174,11 +245,25 @@ describe('model', () => {
                     }
                 });
 
-                await expect(user.getId()).toBe((await UserManager.get(user.getId())).getId());
+                expect(user.getId()).toBe((await UserManager.get(user.getId())).getId());
             });
 
             it('should throw if the user does not exist', async () => {
                 await expect(UserManager.get(-1)).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getFromGoogleID()', () => {
+            it('should return the correct user if it exists', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+                const testUser = await UserManager.getFromGoogleID('google-uid');
+
+                expect(testUser.getId()).toBe(user.getId());
+            });
+
+            it('should throw if the user does not exist', async () => {
+                await expect(UserManager.getFromGoogleID('invalid Google user ID'))
+                    .rejects.toEqual(new errors.InvalidCredentialsError());
             });
         });
 
@@ -195,7 +280,7 @@ describe('model', () => {
                 const login = await user.getDefaultLogin();
                 const checkLogin = await UserManager.getDefaultLogin(login.getId());
 
-                await expect(login.getId()).toBe(checkLogin.getId());
+                expect(login.getId()).toBe(checkLogin.getId());
             });
 
             it('should throw if the login does not exist', async () => {

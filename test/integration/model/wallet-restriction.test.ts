@@ -339,15 +339,15 @@ describe('model', () => {
                 });
             });
 
-            it('should throw WalletRestrictionsNotFoundError error if the wallet restrictions' +
-                ' does note exist (no params)', async () => {
+            it('should 1 throw WalletRestrictionsNotFoundError error if the wallet restrictions' +
+                ' does not exist (no params)', async () => {
 
                 await expect(new WalletRestrictions(-1).update({}))
                     .rejects.toEqual(new errors.WalletRestrictionsNotFoundError(-1));
             });
 
             it('should throw WalletRestrictionsNotFoundError error if the wallet restrictions' +
-                ' does note exist (with params)', async () => {
+                ' does not exist (with params)', async () => {
 
                 await expect(new WalletRestrictions(-1).update({ignoreAlt: 0}))
                     .rejects.toEqual(new errors.WalletRestrictionsNotFoundError(-1));

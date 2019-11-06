@@ -22,7 +22,7 @@ function urlQueryToUserQueryParams(params: any): User.QueryData[] {
 }
 
 interface ITemporaryBody {
-    [key: string]: string | Date | number | undefined;
+    [key: string]: string | Date | number | undefined | null;
 }
 
 function resultToBodyObject(result: User.IQueryResult): ITemporaryBody {
@@ -41,7 +41,7 @@ function bodyTransformer(inBody: ITemporaryBody): {[key: string]: string | numbe
                 if (object instanceof Date) {
                     ret[key] = object.toISOString();
                 } else { // case for strings + numbers
-                    ret[key] = object;
+                    ret[key] = object!;
                 }
             }
         }

@@ -290,7 +290,8 @@ namespace DatabaseConnection {
     export enum ErrorCodes {
         CONSTRAINT_FAIL = 4025,
         DUPLICATE_ENTRY = 1062,
-        DATA_TOO_LONG = 1406
+        DATA_TOO_LONG = 1406,
+        SIGNAL_EXCEPTION = 1644
     }
 
     /**

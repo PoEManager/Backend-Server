@@ -20,8 +20,7 @@ namespace UserManager {
      * @param createData The data that is used to create the new user.
      * @returns A reference to the new user.
      *
-     * @throws **DuplicateEmailError** An account with the passed E-Mail address already exists. Only thrown if the
-     *         'loginData' field in the user create data is 'IDefaultLoginCreateData'.
+     * @throws **DuplicateEmailError** An account with the passed E-Mail address already exists.
      * @throws **InvalidEmailError** The passed email is invalid.
      * @throws **InvalidNicknameError** The passed nickname is invalid.
      */
@@ -39,8 +38,6 @@ namespace UserManager {
                 'INSERT INTO `DefaultLogins` (`password`) VALUES (?)', {
                     parameters: [
                         password.getEncrypted()
-                    ],
-                    expectedErrors: [
                     ]
                 });
 
@@ -93,11 +90,12 @@ namespace UserManager {
      * @param googleID The Google user ID.
      * @returns A reference to the new user.
      *
-     * @throws **LoginAlreadyPresentError** An account with the same Google user ID already exists.
+     * @throws **DuplicateEmailError** An account with the passed E-Mail address already exists.
+     * @throws **DuplicateGoogleUIDError** An account with the passed Google user ID already exists.
+     * @throws **InvalidEmailError** The passed email is invalid.
+     * @throws **InvalidNicknameError** The passed nickname is invalid.
      */
-    // todo LoginAlreadyPresentError wont be thrown, fix this
-    /*
-    export async function createWithGoogleUID(googleID: string): Promise<User> {
+    export async function createWithGoogleLogin(googleID: string, nickname: string, email: string): Promise<User> {
         let result: any;
 
         await DatabaseConnection.transaction(async conn => {
@@ -106,19 +104,65 @@ namespace UserManager {
             const walletId = result.insertId;
 
             result = await conn.query(
-                'INSERT INTO `Users` (`wallet_restriction_id`, `google_uid`, `nickname`, `verified`, ' +
-                '`change_uid`, `change_expire_date`) VALUES (?, ?, ?, ?, NULL, NULL)', {
+                'INSERT INTO `GoogleLogins` (`google_uid`) VALUES (?)', {
                     parameters: [
-                        walletId,
-                        googleID,
-                        'todo-todo', // todo query nickname from google
-                        true
+                        googleID
+                    ],
+                    expectedErrors: [
+                        {
+                            callback: error => {
+                                return error.errno === DatabaseConnection.ErrorCodes.DUPLICATE_ENTRY
+                                && error.message.includes('google_uid');
+                            },
+                            error: new errors.DuplicateGoogleUIDError(googleID)
+                        }
                     ]
                 });
+
+            const loginId = result.insertId;
+
+            result = await conn.query(
+                'INSERT INTO `Users` (`wallet_restriction_id`, `googlelogin_id`, `nickname`, `verified`, ' +
+                '`change_uid`, `change_expire_date`, `email`) VALUES (?, ?, ?, ?, NULL, NULL, ?)', {
+                parameters: [
+                    walletId,
+                    loginId,
+                    nickname,
+                    true,
+                    email
+                ],
+                expectedErrors: [
+                    {
+                        code: DatabaseConnection.ErrorCodes.DATA_TOO_LONG,
+                        error: new errors.InvalidNicknameError(nickname)
+                    },
+                    {
+                        callback: error => {
+                            return error.errno === DatabaseConnection.ErrorCodes.DUPLICATE_ENTRY
+                            && error.message.includes('email');
+                        },
+                        error: new errors.DuplicateEmailError(email)
+                    },
+                    {
+                        callback: error => {
+                            return error.errno === DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL
+                            && error.message.includes('CHECK_nickname');
+                        },
+                        error: new errors.InvalidNicknameError(nickname)
+                    },
+                    {
+                        callback: error => {
+                            return error.errno === DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL
+                            && error.message.includes('CHECK_email');
+                        },
+                        error: new errors.InvalidEmailError(email)
+                    }
+                ]
+            });
         });
 
         return new User(result.insertId);
-    }*/
+    }
 
     /**
      * Get the reference to a user.
@@ -150,7 +194,8 @@ namespace UserManager {
      * @returns The queried or created user.
      */
     export async function getFromGoogleID(googleID: string): Promise<User> {
-        const sql = 'SELECT `Users`.`user_id` FROM `Users` WHERE `Users`.`google_uid` = ?';
+        const sql = 'SELECT `Users`.`user_id` FROM `Users` NATURAL JOIN `GoogleLogins` ' +
+            'WHERE `GoogleLogins`.`google_uid` = ?';
 
         const result = await DatabaseConnection.query(sql, {
             parameters: [
@@ -161,7 +206,7 @@ namespace UserManager {
         if (result.length === 1) {
             return new User(result[0].user_id);
         } else {
-            return null as unknown as User; // await createWithGoogleUID(googleID);
+            throw new errors.InvalidCredentialsError();
         }
     }
 

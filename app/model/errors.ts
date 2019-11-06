@@ -1,5 +1,6 @@
 import Error from '../core/error';
 import DefaultLogin from './default-login';
+import GoogleLogin from './google-login';
 import User from './user';
 import UserManager from './user-manager';
 import WalletRestrictions from './wallet-restrictions';
@@ -42,6 +43,24 @@ namespace errors {
     }
 
     /**
+     * Thrown if a user account with the same Google user ID already exists.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     uid: "<the Google user ID the user that already exists>"
+     * }
+     * ```
+     */
+    export class DuplicateGoogleUIDError extends Error {
+        public constructor(uid: string) {
+            super('DUPLICATE_GOOGLE_UID_ERROR', `An account with the Google user ID ${uid} already exists.`, 400, {
+                uid
+            });
+        }
+    }
+
+    /**
      * Thrown if a default login does not exist.
      *
      * The data layout is the following:
@@ -60,6 +79,24 @@ namespace errors {
     }
 
     /**
+     * Thrown if a Google login does not exist.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the login that was not found>",
+     * }
+     * ```
+     */
+    export class GoogleLoginNotFoundError extends Error {
+        constructor(id: GoogleLogin.ID) {
+            super('GOOGLE_LOGIN_NOT_FOUND_ERROR', `Google Login with ID ${id} does not exist`, 404, {
+                id
+            });
+        }
+    }
+
+    /**
      * Thrown if a login method does not exist.
      *
      * The data layout is the following:
@@ -71,7 +108,7 @@ namespace errors {
      * ```
      */
     export class LoginNotPresentError extends Error {
-        public constructor(id: User.ID, type: LoginNotPresentError.LoginType) {
+        public constructor(id: User.ID, type: LoginType) {
             super('LOGIN_NOT_FOUND_ERROR',
                 `Login of type ${type} for the user with the ID '${id}' does not exist.`, 404, {
                 id,
@@ -85,13 +122,6 @@ namespace errors {
      */
     /* istanbul ignore next ; weird typescript behavior, the namespace will be turned into an (uncovered) branch*/
     export namespace LoginNotPresentError {
-        /**
-         * The identifiers of the different login types.
-         */
-        export enum LoginType {
-            DEFAULT = 'DEFAULT',
-            GOOGLE = 'GOOGLE'
-        }
     }
 
     /**
@@ -107,7 +137,7 @@ namespace errors {
      */
     export class DefaultLoginNotPresentError extends LoginNotPresentError {
         constructor(id: User.ID) {
-            super(id, LoginNotPresentError.LoginType.DEFAULT);
+            super(id, LoginType.DEFAULT);
         }
     }
 
@@ -124,7 +154,7 @@ namespace errors {
      */
     export class GoogleLoginNotPresentError extends LoginNotPresentError {
         constructor(id: User.ID) {
-            super(id, LoginNotPresentError.LoginType.GOOGLE);
+            super(id, LoginType.GOOGLE);
         }
     }
 
@@ -271,6 +301,88 @@ namespace errors {
         public constructor() {
             super('INVALID_CREDENTIALS_ERROR', `The credentials do not identify a user.`, 404, {});
         }
+    }
+
+    /**
+     * The user already has a login of a certain type.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>",
+     *     type: "<the type of the login that cannot be added>"
+     * }
+     * ```
+     */
+    export class LoginAlreadyPresentError extends Error {
+        public constructor(id: User.ID, type: LoginType) {
+            super('LOGIN_ALREADY_PRESENT_ERROR',
+                `A ${type} login can not be added as it already exists on the user ${id}.`, 400, {
+
+                id,
+                type
+            });
+        }
+    }
+
+    /**
+     * The user already has a login of a certain type.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>",
+     *     type: "DEFAULT"
+     * }
+     * ```
+     */
+    export class DefaultLoginAlreadyPresentError extends LoginAlreadyPresentError {
+        public constructor(id: User.ID) {
+            super(id, LoginType.DEFAULT);
+        }
+    }
+
+    /**
+     * The user already has a login of a certain type.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>",
+     *     type: "GOOGLE"
+     * }
+     * ```
+     */
+    export class GoogleLoginAlreadyPresentError extends LoginAlreadyPresentError {
+        public constructor(id: User.ID) {
+            super(id, LoginType.GOOGLE);
+        }
+    }
+
+    /**
+     * The user would not have enough logins (one login is required).
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     id: "<the ID of the user>"
+     * }
+     * ```
+     */
+    export class InvalidLoginStateError extends Error {
+        public constructor(id: User.ID) {
+            super('INVALID_LOGIN_STATE_ERROR', `The user with the id '${id}' would only have a single login.`, 400, {
+                id
+            });
+        }
+    }
+
+    /**
+     * The identifiers of the different login types.
+     */
+    export enum LoginType {
+        DEFAULT = 'DEFAULT',
+        GOOGLE = 'GOOGLE'
     }
 }
 

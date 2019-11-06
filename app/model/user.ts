@@ -3,6 +3,8 @@ import _ from 'lodash';
 import DatabaseConnection from '../core/database-connection';
 import DefaultLogin from './default-login';
 import errors from './errors';
+import GoogleLogin from './google-login';
+import Password from './password';
 import UserChanges from './user-changes';
 import UserManager from './user-manager';
 import WalletRestrictions from './wallet-restrictions';
@@ -124,14 +126,84 @@ class User {
     }
 
     /**
-     * @returns `true`, if the user has a Google user ID, `false` if not.
+     * Removes the default login from the User.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **DefaultLoginNotPresentError** If the user does not have a default login.
+     * @throws **InvalidLoginStateError** If the user only has this login.
+     */
+    public async removeDefaultLogin(): Promise<void> {
+        if (!await this.hasDefaultLogin()) {
+            throw new errors.DefaultLoginNotPresentError(this.id);
+        }
+
+        const result = await DatabaseConnection.query(
+            'DELETE FROM \`DefaultLogins\` WHERE \`DefaultLogins\`.\`defaultlogin_id\` = ?', {
+                parameters: [
+                    (await this.getDefaultLogin()).getId() // sub-query does not work
+                ],
+                expectedErrors: [
+                    {
+                        code: DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL,
+                        error: new errors.InvalidLoginStateError(this.id)
+                    },
+                    {
+                        // 45002 is the state INVALID_LOGIN_STATE
+                        callback: e => e.errno === DatabaseConnection.ErrorCodes.SIGNAL_EXCEPTION &&
+                                       e.sqlState === '45002',
+                        error: new errors.InvalidLoginStateError(this.id)
+                    }
+                ]
+            });
+
+        // should not happen, this is already caught by .hasDefaultLogin()
+        /* istanbul ignore if */
+        if (result.affectedRows !== 1) {
+            throw this.makeUserNotFoundError();
+        }
+    }
+
+    /**
+     * Adds a default login to a user.
+     *
+     * @param password The unencrypted password of the login.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **DefaultLoginAlreadyPresentError** If the user already has a default login.
+     */
+    public async addDefaultLogin(password: string): Promise<void> {
+        if (await this.hasDefaultLogin()) {
+            throw new errors.DefaultLoginAlreadyPresentError(this.id);
+        }
+
+        const encrypted = await Password.encryptPassword(password);
+
+        await DatabaseConnection.transaction(async conn => {
+            const result = await conn.query('INSERT INTO `DefaultLogins` (`password`) VALUES (?);' +
+                'UPDATE `Users` SET `Users`.`defaultlogin_id` = LAST_INSERT_ID() WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    encrypted.getEncrypted(),
+                    this.id
+                ]
+            });
+
+            // should not happen, this is already caught by .hasDefaultLogin()
+            /* istanbul ignore if */
+            if (result[0].affectedRows !== 1 || result[1].affectedRows !== 1) {
+                throw this.makeUserNotFoundError();
+            }
+        });
+    }
+
+    /**
+     * @returns `true`, if the user has a Google login, `false` if not.
      *
      * @throws **UserNotFoundError** If the user does not exist.
      */
-    public async hasGoogleUID(): Promise<boolean> {
+    public async hasGoogleLogin(): Promise<boolean> {
         try {
             // check if this function throws or not
-            await this.getGoogleUID();
+            await this.getGoogleLogin();
             return true;
         } catch (error) {
             if (error instanceof errors.LoginNotPresentError) {
@@ -143,45 +215,94 @@ class User {
     }
 
     /**
-     * @returns The Google user ID of the user.
+     * @returns A reference to the Google login of the user.
      *
      * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **GoogleLoginNotPresentError** If the user does not have a default login.
      */
-    public async getGoogleUID(): Promise<string> {
-        const result = await DatabaseConnection.query('SELECT `google_uid` FROM `Users` WHERE `Users`.`user_id` = ?', {
-            parameters: [
-                this.id
-            ]
-        });
+    public async getGoogleLogin(): Promise<GoogleLogin> {
+        const result = await DatabaseConnection.query(
+            'SELECT `googlelogin_id` FROM `Users` WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    this.id
+                ]
+            });
 
-        if (result.length !== 1) {
+        if (result.length === 1 && result[0].googlelogin_id !== null) {
+            return new GoogleLogin(result[0].googlelogin_id);
+        } else if (result[0] === undefined) {
             throw this.makeUserNotFoundError();
-        } else if (!result[0].google_uid) {
-            throw new errors.GoogleLoginNotPresentError(this.id);
         } else {
-            return result[0].google_uid;
+            throw new errors.GoogleLoginNotPresentError(this.id);
         }
     }
 
     /**
-     * Sets a new Google user ID.
-     *
-     * @param uid The new ID.
+     * Removes the Google login from the User.
      *
      * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **GoogleLoginNotPresentError** If the user does not have a Google login.
+     * @throws **InvalidLoginStateError** If the user only has this login.
      */
-    public async setGoogleUID(uid: string): Promise<void> {
-        const result = await DatabaseConnection.query(
-            'UPDATE `Users` SET `Users`.`google_uid` = ? WHERE `Users`.`user_id` = ?', {
-            parameters: [
-                uid,
-                this.id
-            ]
-        });
+    public async removeGoogleLogin(): Promise<void> {
+        if (!await this.hasGoogleLogin()) {
+            throw new errors.GoogleLoginNotPresentError(this.id);
+        }
 
+        const result = await DatabaseConnection.query(
+            'DELETE FROM \`GoogleLogins\` WHERE \`GoogleLogins\`.\`googlelogin_id\` = ?', {
+                parameters: [
+                    (await this.getGoogleLogin()).getId() // sub-query does not work
+                ],
+                expectedErrors: [
+                    {
+                        code: DatabaseConnection.ErrorCodes.CONSTRAINT_FAIL,
+                        error: new errors.InvalidLoginStateError(this.id)
+                    },
+                    {
+                        // 45002 is the state INVALID_LOGIN_STATE
+                        callback: e => e.errno === DatabaseConnection.ErrorCodes.SIGNAL_EXCEPTION &&
+                                       e.sqlState === '45002',
+                        error: new errors.InvalidLoginStateError(this.id)
+                    }
+                ]
+            });
+
+        // should not happen, this is already caught by .hasGoogleLogin()
+        /* istanbul ignore if */
         if (result.affectedRows !== 1) {
             throw this.makeUserNotFoundError();
         }
+    }
+
+    /**
+     * Adds a Google login to a user.
+     *
+     * @param googleUID The Google user ID of the user.
+     *
+     * @throws **UserNotFoundError** If the user does not exist.
+     * @throws **DefaultLoginAlreadyPresentError** If the user already has a default login.
+     */
+    public async addGoogleLogin(googleUID: string): Promise<void> {
+        if (await this.hasGoogleLogin()) {
+            throw new errors.GoogleLoginAlreadyPresentError(this.id);
+        }
+
+        await DatabaseConnection.transaction(async conn => {
+            const result = await conn.query('INSERT INTO `GoogleLogins` (`google_uid`) VALUES (?);' +
+            'UPDATE `Users\` SET `Users`.`googlelogin_id` = LAST_INSERT_ID() WHERE `Users`.`user_id` = ?', {
+                parameters: [
+                    googleUID,
+                    this.id
+                ]
+            });
+
+            // should not happen, this is already caught by .hasGoogleLogin()
+            /* istanbul ignore if */
+            if (result[0].affectedRows !== 1 || result[1].affectedRows !== 1) {
+                throw this.makeUserNotFoundError();
+            }
+        });
     }
 
     /**
@@ -545,6 +666,8 @@ function queryDataToColumn(queryData: User.QueryData): string {
             return '`Users`.`nickname`';
         case User.QueryData.DEFAULT_LOGIN_ID:
             return '`Users`.`defaultlogin_id`';
+        case User.QueryData.GOOGLE_LOGIN_ID:
+            return '`Users`.`googlelogin_id`';
         case User.QueryData.CHANGE_UID:
             return 'TO_BASE64(\`Users\`.\`change_uid\`) AS change_uid';
         case User.QueryData.SESSION_ID:
@@ -554,9 +677,9 @@ function queryDataToColumn(queryData: User.QueryData): string {
         case User.QueryData.AVATAR_STATE:
             return '\`Users\`.\`avatar_state\`';
         case User.QueryData.EMAIL:
-            return 'email';
+            return '\`Users\`.\`email\`';
         case User.QueryData.NEW_EMAIL:
-            return 'new_email';
+            return '\`Users\`.\`new_email\`';
         /* istanbul ignore next */
         default:
             return ''; // does not happen
@@ -573,6 +696,7 @@ function sqlResultToQueryResult(result: any, queryData: User.QueryData[]): User.
     return {
         id: queryData.includes(User.QueryData.ID) ? result.user_id : undefined,
         defaultLoginId: queryData.includes(User.QueryData.DEFAULT_LOGIN_ID) ? result.defaultlogin_id : undefined,
+        googleLoginId: queryData.includes(User.QueryData.GOOGLE_LOGIN_ID) ? result.googlelogin_id : undefined,
         nickname: queryData.includes(User.QueryData.NICKNAME) ? result.nickname : undefined,
         changeUid: queryData.includes(User.QueryData.CHANGE_UID) ? result.change_uid : undefined,
         sessionId: queryData.includes(User.QueryData.SESSION_ID) ? result.session_id : undefined,
@@ -605,10 +729,16 @@ namespace User {
          * The user's nickname.
          */
         NICKNAME,
+
         /**
          * The user's default login ID.
          */
         DEFAULT_LOGIN_ID,
+
+        /**
+         * The user's Google login ID.
+         */
+        GOOGLE_LOGIN_ID,
 
         /**
          * The user's change UID.
@@ -663,9 +793,14 @@ namespace User {
         nickname?: string;
 
         /**
-         * The default login ID of the user. If the user does not have a default login, this will be set to ```null```.
+         * The default login ID of the user. If the user does not have a default login, this will be set to `null`.
          */
-        defaultLoginId?: DefaultLogin.ID;
+        defaultLoginId?: DefaultLogin.ID | null;
+
+        /**
+         * The Google login ID of the user. If the user does not have a default login, this will be set to `null`.
+         */
+        googleLoginId?: GoogleLogin.ID;
 
         /**
          * The current change UID. If there is no change going on, this will be set to `null`.

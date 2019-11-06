@@ -63,6 +63,7 @@ class Password {
     }
 }
 
+/* istanbul ignore next */
 namespace Password {
     /**
      * The amount of rounds used to generate the salt.

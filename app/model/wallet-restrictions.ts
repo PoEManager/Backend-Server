@@ -116,10 +116,11 @@ class WalletRestrictions {
 
         const processedColumns = _.map(columns, (c, i) => `\`WalletRestrictions\`.\`${c}\`= ?`);
 
-        const sql = `UPDATE \`WalletRestrictions\` SET ${processedColumns.join(', ')}`;
+        const sql = `UPDATE \`WalletRestrictions\` SET ${processedColumns.join(', ')} WHERE ` +
+            `\`WalletRestrictions\`.\`wallet_restriction_id\` = ?`;
 
         const result = await DatabaseConnection.query(sql, {
-            parameters: walletRestrictionDataToValueList(restrictionData)
+            parameters: [...walletRestrictionDataToValueList(restrictionData), this.id]
         });
 
         if (result.affectedRows === 0) {

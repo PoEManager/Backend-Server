@@ -137,10 +137,9 @@ describe('model', () => {
             });
 
             it('should return correctly if the user does not have a default login', async () => {
-                /*const user = await UserManager.createWithGoogleUID('google-uid');
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
 
-                await expect(user.hasDefaultLogin()).resolves.toBeFalsy();*/
-                // todo
+                await expect(user.hasDefaultLogin()).resolves.toBeFalsy();
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
@@ -159,21 +158,219 @@ describe('model', () => {
                 });
 
                 const defaultlogin = await user.getDefaultLogin();
-                await expect(user.getEmail()).resolves.toBe('test@test.com');
                 // bcrypt generates 60 character hashes
                 expect((await defaultlogin.getPassword()).getEncrypted().length).toBe(60);
             });
 
             it('should throw if the user does not have a default login', async () => {
-                /*const user = await UserManager.createWithGoogleUID('google-uid');
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
 
                 await expect(user.getDefaultLogin())
-                    .rejects.toEqual(new errors.DefaultLoginNotPresentError(user.getId()));*/
-                    // todo
+                    .rejects.toEqual(new errors.DefaultLoginNotPresentError(user.getId()));
             });
 
             it('should throw UserNotFound error if the user does note exist', async () => {
                 await expect(new User(-1).getDefaultLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('removeDefaultLogin()', () => {
+            it('should return correctly if the user does have two logins', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+                await user.addDefaultLogin('password');
+
+                await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
+                await expect(user.hasGoogleLogin()).resolves.toBeTruthy();
+
+                await user.removeDefaultLogin();
+
+                await expect(user.hasDefaultLogin()).resolves.toBeFalsy();
+                await expect(user.hasGoogleLogin()).resolves.toBeTruthy();
+            });
+
+            it('should throw if the user only has a Default login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.removeDefaultLogin())
+                    .rejects.toEqual(new errors.InvalidLoginStateError(user.getId()));
+            });
+
+            it('should throw if the user does not have a Google login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                await expect(user.removeDefaultLogin())
+                    .rejects.toEqual(new errors.DefaultLoginNotPresentError(user.getId()));
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).removeDefaultLogin())
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('addDefaultLogin()', () => {
+            it('should correctly add the login, if the user does not have a default login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                await expect(user.hasDefaultLogin()).resolves.toBeFalsy();
+
+                await user.addDefaultLogin('password');
+
+                await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
+
+                const defaultlogin = await user.getDefaultLogin();
+                const password = await defaultlogin.getPassword();
+
+                await expect(password.compareTo('password')).resolves.toBeTruthy();
+            });
+
+            it('should throw if the user already has a default login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.addDefaultLogin('password'))
+                    .rejects.toEqual(new errors.DefaultLoginAlreadyPresentError(user.getId()));
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).addDefaultLogin('password'))
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('hasGoogleLogin()', () => {
+            it('should return correctly if the user has a Google login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                await expect(user.hasGoogleLogin()).resolves.toBeTruthy();
+            });
+
+            it('should return correctly if the user does not have a Google login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.hasGoogleLogin()).resolves.toBeFalsy();
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).hasGoogleLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('getGoogleLogin()', () => {
+            it('should return correctly if the user has a Google login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                const googleLogin = await user.getGoogleLogin();
+                await expect(googleLogin.getGoogleUID()).resolves.toBe('google-uid');
+            });
+
+            it('should throw if the user does not have a default login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.getGoogleLogin())
+                    .rejects.toEqual(new errors.GoogleLoginNotPresentError(user.getId()));
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).getGoogleLogin()).rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('removeGoogleLogin()', () => {
+            it('should return correctly if the user does have two logins', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+                await user.addDefaultLogin('password');
+
+                await expect(user.hasGoogleLogin()).resolves.toBeTruthy();
+                await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
+
+                await user.removeGoogleLogin();
+
+                await expect(user.hasGoogleLogin()).resolves.toBeFalsy();
+                await expect(user.hasDefaultLogin()).resolves.toBeTruthy();
+            });
+
+            it('should throw if the user only has a Google login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                await expect(user.removeGoogleLogin())
+                    .rejects.toEqual(new errors.InvalidLoginStateError(user.getId()));
+            });
+
+            it('should throw if the user does not have a Google login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.removeGoogleLogin())
+                    .rejects.toEqual(new errors.GoogleLoginNotPresentError(user.getId()));
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).removeGoogleLogin())
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
+            });
+        });
+
+        describe('addGoogleLogin()', () => {
+            it('should correctly add the login, if the the user does not have a Google login', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                await expect(user.hasGoogleLogin()).resolves.toBeFalsy();
+
+                await user.addGoogleLogin('google-uid');
+
+                await expect(user.hasGoogleLogin()).resolves.toBeTruthy();
+
+                const googleLogin = await user.getGoogleLogin();
+                const googleUID = await googleLogin.getGoogleUID();
+
+                expect(googleUID).toBe('google-uid');
+            });
+
+            it('should throw if the user already has a Google login', async () => {
+                const user = await UserManager.createWithGoogleLogin('google-uid', 'nickname', 'test@test.com');
+
+                await expect(user.addGoogleLogin('google-uid'))
+                    .rejects.toEqual(new errors.GoogleLoginAlreadyPresentError(user.getId()));
+            });
+
+            it('should throw UserNotFound error if the user does note exist', async () => {
+                await expect(new User(-1).addGoogleLogin('google-uid'))
+                    .rejects.toEqual(new errors.UserNotFoundError(-1));
             });
         });
 
@@ -188,6 +385,7 @@ describe('model', () => {
                 });
 
                 const defaultLoginId = (await user.getDefaultLogin()).getId();
+                const googleLoginId = null;
 
                 const timeBefore = new Date();
                 timeBefore.setMilliseconds(0);
@@ -195,6 +393,7 @@ describe('model', () => {
                 const result = await user.query([
                     User.QueryData.ID,
                     User.QueryData.DEFAULT_LOGIN_ID,
+                    User.QueryData.GOOGLE_LOGIN_ID,
                     User.QueryData.NICKNAME,
                     User.QueryData.CHANGE_UID,
                     User.QueryData.SESSION_ID,
@@ -209,6 +408,7 @@ describe('model', () => {
                 expect(result.id).toBe(user.getId());
                 expect(result.nickname).toBe('nickname');
                 expect(result.defaultLoginId).toBe(defaultLoginId);
+                expect(result.googleLoginId).toBe(googleLoginId);
                 expect(result.changeUid!.length).toBe(24);
                 expect(result.sessionId!).toBeNull();
                 expect(result.createdTime!.getTime()).toBeGreaterThanOrEqual(timeBefore.getTime());
@@ -383,7 +583,7 @@ describe('model', () => {
 
         describe('getChangeUID()', () => {
             it('should return null if no change is going on', async () => {
-                /*const user = await UserManager.createWithGoogleUID('google-uid');
+                /*const user = await UserManager.createWithGoogleLogin('google-uid');
 
                 await expect(user.getChangeState()).resolves.toBeNull();*/
                 // todo
