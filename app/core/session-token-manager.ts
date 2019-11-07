@@ -42,12 +42,18 @@ namespace SessionTokenManager {
     /**
      * Invalidates the current session ID of a user.
      *
-     * @param token The session ID.
+     * @param tokenOrUser The session ID or user to invalidate.
      *
      * @throws **InvalidCredentialsError** See `verify()`.
      */
-    export async function invalidate(token: string): Promise<void> {
-        const user = await verify(token);
+    export async function invalidate(tokenOrUser: string | User): Promise<void> {
+        let user: User;
+
+        if (typeof tokenOrUser === 'string') {
+            user = await verify(tokenOrUser);
+        } else {
+            user = tokenOrUser;
+        }
 
         await user.invalidateSessionId();
     }
