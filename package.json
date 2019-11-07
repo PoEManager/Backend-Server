@@ -8,6 +8,7 @@
         "doc": "typedoc --mode file --out 'docs/typedoc'",
         "build": "tsc",
         "prestart": "npm run build",
+        "clean": "rimraf dist",
         "start": "node dist/app/app.js"
     },
     "keywords": [],
@@ -54,6 +55,7 @@
     "devDependencies": {
         "@types/jest": "^24.0.21",
         "jest": "^24.9.0",
+        "rimraf": "^3.0.0",
         "ts-jest": "^24.1.0",
         "tslint": "^5.20.0",
         "typedoc": "^0.15.0"
