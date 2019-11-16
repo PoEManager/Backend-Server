@@ -53,6 +53,7 @@
                     "required": [
                         "baseURL",
                         "basePath",
+                        "ip",
                         "port",
                         "avatarUploadMaxInKb"
                     ],
@@ -62,6 +63,10 @@
                         },
                         "basePath": {
                             "type": "string"
+                        },
+                        "ip": {
+                            "type": "string",
+                            "format": "ipv4"
                         },
                         "port": {
                             "type": "integer"

@@ -106,8 +106,9 @@ namespace Server {
         setupRouterAndRoutes()
         .then(() => {
             try {
+                logger.info(`Creating server on ${config.basic.ip}:${config.basic.port}.`);
                 server = createServer(app!);
-                server.listen(config.basic.port);
+                server.listen(config.basic.port, config.basic.ip);
 
                 server.on('close', () => {
                     logger.info('Server is closing down.');
