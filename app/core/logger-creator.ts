@@ -16,8 +16,10 @@ function newLogger(label: string): winston.Logger {
     return winston.createLogger({
         format: winston.format.combine(winston.format.timestamp(), winston.format.label({label}), format),
         transports: [
+            /*
             new winston.transports.File({filename: `logs/${dir}/error.log`, level: 'error'}),
             new winston.transports.File({filename: `logs/${dir}/log.log`}),
+            */
             new winston.transports.Console()
         ]
     });
