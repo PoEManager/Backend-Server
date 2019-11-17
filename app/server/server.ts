@@ -1,6 +1,8 @@
+import compression from 'compression';
 import express from 'express';
 import fileUpload from 'express-fileupload';
 import fs from 'fs';
+import helmet from 'helmet';
 import http from 'http';
 import https from 'https';
 import passport from 'passport';
@@ -34,6 +36,8 @@ namespace Server {
 
     function addMiddleWare() {
         logger.info('Setting up middleware...');
+        app!.use(helmet());
+        app!.use(compression());
         app!.use(requestId());
         app!.use(requestLogger.setupRequestLogger());
         app!.use(requestLogger.logRequests());
@@ -51,15 +55,19 @@ namespace Server {
     }
 
     function setupErrorRoute() {
-        app!.use((req, res, next) => {
+        app!.use((req, res) => {
             ServerUtils.sendRESTError(req, res, new errors.InvalidRouteError(req.method, req.path));
         });
     }
 
     function createServer(requestListener: http.RequestListener): http.Server | https.Server {
         if (!config.security.sslSettings.useSSL) {
+            logger.info('Using a HTTP server.');
             return http.createServer(requestListener);
         } else {
+            logger.info('Using a HTTPS server.');
+            logger.info(`Using SSL key file from ${config.security.sslSettings.keyFile}.`);
+            logger.info(`Using SSL cert file from ${config.security.sslSettings.certFile}.`);
             const keyPath = path.resolve(RootDirectory.getSync(), config.security.sslSettings.keyFile);
             const certPath = path.resolve(RootDirectory.getSync(), config.security.sslSettings.certFile);
 
@@ -97,6 +105,8 @@ namespace Server {
             logger.warn('Server is already started.');
             return;
         }
+
+        logger.info(`Starting server in environment '${process.env.NODE_ENV}'.`);
 
         app = express();
 
@@ -138,7 +148,7 @@ namespace Server {
         return new Promise((resolve, reject) => {
             if (!app) {
                 logger.warn('Server is not running.');
-                reject('Server is not running');
+                reject(new Error('Server is not running'));
                 return;
             }
 
