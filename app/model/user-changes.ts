@@ -26,6 +26,8 @@ namespace UserChanges {
             if (await isChangeInProgress(innerConn, id)) {
                 return state;
             } else {
+                /* this istanbul ignore does not work */
+                /* istanbul ignore next ; Typescript generates weird code and only the else path will be taken */
                 if (state !== null) {
                     await resetChange(innerConn, id, state);
                 }
@@ -57,6 +59,7 @@ namespace UserChanges {
             ]
         });
 
+        /* istanbul ignore if ; this is just for safety, UserNotFoundError will be thrown by another before this */
         if (result.length !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -81,7 +84,8 @@ namespace UserChanges {
         // <add here> add new cases
         switch (change) {
             case ChangeType.VERIFY_ACCOUNT:
-                // verification needs no reset
+                // verification needs no reset; b/c it does not have any additional data (only the data that will be
+                // reset by resetChangeMeta())
                 break;
             case ChangeType.NEW_EMAIL:
                 await conn.query(
@@ -119,6 +123,7 @@ namespace UserChanges {
             ]
         });
 
+        /* istanbul ignore if ; this is just for safety, UserNotFoundError will be thrown by another before this */
         if (result.affectedRows !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -184,6 +189,7 @@ namespace UserChanges {
                 ]
             });
 
+        /* istanbul ignore if ; this is just for safety, UserNotFoundError will be thrown by another before this */
         if (result[0].affectedRows !== 1 || result[1].length !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -250,6 +256,7 @@ namespace UserChanges {
             ]
         });
 
+        /* istanbul ignore if ; this is just for safety, InvalidChangeIDError will be thrown by another before this */
         if (result.affectedRows !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -270,6 +277,7 @@ namespace UserChanges {
             ]
         });
 
+        /* istanbul ignore if ; this is just for safety, InvalidChangeIDError will be thrown by another before this */
         if (result.affectedRows !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -292,6 +300,7 @@ namespace UserChanges {
             ]
         });
 
+        /* istanbul ignore if ; this is just for safety, InvalidChangeIDError will be thrown by another before this */
         if (result.affectedRows !== 1) {
             throw new errors.UserNotFoundError(id);
         }
@@ -305,6 +314,7 @@ namespace UserChanges {
                 ]
             });
 
+        /* istanbul ignore if ; this is just for safety, InvalidChangeIDError will be thrown by another before this */
         if (result.length !== 1) {
             throw new errors.InvalidChangeIDError(changeId);
         }

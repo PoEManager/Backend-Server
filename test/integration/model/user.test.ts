@@ -2,6 +2,7 @@ import DatabaseConnection from '../../../app/core/database-connection';
 import errors from '../../../app/model/errors';
 import Password from '../../../app/model/password';
 import User from '../../../app/model/user';
+import UserChanges from '../../../app/model/user-changes';
 import UserManager from '../../../app/model/user-manager';
 
 describe('model', () => {
@@ -68,6 +69,36 @@ describe('model', () => {
                 await expect(user.delete()).resolves.toBeUndefined();
                 await expect(UserManager.getDefaultLogin(defaultLogin.getId())).rejects
                     .toEqual(new errors.DefaultLoginNotFoundError(defaultLogin.getId()));
+            });
+        });
+
+        describe('newChange()', () => {
+            let spy: jest.SpyInstance;
+
+            beforeEach(() => {
+                spy = jest.spyOn(UserChanges, 'newChange');
+            });
+
+            afterEach(() => {
+                jest.restoreAllMocks();
+            });
+
+            it('should call UserManager.newChange()', async () => {
+                const user = await UserManager.createWithDefaultLogin({
+                    nickname: 'nickname',
+                    loginData: {
+                        email: 'test@test.com',
+                        unencryptedPassword: 'password'
+                    }
+                });
+
+                try {
+                    await user.newChange(false);
+                } catch (error) {
+                    // don't care about errors
+                }
+
+                expect(spy).toHaveBeenCalled();
             });
         });
 
