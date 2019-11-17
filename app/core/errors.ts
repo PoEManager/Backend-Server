@@ -150,6 +150,26 @@ namespace errors {
     }
 
     /**
+     * An object could not be validated.
+     *
+     * The data layout is the following:
+     * ```typescript
+     * {
+     *     config: <the configuration that could not be validated>,
+     *     error: <an instance of InternalObjectValidationError>
+     * }
+     * ```
+     */
+    export class ConfigValidationError extends InternalError {
+        public constructor(config: string, error: InternalObjectValidationError) {
+            super('CONFIG_VALIDATION_ERROR', {
+                config,
+                error
+            });
+        }
+    }
+
+    /**
      * A config meta file could not be located.
      *
      * The data layout is the following:

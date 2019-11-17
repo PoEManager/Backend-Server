@@ -364,7 +364,8 @@ function loadConfiguration(root: string, sources: string[], file: IConfiguration
     const valid = validate(ret);
 
     if (!valid) {
-        throw new errors.InternalObjectValidationError(validate.errors!, validate.schema as object, ret);
+        const objValError = new errors.InternalObjectValidationError(validate.errors!, validate.schema as object, ret);
+        throw new errors.ConfigValidationError(file.name, objValError);
     }
 
     return ret;

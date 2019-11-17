@@ -34,20 +34,22 @@ describe('core', () => {
         });
 
         it('should throw if the config is in an invalid schema', () => {
-            expect(() => config._loadDbgConfig('test/integration/res/config/cfg7'))
-                .toThrow(new errors.InternalObjectValidationError(['should have required property \'test\''], {
-                    $schema: 'http://json-schema.org/draft-07/schema',
-                    type: 'object',
-                    additionalProperties: false,
-                    required: [
-                        'test'
-                    ],
-                    properties: {
-                        test: {
-                            type: 'string'
-                        }
+            const objValError = new errors.InternalObjectValidationError(['should have required property \'test\''], {
+                $schema: 'http://json-schema.org/draft-07/schema',
+                type: 'object',
+                additionalProperties: false,
+                required: [
+                    'test'
+                ],
+                properties: {
+                    test: {
+                        type: 'string'
                     }
-                }, {}));
+                }
+            }, {});
+
+            expect(() => config._loadDbgConfig('test/integration/res/config/cfg7'))
+                .toThrow(new errors.ConfigValidationError('test', objValError));
         });
 
         it('should throw if the config metadata is in an invalid schema', () => {
