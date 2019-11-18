@@ -1,6 +1,6 @@
 
 import bcrypt from 'bcrypt';
-import config from '../core/config';
+import config from 'cascading-config';
 
 /**
  * A class that creates and compares encrypted passwords.

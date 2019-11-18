@@ -1,6 +1,6 @@
+import config from 'cascading-config';
 import passport from 'passport';
 import Google from 'passport-google-oauth20';
-import config from '../../core/config';
 import UserManager from '../../model/user-manager';
 import redirectRouteDefinition from '../routes/get-login-google-redirect/route-definition.json';
 import ServerUtils from '../server-utils';

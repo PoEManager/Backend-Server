@@ -1,7 +1,7 @@
 
+import config from 'cascading-config';
 import _, { Many } from 'lodash';
 import mariadb from 'mariadb';
-import config from '../core/config';
 import Error from './error';
 import InternalError from './internal-error';
 

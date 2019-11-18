@@ -1,6 +1,6 @@
 
+import config from 'cascading-config';
 import express from 'express';
-import config from '../core/config';
 import Error from '../core/error';
 import InternalError from '../core/internal-error';
 

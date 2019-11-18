@@ -1,3 +1,4 @@
+import config from 'cascading-config';
 import compression from 'compression';
 import express from 'express';
 import fileUpload from 'express-fileupload';
@@ -7,7 +8,6 @@ import http from 'http';
 import https from 'https';
 import passport from 'passport';
 import path from 'path';
-import config from '../core/config';
 import DatabaseConnection from '../core/database-connection';
 import logger from '../core/logger';
 import RootDirectory from '../core/root-directory';

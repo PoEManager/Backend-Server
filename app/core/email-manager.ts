@@ -1,4 +1,5 @@
 import base64url from 'base64-url';
+import config from 'cascading-config';
 import fs from 'fs';
 import Handlebars from 'handlebars';
 import juice from 'juice';
@@ -9,7 +10,6 @@ import errors from '../model/errors';
 import User from '../model/user';
 import UserManager from '../model/user-manager';
 import ServerUtils from '../server/server-utils';
-import config from './config';
 import coreErrors from './errors';
 import JSONValidator from './json-validator';
 import RootDirectory from './root-directory';
