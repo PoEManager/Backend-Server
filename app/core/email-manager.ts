@@ -5,10 +5,8 @@ import Handlebars from 'handlebars';
 import juice from 'juice';
 import nodemailer from 'nodemailer';
 import path from 'path';
-import JSONLoader from '../core/load-json';
 import errors from '../model/errors';
 import User from '../model/user';
-import UserManager from '../model/user-manager';
 import ServerUtils from '../server/server-utils';
 import coreErrors from './errors';
 import JSONValidator from './json-validator';
@@ -124,7 +122,7 @@ namespace EmailManager {
         let emailConfig: {template: string, subject: string};
 
         try {
-            emailConfig = await JSONLoader.loadJSON(path.join(await getEmailDir(), `${configName}.json`));
+            emailConfig = require(path.join(await getEmailDir(), `${configName}.json`));
             await JSONValidator.validate(emailConfig, await import(EMAIL_CONFIG_SCHEMA_FILE));
         } catch (error) {
             throw new coreErrors.InvalidEmailConfigurationError(configName);
