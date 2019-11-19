@@ -1,8 +1,6 @@
 import server from './server/server';
 
-function main() {
-    server.start();
-
+function doneCb() {
     async function handler() {
         try {
             await server.stop();
@@ -13,6 +11,10 @@ function main() {
 
     process.on('SIGINT', handler);
     process.on('SIGTERM', handler);
+}
+
+function main() {
+    server.start({ doneCb });
 }
 
 main();

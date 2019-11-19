@@ -6,9 +6,10 @@ import MiddlewareFunction from './middleware-function';
  *
  * @returns The middleware function.
  */
-function setupRequestLogger(): MiddlewareFunction {
+function setupRequestLogger(disableLogging: boolean): MiddlewareFunction {
     return async (req, res, next) => {
         req.locals.logger = LoggerCreator.newLogger(req.locals.requestId);
+        req.locals.logger.silent = disableLogging;
         next();
     };
 }

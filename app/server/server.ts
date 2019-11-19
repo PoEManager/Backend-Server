@@ -22,8 +22,14 @@ import RouteLoader from './route-loader';
 import ServerUtils from './server-utils';
 
 namespace Server {
+    export interface IServerInitData {
+        testMode?: boolean;
+        doneCb?: () => void;
+        disableLogging?: boolean;
+    }
+
     let app: express.Express | null = null;
-    let server: http.Server;
+    let server: http.Server | null = null;
 
     function initAuthMethods() {
         logger.info('Setting authentication methods...');
@@ -34,12 +40,14 @@ namespace Server {
         logger.info('Done setting up authentication methods.');
     }
 
-    function addMiddleWare() {
+    function addMiddleWare(initData: IServerInitData) {
+        const disableLogging = !!initData.disableLogging;
+
         logger.info('Setting up middleware...');
         app!.use(helmet());
         app!.use(compression());
         app!.use(requestId());
-        app!.use(requestLogger.setupRequestLogger());
+        app!.use(requestLogger.setupRequestLogger(disableLogging));
         app!.use(requestLogger.logRequests());
         app!.use(express.json());
         app!.use(express.urlencoded({extended: false}));
@@ -99,7 +107,11 @@ namespace Server {
         await RouteLoader.addRoutes(router);
     }
 
-    export function start() {
+    export function start(initData: IServerInitData = {}) {
+        if (initData.disableLogging) {
+            logger.silent = true;
+        }
+
         logger.info('Starting server...');
         if (app !== null) {
             logger.warn('Server is already started.');
@@ -111,11 +123,21 @@ namespace Server {
         app = express();
 
         initAuthMethods();
-        addMiddleWare();
+        addMiddleWare(initData);
         logMeta();
         setupRouterAndRoutes()
         .then(() => {
             try {
+                if (initData.testMode) {
+                    logger.info('Creating server in test-mode. No actual server will be started.');
+
+                    if (initData.doneCb) {
+                        initData.doneCb();
+                    }
+
+                    return;
+                }
+
                 logger.info(`Creating server on ${config.basic.ip}:${config.basic.port}.`);
                 server = createServer(app!);
                 server.listen(config.basic.port, config.basic.ip);
@@ -130,6 +152,9 @@ namespace Server {
 
                 server.on('listening', () => {
                     logger.info('Server is now listening.');
+                    if (initData.doneCb) {
+                        initData.doneCb();
+                    }
                 });
             } catch (error) {
                 logger.error('Unexpected error occurred while setting up the server.');
@@ -146,21 +171,32 @@ namespace Server {
 
     export async function stop(): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!app) {
+            if (!server || !app) {
                 logger.warn('Server is not running.');
                 reject(new Error('Server is not running'));
                 return;
             }
 
+            logger.info('Starting to close the server.');
+
             server.close(err => {
                 app = null;
                 if (err) {
-                    reject(new Error(`Server could not be stopped gracefully: ${err}`));
+                    reject(new Error(`Server could not be closed gracefully: ${err}`));
                 } else {
+                    logger.info('Server has been closed.');
                     resolve();
                 }
             });
         });
+    }
+
+    export function getExpress(): express.Application {
+        return app!;
+    }
+
+    export function getServer(): http.Server {
+        return server!;
     }
 }
 

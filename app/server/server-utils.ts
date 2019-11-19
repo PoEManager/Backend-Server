@@ -23,7 +23,7 @@ namespace ServerUtils {
      * @returns The passed error, if it is an instance of `Error`, or `UnexpectedError` if it is not.
      */
     export function makeRESTableError(error: any): Error {
-        if (error instanceof Error) {
+        if (error.asRESTError) {
             return error;
         } else {
             return new UnexpectedError();
@@ -43,7 +43,7 @@ namespace ServerUtils {
     export function sendRESTError(req: express.Request, res: express.Response, error: any): void {
         const e = makeRESTableError(error);
 
-        if (error instanceof Error) {
+        if (error.asRESTError) {
             if (error instanceof InternalError) {
                 req.locals.logger.error('An internal error occurred: ');
                 req.locals.logger.error(`name: ${error.name}`);

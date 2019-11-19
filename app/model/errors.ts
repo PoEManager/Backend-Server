@@ -36,7 +36,7 @@ namespace errors {
      */
     export class DuplicateEmailError extends Error {
         public constructor(email: string) {
-            super('DUPLICATE_EMAIL_ERROR', `An account with the E-Mail address ${email} already exists.`, 400, {
+            super('DUPLICATE_EMAIL_ERROR', `An account with the E-Mail address ${email} already exists.`, 409, {
                 email
             });
         }

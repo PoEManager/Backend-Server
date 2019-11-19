@@ -16,7 +16,7 @@ The enum 'ErrorCodes' contains all of the error codes.
 */
 
 namespace RouteLoader {
-    const ROUTE_DIR = path.join(__dirname, 'routes');
+    const ROUTE_DIR = path.join(RootDirectory.getSync(), 'dist', 'app', 'server', 'routes');
     const ROUTE_DEF_FILE = 'route-definition.json';
     const HANDLER_FILE = 'handler.js';
     const PARAMETER_SCHEMA_FILE = 'parameter.schema.json';

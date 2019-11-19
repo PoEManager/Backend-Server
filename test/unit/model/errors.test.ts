@@ -30,7 +30,7 @@ describe('model', () => {
                 expect(error.name).toBe('DUPLICATE_EMAIL_ERROR');
                 expect(error.message).toContain('test@test.com');
                 expect(error.data.email).toBe('test@test.com');
-                expect(error.httpCode).toBe(400);
+                expect(error.httpCode).toBe(409);
             });
 
             it('should correctly generate a REST error', () => {

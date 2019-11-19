@@ -4,10 +4,11 @@
     "description": "The backend (i.e. REST) server of PoE Manager.",
     "main": "app.js",
     "scripts": {
-        "test": "NODE_ENV='test' jest --coverage --runInBand",
+        "test": "NODE_ENV='test' jest --coverage --runInBand --forceExit --detectOpenHandles",
         "doc": "typedoc --mode file --out 'docs/typedoc'",
         "build": "tsc",
         "prestart": "npm run build",
+        "pretest": "npm run build",
         "clean": "rimraf dist",
         "start": "node dist/app/app.js"
     },
@@ -35,6 +36,7 @@
         "@types/passport-google-oauth20": "^2.0.3",
         "@types/passport-http": "^0.3.8",
         "@types/passport-http-bearer": "^1.0.34",
+        "@types/supertest": "^2.0.8",
         "ajv": "^6.10.2",
         "app-root-path": "^3.0.0",
         "base64-url": "^2.3.2",
@@ -56,6 +58,7 @@
         "passport-google-oauth20": "^2.0.0",
         "passport-http": "^0.3.0",
         "passport-http-bearer": "^1.0.1",
+        "supertest": "^4.0.2",
         "typescript": "^3.6.4",
         "winston": "^3.2.1"
     },
