@@ -8,19 +8,14 @@ let agent: supertest.SuperTest<supertest.Test>;
 describe('server', () => {
     describe('POST /users', () => {
         beforeAll(done => {
-            DatabaseConnection.transaction(async conn => {
-                await conn.query('DELETE FROM `Users`');
-            }).then(() => {
-                server.start({
-                    disableLogging: true,
-                    doneCb: () => {
-                        agent = supertest.agent(server.getServer());
-                        done();
-                    },
-                    testMode: false
-                });
-            })
-            .catch(e => done(e));
+            server.start({
+                disableLogging: true,
+                doneCb: () => {
+                    agent = supertest.agent(server.getServer());
+                    done();
+                },
+                testMode: false
+            });
         });
 
         beforeEach(async () => {

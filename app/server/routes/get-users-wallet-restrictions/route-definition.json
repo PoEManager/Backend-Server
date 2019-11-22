@@ -1,5 +1,5 @@
 {
     "method": "GET",
     "path": "/users/walletRestrictions",
-    "authorizationLevel": "VERIFIED"
+    "authorizationLevel": "AUTHENTICATED"
 }
