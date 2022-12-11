@@ -39,7 +39,7 @@
         "bcrypt": "^3.0.6",
         "compression": "^1.7.4",
         "config": "^3.2.4",
-        "express": "^4.17.1",
+        "express": "^4.17.3",
         "express-fileupload": "^1.1.6-alpha.6",
         "handlebars": "^4.5.2",
         "helmet": "^3.21.2",
